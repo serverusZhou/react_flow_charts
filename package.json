@@ -1,0 +1,38 @@
+{
+  "name": "react_flow_charts",
+  "version": "1.0.0",
+  "description": "A react flow chart component",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "npm run lint:es && npm run lint:style",
+    "lint:es": "eslint ./src --ext '.js,.jsx'",
+    "lint:style": "stylelint \"src/**/*.less\" --syntax less",
+    "lint-fix": "eslint --fix ./src && stylelint --fix \"src/**/*.less\" --syntax less"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/serverusZhou/react_flow_charts.git"
+  },
+  "keywords": [
+    "react",
+    "flow",
+    "charts"
+  ],
+  "author": "arvin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/serverusZhou/react_flow_charts/issues"
+  },
+  "homepage": "https://github.com/serverusZhou/react_flow_charts#readme",
+  "dependencies": {
+    "prop-types": "^15.6.2",
+    "react": "^16.4.2"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "pre-commit": [
+    "lint"
+  ]
+}
