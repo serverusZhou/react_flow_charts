@@ -11,6 +11,4 @@ class Chart extends Component{
     }
 }
 
-
-
 export default Chart
