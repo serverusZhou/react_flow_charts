@@ -22,6 +22,7 @@ class Chart extends Component {
   }
   componentWillReceiveProps(nextProps, preProps) {
     console.log('nextPropsnextProps', nextProps)
+
     console.log('prePropsprePropspreProps', preProps)
   }
 }

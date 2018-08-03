@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "node build/build",
-    "start": "node ./build/test",
+    "start": "webpack-dev-server --inline --progress --config build/test.conf.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "npm run lint:es && npm run lint:style",
     "lint:es": "eslint ./src --ext '.js,.jsx'",
