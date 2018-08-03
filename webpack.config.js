@@ -1,11 +1,12 @@
 const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     mode: "production",
-    entry: "./src/index",
+    entry: {index: "./src/index",test: "./src/test"},
     output: {
         path: path.resolve(__dirname, "dist"),
-        filename: "index.js"
+        filename: '[name][hash].js'
     },
     module: {
         rules: [
@@ -14,9 +15,18 @@ module.exports = {
                 loader: 'babel-loader',
                 exclude: /node_modules/,
                 query: {
-                    presets: ['react']//支持react jsx和ES6语法编译
+                    presets: ['react', 'es2015']//支持react jsx和ES6语法编译
                   }
             },
         ]
-    }
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            filename: __dirname + '/dist/index.html',
+            template: __dirname + '/index.html',
+            inject: true,
+            hash: false,
+            chunks: ['test']
+        })
+    ]
 }

@@ -1,13 +1,28 @@
 import React, {Component} from 'react'
-import PropTypes from 'prop-types';
 
 class Chart extends Component{
+    constructor (props) {
+        super(props);
+        this.state = {
+
+        }
+    }
     render(){
         return (
             <div>
                 <aside>左边组件部分</aside>
+                <div>
+                    <canvas ref='flow_canvas' />
+                </div>
             </div>
         )
+    }
+    componentDidMount(){
+        console.log(this.refs['flow_canvas'])
+    }
+    componentWillReceiveProps(nextProps, preProps) {
+        console.log('nextPropsnextProps', nextProps)
+        console.log('prePropsprePropspreProps', preProps)
     }
 }
 
