@@ -26,7 +26,7 @@ module.exports = {
     'PRE': true
   },
   settings: {
-    'import/core-modules': [ 'Utils', 'Assets', 'Global', 'Components', 'Modules' ]
+    'import/core-modules': [ 'Utils', 'Assets', 'Global', 'Components', 'Modules', 'src' ]
   },
   // http://eslint.org/docs/rules/xxx, xxx代表rule名称, 0=off, 1=warning, 2=error
   rules: { // 具体规则
