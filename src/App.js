@@ -18,7 +18,10 @@ class Chart extends Component {
     ev.dataTransfer.setData('Text', ev.target.id)
   }
   onDropFunc = (ev) => {
-
+    console.log(ev)
+  }
+  allowDrop = (ev) => {
+    ev.preventDefault()
   }
   render() {
     return (
@@ -27,12 +30,12 @@ class Chart extends Component {
           {
             this.state.imageItems.map((obj, index) => {
               return (
-                <img key={index} src={obj.imgSrc} id={obj.key} draggable={true} ref={'key' + index} ondragstart={(event) => this.ondragstartFunc(event)} />
+                <img key={index} src={obj.imgSrc} id={obj.key} draggable={true} ref={'key' + index} onDragStart={(event) => this.onDragstartFunc(event)} />
               )
             })
           }
         </div>
-        <div className={styles['content']} onDrop={this.dropFunc}>
+        <div className={styles['content']} onDrop={(event) => this.onDropFunc(event)} onDragOver={(event) => this.allowDrop(event)}>
           <canvas ref='flow_canvas' />
         </div>
       </div>
@@ -40,7 +43,6 @@ class Chart extends Component {
   }
   componentDidMount() {
     console.log(this.refs['flow_canvas'])
-    this.refs['key0'].d
   }
   componentWillReceiveProps(nextProps, preProps) {
     console.log('nextPropsnextProps', nextProps)
