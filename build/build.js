@@ -20,11 +20,19 @@ const config = {
           presets: ['react', 'es2015']
         }
       },
+      {
+        test: /\.less$/,
+        use: [
+          'style-loader',
+          { loader: 'css-loader?modules', options: { importLoaders: 1, modules: true }},
+          'less-loader'
+        ]
+      },
     ]
   },
   plugins: [
     new ProgressBarPlugin({
-      format: '  build [:bar] :percent (:elapsed seconds)',
+      format: '  已经构建 [:bar] :percent (:elapsed seconds)',
       clear: false,
       width: 60
     })

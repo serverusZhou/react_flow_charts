@@ -20,6 +20,14 @@ const config = {
           presets: ['react', 'es2015']// 支持react jsx和ES6语法编译
         }
       },
+      {
+        test: /\.less$/,
+        use: [
+          'style-loader',
+          { loader: 'css-loader?modules', options: { importLoaders: 1, modules: true }},
+          'less-loader'
+        ]
+      },
     ]
   },
   plugins: [
@@ -30,7 +38,7 @@ const config = {
       hash: false,
     }),
     new ProgressBarPlugin({
-      format: '  build [:bar] :percent (:elapsed seconds)',
+      format: '  构建 [:bar] :percent (:elapsed seconds)',
       clear: false,
       width: 60
     })

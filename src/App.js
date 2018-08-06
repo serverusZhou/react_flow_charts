@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import styles from './index.less'
 
 class Chart extends Component {
   constructor (props) {
@@ -8,10 +9,11 @@ class Chart extends Component {
     }
   }
   render() {
+    console.log(styles['flow-content'])
     return (
-      <div style={{ width: '100%', height: '100%' }}>
-        <aside>左边组件部分</aside>
-        <div>
+      <div className={styles['flow-content']}>
+        <div className={styles['left-side']}>左边组件部分</div>
+        <div className={styles['content']}>
           <canvas ref='flow_canvas' />
         </div>
       </div>
