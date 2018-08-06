@@ -4,12 +4,12 @@
         "env", 
         "react"
         ],
-        "stage-2"
+        "stage-0"
     ],
-    "plugins": ["transform-runtime"],
+    "plugins": ["transform-runtime",["transform-class-properties", { "spec": true }]],
     "env": {
         "test": {
-        "presets": ["env", "stage-2"],
+        "presets": ["env", "stage-0"],
         "plugins": ["istanbul"]
         }
     }

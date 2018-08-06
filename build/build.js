@@ -17,14 +17,14 @@ const config = {
         loader: 'babel-loader',
         exclude: /node_modules/,
         query: {
-          presets: ['react', 'es2015']
+          presets: ['react', 'es2015', 'stage-0']
         }
       },
       {
         test: /\.less$/,
         use: [
           'style-loader',
-          { loader: 'css-loader?modules', options: { importLoaders: 1, modules: true }},
+          { loader: 'css-loader', options: { importLoaders: 1, modules: true }},
           'less-loader'
         ]
       },
