@@ -10,13 +10,14 @@ function getAllItems (array) {
   })
   Object.keys(items).forEach(key => {
     if (!items[key].draw) {
-      items[key].draw = function(ctx) {
+      items[key].getPic = function(ctx) {
         const image = new Image()
         image.src = items[key].imgSrc
-        ctx.drawImage(image, 10, 10)
+        return image
       }
     }
   })
+  return items
 }
 
 function drawImage (src) {

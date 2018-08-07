@@ -2,27 +2,25 @@ import React, { Component } from 'react'
 import styles from './index.less'
 import items from './items'
 import draw from './draw'
+import utils from './utils'
 
 const icons = items.icons
 const lines = items.lines
-
-class Chart extends Component {
-  constructor (props) {
-    super(props)
-    this.state = {
-      icons,
-      lines,
-      chartConfig: [
-        {
-          type: 'friend1',
-          position: {
-            x: 20,
-            y: 20
-          }
-        }
-      ]
+const formatItems = utils.getAllItems(icons)
+const chartConfig = [
+  {
+    type: 'friend1',
+    position: {
+      x: 20,
+      y: 20
+    },
+    size: {
+      width: 40,
+      height: 20
     }
   }
+]
+class Chart extends Component {
   onDragstartFunc = (ev) => {
     ev.dataTransfer.setData('key', ev.target.id)
   }
@@ -43,7 +41,7 @@ class Chart extends Component {
       <div className={styles['flow-content']}>
         <div className={styles['left_side']}>
           {
-            this.state.icons.map((obj, index) => {
+            icons.map((obj, index) => {
               return (
                 <div key = {index}>
                   <p>{obj.type}</p>
@@ -64,7 +62,7 @@ class Chart extends Component {
             <p>线条</p>
             <div>
               {
-                this.state.lines.map((element, index) => {
+                lines.map((element, index) => {
                   return (
                     <img key={index} src={element.imgSrc} id={element.key} ref={'line' + index} />
                   )
@@ -89,10 +87,13 @@ class Chart extends Component {
     const c = that.refs['flow_canvas']
     let cxt = c.getContext('2d')
     function mainLoop() {
-      draw(cxt, that.state.chartConfig)
+      draw(cxt, chartConfig, formatItems)
       requestAnimationFrame(mainLoop)
     }
     mainLoop()
+    setTimeout(() => {
+      chartConfig[0].position.x = 60
+    }, 3000)
   }
   componentWillReceiveProps(nextProps, preProps) {
     console.log('nextPropsnextProps', nextProps)
