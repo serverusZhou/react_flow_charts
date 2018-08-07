@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import styles from './index.less'
 import items from './items'
 import draw from './draw'
-import utils from './utils'
+import utils from './utils'
 
 const icons = items.icons
 const lines = items.lines
@@ -87,12 +87,13 @@ class Chart extends Component {
     const c = that.refs['flow_canvas']
     let cxt = c.getContext('2d')
     function mainLoop() {
+      cxt.clearRect(0, 0, c.width, c.height)
       draw(cxt, chartConfig, formatItems)
       requestAnimationFrame(mainLoop)
     }
     mainLoop()
     setTimeout(() => {
-      chartConfig[0].position.x = 60
+      chartConfig[0].position.x = 50
     }, 3000)
   }
 }
