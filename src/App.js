@@ -95,9 +95,5 @@ class Chart extends Component {
       chartConfig[0].position.x = 60
     }, 3000)
   }
-  componentWillReceiveProps(nextProps, preProps) {
-    console.log('nextPropsnextProps', nextProps)
-    console.log('prePropsprePropspreProps', preProps)
-  }
 }
 export default Chart
