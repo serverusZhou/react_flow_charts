@@ -1,15 +1,39 @@
+*{padding: 0;margin:0;}
 .flow-content{
     width: 100%;
     height: 100%;
     display: flex;
 }
 .left_side{
-    width: 200px;
-    img{
-        width: 50px;
-        height: 50px;
+    width: 180px;
+    border: 1px #ccc solid;
+    border-radius: 3px;
+    overflow-y: auto;
+    padding: 0 10px;
+    div{
+        width: 94%;
+        p{
+            font-size: 18px;
+            padding: 10px 0 5px;
+        }
+        div{
+            display: flex;
+            flex-wrap: wrap;
+            img{
+                width: 30%;
+                height: 30%;
+                border-radius: 3px;
+                margin: 5px 1.5%;
+            }
+        }
     }
 }
 .content{
-    width: calc(100% - 200px);
+    width: calc(100% - 201px);
+    box-shadow: #ccc 0 0 5px;
+    border-left:1px #ccc solid;
+    canvas{
+        width: 100%;
+        height: 100%;
+    }
 }
