@@ -20,7 +20,7 @@ function drawHoverWapper(cxt, position, size) {
 function drawALine(chartsInfo, cxt, from, to) {
   cxt.beginPath()
   cxt.lineWidth = 3
-  cxt.strokeStyle = 'green'
+  cxt.strokeStyle = '#000'
   let x = to[0] - from[0]
   let y = to[1] - from[1]
   const ruleX = 5
