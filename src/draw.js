@@ -26,10 +26,10 @@ function drawALine(cxt, from, to) {
   let z = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
   let cos = y / z
   let radina = Math.acos(cos)// 用反三角函数求弧度
-  let firstPointer = [from[0] - 10 * Math.cos(radina), from[1] + 10 * Math.sin(radina)]
-  let secondPointer = [from[0] + 10 * Math.cos(radina), from[1] - 10 * Math.sin(radina)]
-  let thirdPointer = [to[0] + 10 * Math.cos(radina), to[1] - 10 * Math.sin(radina)]
-  let forthPointer = [to[0] - 10 * Math.cos(radina), to[1] + 10 * Math.sin(radina)]
+  let firstPointer = [from[0] - 10 * Math.sin(radina), from[1] + 10 * Math.cos(radina)]
+  let secondPointer = [from[0] + 10 * Math.sin(radina), from[1] - 10 * Math.cos(radina)]
+  let thirdPointer = [to[0] + 10 * Math.sin(radina), to[1] - 10 * Math.cos(radina)]
+  let forthPointer = [to[0] - 10 * Math.sin(radina), to[1] + 10 * Math.cos(radina)]
   cxt.moveTo(...firstPointer)
   cxt.lineTo(...secondPointer)
   cxt.lineTo(...thirdPointer)
