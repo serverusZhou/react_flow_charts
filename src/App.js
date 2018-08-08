@@ -8,7 +8,8 @@ import UUID from 'uuid'
 const icons = items.icons
 const lines = items.lines
 const formatItems = utils.getAllItems(icons)
-const chartConfig = [] // 记录
+const chartConfig = [] // 记录图表中加入的图标
+const lineConfig = [] // 记录图标中加入的线
 const chartsInfo = {} // 记录canvas的位置信息
 let choosenObj = {} // 被点击选择的
 let hoverObj = {} // 被hover的
@@ -64,9 +65,9 @@ class Chart extends Component {
         y: clickY
       }, {
         x: element.position.x,
-        endX: element.position.x + 100,
+        endX: element.position.x + element.size.width,
         y: element.position.y,
-        endY: element.position.y + 100,
+        endY: element.position.y + element.size.height,
       })) {
         choosenObj[element.hash] = true
       }
@@ -88,9 +89,9 @@ class Chart extends Component {
         y: clickY
       }, {
         x: element.position.x,
-        endX: element.position.x + 100,
+        endX: element.position.x + element.size.width,
         y: element.position.y,
-        endY: element.position.y + 100,
+        endY: element.position.y + element.size.height,
       })) {
         moveObj[element.hash] = true
       }
@@ -121,6 +122,22 @@ class Chart extends Component {
     chartConfig.forEach((element, index) => {
       if (choosenObj[element.hash]) {
         chartConfig.splice(index, 1)
+      }
+    })
+  }
+  enlarge = () => {
+    chartConfig.forEach((element, index) => {
+      if (choosenObj[element.hash]) {
+        element.size.width = element.size.width * 1.1
+        element.size.height = element.size.height * 1.1
+      }
+    })
+  }
+  narrow = () => {
+    chartConfig.forEach((element, index) => {
+      if (choosenObj[element.hash]) {
+        element.size.width = element.size.width / 1.1
+        element.size.height = element.size.height / 1.1
       }
     })
   }
@@ -177,7 +194,15 @@ class Chart extends Component {
             onKeyPress={(event => this.onKeyDown(event))}
           />
         </div>
-        <button onClick={this.remove}>删除</button>
+        <div>
+          <button onClick={this.remove}>delete</button>
+          <br />
+          <button onClick={this.enlarge}>enlarge</button>
+          <br />
+          <button onClick={this.narrow}>narrow</button>
+          <br />
+          <button onClick={this.save}>save</button>
+        </div>
       </div>
     )
   }
@@ -191,7 +216,7 @@ class Chart extends Component {
     let cxt = c.getContext('2d')
     function mainLoop() {
       cxt.clearRect(0, 0, c.width, c.height)
-      draw(cxt, chartConfig, formatItems, choosenObj, hoverObj)
+      draw(cxt, chartConfig, lineConfig, formatItems, choosenObj, hoverObj)
       requestAnimationFrame(mainLoop)
     }
     mainLoop()
