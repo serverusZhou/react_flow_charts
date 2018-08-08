@@ -5,7 +5,10 @@ const icons = [
       {
         key: 'friend1',
         imgSrc: 'https://goss.vcg.com/creative/vcg/800/version23/VCG41461237897.jpg',
-        imgOnly: true
+        size: {
+          width: 300,
+          height: 300
+        },
       },
       {
         key: 'friend2',

@@ -24,12 +24,12 @@ class Chart extends Component {
       hash: UUID(),
       type: data,
       position: {
-        x: (ev.clientX - chartsInfo.offsetLeft) / chartsInfo.width * 1000 - 50,
-        y: (ev.clientY - chartsInfo.offsetTop) / chartsInfo.height * 1000 - 50,
+        x: (ev.clientX - chartsInfo.offsetLeft) / chartsInfo.width * 1000 - ((formatItems[data].size && formatItems[data].size.width) || 100) / 2,
+        y: (ev.clientY - chartsInfo.offsetTop) / chartsInfo.height * 1000 - ((formatItems[data].size && formatItems[data].size.height) || 100) / 2,
       },
       size: {
-        width: 100,
-        height: 100
+        width: (formatItems[data].size && formatItems[data].size.width) || 100,
+        height: (formatItems[data].size && formatItems[data].size.height) || 100
       }
     })
   }
@@ -46,9 +46,9 @@ class Chart extends Component {
         y: clickY
       }, {
         x: element.position.x,
-        endX: element.position.x + 100,
+        endX: element.position.x + element.size.width,
         y: element.position.y,
-        endY: element.position.y + 100,
+        endY: element.position.y + element.size.height,
       })) {
         hoverObj[element.hash] = true
       }
@@ -110,12 +110,19 @@ class Chart extends Component {
       chartConfig.forEach(element => {
         if (moveObj[element.hash]) {
           element.position = {
-            x: (ev.clientX - chartsInfo.offsetLeft) / chartsInfo.width * 1000 - 50,
-            y: (ev.clientY - chartsInfo.offsetTop) / chartsInfo.height * 1000 - 50,
+            x: (ev.clientX - chartsInfo.offsetLeft) / chartsInfo.width * 1000 - element.size.width / 2,
+            y: (ev.clientY - chartsInfo.offsetTop) / chartsInfo.height * 1000 - element.size.height / 2,
           }
         }
       })
     }
+  }
+  remove = () => {
+    chartConfig.forEach((element, index) => {
+      if (choosenObj[element.hash]) {
+        chartConfig.splice(index, 1)
+      }
+    })
   }
   render() {
     return (
@@ -167,8 +174,10 @@ class Chart extends Component {
             onMouseUp={this.loseMouse}
             onMouseOut={this.loseMouse}
             onMouseMove={(event) => this.onMouseMoveInCanvas(event)}
+            onKeyPress={(event => this.onKeyDown(event))}
           />
         </div>
+        <button onClick={this.remove}>删除</button>
       </div>
     )
   }
