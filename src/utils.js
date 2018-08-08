@@ -20,6 +20,14 @@ function getAllItems (array) {
   return items
 }
 
+function checkIsBelongPosition (point, belongPoints) {
+  if (point.x > belongPoints.x && point.x < belongPoints.endX && point.y > belongPoints.y && point.y < belongPoints.endY) {
+    return true
+  } else {
+    return false
+  }
+}
+
 function drawImage (src) {
   const image = new Image()
   image.src = src
@@ -28,5 +36,6 @@ function drawImage (src) {
 
 export default {
   getAllItems,
-  drawImage
+  drawImage,
+  checkIsBelongPosition
 }

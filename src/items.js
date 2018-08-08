@@ -1,49 +1,44 @@
 const icons = [
   {
-    type: '可爱型',
+    type: '图标',
     icon: [
       {
         key: 'friend1',
-        imgSrc: 'https://bpic.588ku.com/element_banner/20/18/08/c16887b44516e93d5efee96383357d8a.jpg',
+        imgSrc: 'https://goss.vcg.com/creative/vcg/800/version23/VCG41461237897.jpg',
         imgOnly: true
       },
       {
         key: 'friend2',
-        imgSrc: 'https://bpic.588ku.com/element_banner/20/18/08/c16887b44516e93d5efee96383357d8a.jpg',
-        draw: () => {
-          return function() {
-
-          }
-        }
+        imgSrc: 'https://goss4.vcg.com/creative/vcg/800/version23/VCG41461237893.jpg',
       },
       {
         key: 'friend3',
-        imgSrc: 'https://bpic.588ku.com/element_banner/20/18/08/c16887b44516e93d5efee96383357d8a.jpg'
+        imgSrc: 'https://goss4.vcg.com/creative/vcg/800/version23/VCG41461237887.jpg'
       },
       {
         key: 'friend4',
-        imgSrc: 'https://bpic.588ku.com/element_banner/20/18/08/c16887b44516e93d5efee96383357d8a.jpg'
+        imgSrc: 'https://goss3.vcg.com/creative/vcg/800/version23/VCG41461237947.jpg'
       }
     ]
   },
   {
-    type: '卡哇伊型',
+    type: '高级图标',
     icon: [
       {
         key: 'friend5',
-        imgSrc: 'https://bpic.588ku.com/element_banner/20/18/08/c16887b44516e93d5efee96383357d8a.jpg'
+        imgSrc: 'https://goss2.vcg.com/creative/vcg/800/version23/VCG41461223925.jpg'
       },
       {
         key: 'friend6',
-        imgSrc: 'https://bpic.588ku.com/element_banner/20/18/08/c16887b44516e93d5efee96383357d8a.jpg'
+        imgSrc: 'https://goss.vcg.com/creative/vcg/800/version23/VCG41461223891.jpg'
       },
       {
         key: 'friend7',
-        imgSrc: 'https://bpic.588ku.com/element_banner/20/18/08/c16887b44516e93d5efee96383357d8a.jpg'
+        imgSrc: 'https://goss.vcg.com/creative/vcg/800/version23/VCG41461223891.jpg'
       },
       {
         key: 'friend8',
-        imgSrc: 'https://bpic.588ku.com/element_banner/20/18/08/c16887b44516e93d5efee96383357d8a.jpg'
+        imgSrc: 'https://goss.vcg.com/creative/vcg/800/version23/VCG41461223891.jpg'
       }
     ]
   }

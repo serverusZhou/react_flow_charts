@@ -3,38 +3,119 @@ import styles from './index.less'
 import items from './items'
 import draw from './draw'
 import utils from './utils'
+import UUID from 'uuid'
 
 const icons = items.icons
 const lines = items.lines
 const formatItems = utils.getAllItems(icons)
-const chartConfig = [
-  {
-    type: 'friend1',
-    position: {
-      x: 20,
-      y: 20
-    },
-    size: {
-      width: 40,
-      height: 20
-    }
-  }
-]
+const chartConfig = [] // 记录
+const chartsInfo = {} // 记录canvas的位置信息
+let choosenObj = {} // 被点击选择的
+let hoverObj = {} // 被hover的
+let moveObj = {} // 需要被移动的
+let flag = false // 是否在选择的过程中
 class Chart extends Component {
   onDragstartFunc = (ev) => {
     ev.dataTransfer.setData('key', ev.target.id)
   }
   onDropFunc = (ev) => {
     const data = ev.dataTransfer.getData('key')
-    console.log(ev.clientX)
-    console.log(data)
+    chartConfig.push({
+      hash: UUID(),
+      type: data,
+      position: {
+        x: (ev.clientX - chartsInfo.offsetLeft) / chartsInfo.width * 1000 - 50,
+        y: (ev.clientY - chartsInfo.offsetTop) / chartsInfo.height * 1000 - 50,
+      },
+      size: {
+        width: 100,
+        height: 100
+      }
+    })
   }
   allowDrop = (ev) => {
     ev.preventDefault()
   }
   onMouseMove = (ev) => {
-    // console.log('move e.clientX', ev.clientX)
-    // console.log('move e.clientY', ev.clientY)
+    hoverObj = {}
+    const clickX = (ev.clientX - chartsInfo.offsetLeft) / chartsInfo.width * 1000
+    const clickY = (ev.clientY - chartsInfo.offsetTop) / chartsInfo.height * 1000
+    chartConfig.forEach(element => {
+      if (utils.checkIsBelongPosition({
+        x: clickX,
+        y: clickY
+      }, {
+        x: element.position.x,
+        endX: element.position.x + 100,
+        y: element.position.y,
+        endY: element.position.y + 100,
+      })) {
+        hoverObj[element.hash] = true
+      }
+    })
+  }
+  onClick = (ev) => {
+    choosenObj = {}
+    const clickX = (ev.clientX - chartsInfo.offsetLeft) / chartsInfo.width * 1000
+    const clickY = (ev.clientY - chartsInfo.offsetTop) / chartsInfo.height * 1000
+    chartConfig.forEach(element => {
+      if (utils.checkIsBelongPosition({
+        x: clickX,
+        y: clickY
+      }, {
+        x: element.position.x,
+        endX: element.position.x + 100,
+        y: element.position.y,
+        endY: element.position.y + 100,
+      })) {
+        choosenObj[element.hash] = true
+      }
+    })
+    Object.keys(choosenObj).forEach((element, index) => {
+      if (index !== Object.keys(choosenObj).length - 1) {
+        choosenObj[element] = false
+      }
+    })
+  }
+  onMouseDownInCanvas = (ev) => {
+    flag = true
+    moveObj = {}
+    const clickX = (ev.clientX - chartsInfo.offsetLeft) / chartsInfo.width * 1000
+    const clickY = (ev.clientY - chartsInfo.offsetTop) / chartsInfo.height * 1000
+    chartConfig.forEach(element => {
+      if (utils.checkIsBelongPosition({
+        x: clickX,
+        y: clickY
+      }, {
+        x: element.position.x,
+        endX: element.position.x + 100,
+        y: element.position.y,
+        endY: element.position.y + 100,
+      })) {
+        moveObj[element.hash] = true
+      }
+    })
+    Object.keys(moveObj).forEach((element, index) => {
+      if (index !== Object.keys(moveObj).length - 1) {
+        moveObj[element] = false
+      }
+    })
+  }
+  loseMouse = () => {
+    flag = false
+    moveObj = {}
+  }
+  onMouseMoveInCanvas = (ev) => {
+    if (flag && Object.keys(moveObj).length > 0) {
+      chartConfig.forEach(element => {
+        if (moveObj[element.hash]) {
+          element.position = {
+            x: (ev.clientX - chartsInfo.offsetLeft) / chartsInfo.width * 1000 - 50,
+            y: (ev.clientY - chartsInfo.offsetTop) / chartsInfo.height * 1000 - 50,
+          }
+        }
+      })
+    }
   }
   render() {
     return (
@@ -76,8 +157,17 @@ class Chart extends Component {
           onDrop={(event) => this.onDropFunc(event)}
           onDragOver={(event) => this.allowDrop(event)}
           onMouseMove={(event) => this.onMouseMove(event)}
+          onClick = {(event) => this.onClick(event)}
         >
-          <canvas ref='flow_canvas' />
+          <canvas
+            ref='flow_canvas'
+            width='1000'
+            height='1000'
+            onMouseDown={(event) => this.onMouseDownInCanvas(event)}
+            onMouseUp={this.loseMouse}
+            onMouseOut={this.loseMouse}
+            onMouseMove={(event) => this.onMouseMoveInCanvas(event)}
+          />
         </div>
       </div>
     )
@@ -85,16 +175,17 @@ class Chart extends Component {
   componentDidMount() {
     const that = this
     const c = that.refs['flow_canvas']
+    chartsInfo.offsetTop = c.offsetTop
+    chartsInfo.offsetLeft = c.offsetLeft
+    chartsInfo.width = c.offsetWidth
+    chartsInfo.height = c.offsetHeight
     let cxt = c.getContext('2d')
     function mainLoop() {
       cxt.clearRect(0, 0, c.width, c.height)
-      draw(cxt, chartConfig, formatItems)
+      draw(cxt, chartConfig, formatItems, choosenObj, hoverObj)
       requestAnimationFrame(mainLoop)
     }
     mainLoop()
-    setTimeout(() => {
-      chartConfig[0].position.x = 50
-    }, 3000)
   }
 }
 export default Chart
