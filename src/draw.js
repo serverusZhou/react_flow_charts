@@ -17,28 +17,28 @@ function drawHoverWapper(cxt, position, size) {
   cxt.closePath()
 }
 
-function drawALine(cxt, from, to) {
+function drawALine(chartsInfo, cxt, from, to) {
   cxt.beginPath()
   cxt.lineWidth = 3
   cxt.strokeStyle = 'green'
-  let x = Math.abs(to[0] - from[0])
-  let y = Math.abs(to[1] - from[1])
-  let z = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
-  let cos = y / z
-  let radina = Math.acos(cos)// 用反三角函数求弧度
-  let firstPointer = [from[0] - 10 * Math.sin(radina), from[1] + 10 * Math.cos(radina)]
-  let secondPointer = [from[0] + 10 * Math.sin(radina), from[1] - 10 * Math.cos(radina)]
-  let thirdPointer = [to[0] + 10 * Math.sin(radina), to[1] - 10 * Math.cos(radina)]
-  let forthPointer = [to[0] - 10 * Math.sin(radina), to[1] + 10 * Math.cos(radina)]
+  let x = to[0] - from[0]
+  let y = to[1] - from[1]
+  const ruleX = 5
+  const ruleY = ruleX * Math.abs(x) / Math.abs(y) * (chartsInfo.width / chartsInfo.height)
+  let firstPointer = [from[0] - ruleX, from[1] + ruleY]
+  let secondPointer = [from[0] + ruleX, from[1] - ruleY]
+  let thirdPointer = [to[0] - 1 / 3 * x + ruleX, to[1] - 1 / 3 * y - ruleY]
+  let forthPointer = [to[0] - 1 / 3 * x - ruleX, to[1] - 1 / 3 * y + ruleY]
   cxt.moveTo(...firstPointer)
   cxt.lineTo(...secondPointer)
   cxt.lineTo(...thirdPointer)
+  cxt.lineTo(...to)
   cxt.lineTo(...forthPointer)
   cxt.lineTo(...firstPointer)
   cxt.stroke()
   cxt.closePath()
 }
-export default function(cxt, config, lineConfig, items, choosenObj, hoverObj) {
+export default function(chartsInfo, cxt, config, lineConfig, items, choosenObj, hoverObj) {
   config.forEach(element => {
     const item = items[element.type]
     cxt.drawImage(item.getPic(cxt), 0, 0, 800, 622, element.position.x, element.position.y, element.size.width, element.size.height)
@@ -65,6 +65,6 @@ export default function(cxt, config, lineConfig, items, choosenObj, hoverObj) {
   //       to = [ele.position.x, ele.position.y]
   //     }
   //   })
-  drawALine(cxt, [25, 25], [500, 500])
+  drawALine(chartsInfo, cxt, [150, 178], [300, 300])
   // })
 }

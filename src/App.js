@@ -216,7 +216,7 @@ class Chart extends Component {
     let cxt = c.getContext('2d')
     function mainLoop() {
       cxt.clearRect(0, 0, c.width, c.height)
-      draw(cxt, chartConfig, lineConfig, formatItems, choosenObj, hoverObj)
+      draw(chartsInfo, cxt, chartConfig, lineConfig, formatItems, choosenObj, hoverObj)
       requestAnimationFrame(mainLoop)
     }
     mainLoop()
