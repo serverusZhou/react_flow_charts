@@ -16,6 +16,7 @@ let hoverObj = {} // 被hover的
 let moveObj = {} // 需要被移动的
 let lineObj = [] // 选中的线条
 let flag = false // 是否在选择的过程中
+let relativeLines = [] // 操作受关联的线
 let mode = {
   default: true,
   lineMode: false
@@ -85,11 +86,12 @@ class Chart extends Component {
   }
   onMouseDownInCanvas = (ev) => {
     flag = true
+    relativeLines = []
     if (mode.default) {
       moveObj = {}
       const clickX = (ev.clientX - chartsInfo.offsetLeft) / chartsInfo.width * 1000
       const clickY = (ev.clientY - chartsInfo.offsetTop) / chartsInfo.width * 1000
-      chartConfig.forEach(element => {
+      chartConfig.forEach((element, index) => {
         if (utils.checkIsBelongPosition({
           x: clickX,
           y: clickY
@@ -99,12 +101,26 @@ class Chart extends Component {
           y: element.position.y,
           endY: element.position.y + element.size.height,
         })) {
-          moveObj[element.hash] = true
+          moveObj[element.hash] = {
+            isEffect: true,
+            index
+          }
         }
       })
       Object.keys(moveObj).forEach((element, index) => {
         if (index !== Object.keys(moveObj).length - 1) {
-          moveObj[element] = false
+          moveObj[element].isEffect = false
+        } else if (index === Object.keys(moveObj).length - 1) {
+          lineConfig.forEach((line, lIndex) => {
+            if (line.from.element.hash === element || line.to.element.hash === element) {
+              relativeLines.push({
+                hash: line.hash,
+                index: lIndex,
+                objIndex: moveObj[element].index,
+                fromOrTo: line.from.element.hash === element ? 'from' : 'to'
+              })
+            }
+          })
         }
       })
     }
@@ -187,6 +203,7 @@ class Chart extends Component {
           temLine.from.position.y = finalPosition.from.y
           temLine.to.position.x = finalPosition.to.x
           temLine.to.position.y = finalPosition.to.y
+          temLine.to.element = exitLine.element
         }
       } else {
         lineConfig.forEach((element, index) => {
@@ -201,12 +218,40 @@ class Chart extends Component {
     if (mode.default) {
       if (flag && Object.keys(moveObj).length > 0) {
         chartConfig.forEach(element => {
-          if (moveObj[element.hash]) {
+          if (moveObj[element.hash] && moveObj[element.hash].isEffect) {
             element.position = {
               x: (ev.clientX - chartsInfo.offsetLeft) / chartsInfo.width * 1000 - element.size.width / 2,
               y: (ev.clientY - chartsInfo.offsetTop) / chartsInfo.width * 1000 - element.size.height / 2,
             }
           }
+        })
+        relativeLines.forEach((relativeLine, lIndex) => {
+          console.log('relativeLine.objIndexrelativeLine.objIndex', relativeLine.objIndex)
+          const connectLine = lineConfig[relativeLine.index]
+          const item = chartConfig[relativeLine.objIndex]
+          const fromOrTo = relativeLine.fromOrTo
+          console.log('relativeLine.fromOrTo', relativeLine.fromOrTo)
+          console.log('connectLineconnectLine', connectLine)
+          console.log('item.positionitem.position', item)
+          console.log('fromOrTo === to', fromOrTo === 'to')
+          console.log('fromOrTo === from', fromOrTo === 'from')
+          const finalPosition = utils.getLinePosition({
+            x: fromOrTo === 'to' ? (connectLine.from.element.position.x + connectLine.from.element.size.width / 2) : (item.position.x + item.size.width / 2),
+            y: fromOrTo === 'to' ? (connectLine.from.element.position.x + connectLine.from.element.size.width / 2) : (item.position.y + item.size.height / 2),
+          }, {
+            x: fromOrTo === 'from' ? (connectLine.to.element.position.x + connectLine.to.element.size.width / 2) : (item.position.x + item.size.width / 2),
+            y: fromOrTo === 'from' ? (connectLine.to.element.position.y + connectLine.to.element.size.height / 2) : (item.position.y + item.size.height / 2),
+          }, {
+            width: connectLine.from.element.size.width,
+            height: connectLine.from.element.size.height,
+          }, {
+            width: connectLine.to.element.size.width,
+            height: connectLine.to.element.size.height,
+          })
+          connectLine.from.position.x = finalPosition.from.x
+          connectLine.from.position.y = finalPosition.from.y
+          connectLine.to.position.x = finalPosition.to.x
+          connectLine.to.position.y = finalPosition.to.y
         })
       }
     }
