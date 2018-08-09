@@ -28,6 +28,33 @@ function checkIsBelongPosition (point, belongPoints) {
   }
 }
 
+// from to中的坐标为中心点
+function getLinePosition (from, to, fromObjSize, toObjSize) {
+  let x = to.x - from.x
+  let y = to.y - from.y
+  let length = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
+  const fromObjLength = Math.sqrt(Math.pow(fromObjSize.width, 2) + Math.pow(fromObjSize.height, 2))
+  const toObjLength = Math.sqrt(Math.pow(toObjSize.width, 2) + Math.pow(toObjSize.height, 2))
+  return {
+    from: {
+      x: from.x + fromObjLength * x / length / 2,
+      y: from.y + fromObjLength * y / length / 2,
+    },
+    to: {
+      x: to.x - toObjLength * x / length / 2,
+      y: to.y - toObjLength * y / length / 2,
+    }
+    // from: {
+    //   x: from.x,
+    //   y: from.y ,
+    // },
+    // to: {
+    //   x: to.x,
+    //   y: to.y,
+    // }
+  }
+}
+
 function drawImage (src) {
   const image = new Image()
   image.src = src
@@ -37,5 +64,6 @@ function drawImage (src) {
 export default {
   getAllItems,
   drawImage,
-  checkIsBelongPosition
+  checkIsBelongPosition,
+  getLinePosition
 }
