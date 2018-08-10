@@ -47,7 +47,10 @@ const icons = [
   }
 ]
 const lines = [{
-  type: 'singleArrow',
+  type: 'arrow',
+  imgSrc: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1533634167988&di=cecf2f471c88bc03c0f35acb03531119&imgtype=0&src=http%3A%2F%2Fpic.58pic.com%2F58pic%2F15%2F57%2F74%2F11m58PICM5z_1024.jpg'
+}, {
+  type: 'pipe',
   imgSrc: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1533634167988&di=cecf2f471c88bc03c0f35acb03531119&imgtype=0&src=http%3A%2F%2Fpic.58pic.com%2F58pic%2F15%2F57%2F74%2F11m58PICM5z_1024.jpg'
 }]
 export default { icons, lines }

@@ -21,6 +21,7 @@ let mode = {
   default: true,
   lineMode: false
 }
+const drawFlow = draw()
 class Chart extends Component {
   onDragstartFunc = (ev) => {
     ev.dataTransfer.setData('key', ev.target.id)
@@ -140,6 +141,7 @@ class Chart extends Component {
           lineConfig.push({
             hash: UUID(),
             isTemporarily: true,
+            type: lineObj[0].type,
             from: {
               hash: element.hash,
               element: element,
@@ -226,18 +228,12 @@ class Chart extends Component {
           }
         })
         relativeLines.forEach((relativeLine, lIndex) => {
-          console.log('relativeLine.objIndexrelativeLine.objIndex', relativeLine.objIndex)
           const connectLine = lineConfig[relativeLine.index]
           const item = chartConfig[relativeLine.objIndex]
           const fromOrTo = relativeLine.fromOrTo
-          console.log('relativeLine.fromOrTo', relativeLine.fromOrTo)
-          console.log('connectLineconnectLine', connectLine)
-          console.log('item.positionitem.position', item)
-          console.log('fromOrTo === to', fromOrTo === 'to')
-          console.log('fromOrTo === from', fromOrTo === 'from')
           const finalPosition = utils.getLinePosition({
             x: fromOrTo === 'to' ? (connectLine.from.element.position.x + connectLine.from.element.size.width / 2) : (item.position.x + item.size.width / 2),
-            y: fromOrTo === 'to' ? (connectLine.from.element.position.x + connectLine.from.element.size.width / 2) : (item.position.y + item.size.height / 2),
+            y: fromOrTo === 'to' ? (connectLine.from.element.position.y + connectLine.from.element.size.width / 2) : (item.position.y + item.size.height / 2),
           }, {
             x: fromOrTo === 'from' ? (connectLine.to.element.position.x + connectLine.to.element.size.width / 2) : (item.position.x + item.size.width / 2),
             y: fromOrTo === 'from' ? (connectLine.to.element.position.y + connectLine.to.element.size.height / 2) : (item.position.y + item.size.height / 2),
@@ -290,7 +286,10 @@ class Chart extends Component {
     const isAlreadyChoosen = lineObj.some(item => {
       return element.type === item.type
     })
-    if (!isAlreadyChoosen) {
+    if (!isAlreadyChoosen && lineObj.length === 0) {
+      lineObj.push(element)
+    } else if ((!isAlreadyChoosen && lineObj.length !== 0)) {
+      lineObj = []
       lineObj.push(element)
     } else {
       lineObj = []
@@ -385,7 +384,7 @@ class Chart extends Component {
     let cxt = c.getContext('2d')
     function mainLoop() {
       cxt.clearRect(0, 0, c.width, c.height)
-      draw(chartsInfo, cxt, chartConfig, lineConfig, formatItems, choosenObj, hoverObj)
+      drawFlow(chartsInfo, cxt, chartConfig, lineConfig, formatItems, choosenObj, hoverObj)
       requestAnimationFrame(mainLoop)
     }
     mainLoop()
