@@ -61,9 +61,26 @@ function drawImage (src) {
   return image
 }
 
+function keysSwith (swithObj) {
+  return {
+    getCurrentMode: () => {
+      const result = Object.keys(swithObj).find(mode => swithObj[mode])
+      if (result && result.length) {
+        return result[0]
+      } else {
+        return null
+      }
+    },
+    is: (mode) => {
+      return swithObj.mode
+    }
+  }
+}
+
 export default {
   getAllItems,
   drawImage,
   checkIsBelongPosition,
-  getLinePosition
+  getLinePosition,
+  keysSwith,
 }

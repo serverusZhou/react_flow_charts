@@ -1,5 +1,18 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import App from './App'
+import Chart from './chart'
 
-ReactDOM.render(<div style={{ width: '1200px', height: '800px', margin: '0 auto', paddingTop: '20px' }}><App /></div>, document.getElementById('app'))
+import assemblies from './material/assemblies'
+import { typeSummary } from './dict'
+
+ReactDOM.render(
+  <div
+    style={{ width: '1200px', height: '800px', margin: '0 auto', paddingTop: '20px' }}
+  >
+    <Chart
+      typeSummary = {typeSummary}
+      assemblies={assemblies}
+    />
+  </div>,
+  document.getElementById('app')
+)

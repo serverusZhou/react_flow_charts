@@ -2,6 +2,7 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const ProgressBarPlugin = require('progress-bar-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 const config = {
   mode: 'development',
@@ -41,7 +42,14 @@ const config = {
       format: '  构建 [:bar] :percent (:elapsed seconds)',
       clear: false,
       width: 60
-    })
+    }),
+    new CopyWebpackPlugin([
+      {
+        from: path.resolve(__dirname, '../assets'),
+        to: path.resolve(__dirname, '/dist'),
+        ignore: ['.*']
+      }
+    ])
   ],
   devServer: {
     port: 9000,
