@@ -1,3 +1,3 @@
-import ReactFlowChart from './App'
+import ReactFlowChart from './chart'
 
 export default ReactFlowChart
