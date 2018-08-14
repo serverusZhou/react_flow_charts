@@ -6,8 +6,8 @@ export default {
     imageUrl: '/assets/pool.png',
     typeBelong: 'general',
     size: {
-      width: 100,
-      height: 100
+      width: 50,
+      height: 50
     },
     draw: () => {
       let transMark = 1
@@ -40,10 +40,10 @@ export default {
   },
   pool1: {
     imageUrl: '/assets/pool.png',
-    typeBelong: 'general',
+    typeBelong: 'advanced',
     size: {
-      width: 100,
-      height: 100
+      width: 50,
+      height: 50
     }
   }
 }

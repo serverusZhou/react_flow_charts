@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import styles from './index.less'
 import draw from './draw/draw'
 import util from './util'
-import actionMehod from './actionMehod'
+import actionMethod from './actionMehod'
 
 const mode = util.keysSwith({ 'assembly': true, 'line': false })
 const oprateData = {
@@ -13,6 +13,8 @@ const oprateData = {
   choosenAssembly: {},
   ableMoveAssembly: {},
   lines: [],
+  activeLine: {},
+  temLine: {},
   material: {
     assemblies: {},
     lines: {}
@@ -20,7 +22,7 @@ const oprateData = {
 }
 
 const drawWapper = draw(oprateData)
-const actionMehodWapper = actionMehod(oprateData)
+const actionMehodWapper = actionMethod(oprateData)
 
 class Chart extends Component {
   constructor (props) {
@@ -44,36 +46,59 @@ class Chart extends Component {
       x: ev.clientX,
       y: ev.clientY
     })
-    actionMehodWapper.chooseAssmbly(position)
+    if (mode.is('assembly')) {
+      actionMehodWapper.chooseAssmbly(position)
+    }
   }
   moveStart (ev) {
     const { mode } = oprateData
-    if (mode.is('assembly')) {
+    const position = actionMehodWapper.transPixelToPos({
+      x: ev.clientX,
+      y: ev.clientY
+    })
+    mode.is('assembly') && actionMehodWapper.addAbleMoveAssembly(position)
+    mode.is('line') && actionMehodWapper.addTemLine(position)
+  }
+  moveEnd (ev) {
+    const { mode, ableMoveAssembly, temLine } = oprateData
+    mode.is('assembly') && util.clearObj(ableMoveAssembly)
+    if (mode.is('line')) {
       const position = actionMehodWapper.transPixelToPos({
         x: ev.clientX,
         y: ev.clientY
       })
-      actionMehodWapper.addAbleMoveAssembly(position)
-    }
-  }
-  moveEnd (ev) {
-    const { mode } = oprateData
-    if (mode.is('assembly')) {
-      oprateData.ableMoveAssembly = {}
+      const assemblyAtPosition = actionMehodWapper.findAssmblyByPosition(position)
+      if (assemblyAtPosition && Object.keys(assemblyAtPosition).length) {
+        actionMehodWapper.addLine(assemblyAtPosition)
+      }
+      util.clearObj(temLine)
     }
   }
   move (ev) {
-    const { mode, ableMoveAssembly } = oprateData
+    const { mode, ableMoveAssembly, temLine } = oprateData
+    const position = actionMehodWapper.transPixelToPos({
+      x: ev.clientX,
+      y: ev.clientY
+    })
     if (mode.is('assembly') && Object.keys(ableMoveAssembly).length) {
-      const position = actionMehodWapper.transPixelToPos({
-        x: ev.clientX,
-        y: ev.clientY
-      })
       actionMehodWapper.updateAssemblyPosition(position)
     }
+    if (mode.is('line') && Object.keys(temLine).length) {
+      actionMehodWapper.moveTemLine(position)
+    }
+  }
+  setActiveLine (ev, lineKey, lines) {
+    if (!lines[lineKey].isActive) {
+      Object.keys(lines).forEach(key => {
+        lines[key].isActive = false
+      })
+    }
+    lines[lineKey].isActive = !lines[lineKey].isActive
+    this.setState({ lines })
+    actionMehodWapper.setActiveLine(ev.target.id)
   }
   render() {
-    const { typeSummary, assemblies } = this.state
+    const { typeSummary, assemblies, lines } = this.state
     return (
       <div className={styles['flow-content']}>
         <div className={styles['left_side']}>
@@ -86,8 +111,8 @@ class Chart extends Component {
                     {
                       Object.keys(assemblies).map((assembly, i) => {
                         return (
-                          (assemblies[assembly].typeBelong === type) &&
-                          <img key={i} src={assemblies[assembly].imageUrl} id={assembly} draggable={true} onDragStart={(ev) => this.dragAssembly(ev)} />
+                          assemblies[assembly].typeBelong === type
+                            ? <img className={styles['assembly-img']} key={i} src={assemblies[assembly].imageUrl} id={assembly} draggable={true} onDragStart={(ev) => this.dragAssembly(ev)} /> : ''
                         )
                       })
                     }
@@ -98,7 +123,19 @@ class Chart extends Component {
           }
           <div>
             <p>线条</p>
-            <div />
+            <div>
+              {
+                Object.keys(lines).map((line, i) => {
+                  return (
+                    <img
+                      className={!lines[line].isActive ? styles['line-img'] : styles['line-img-active']}
+                      key={i} src={lines[line].imgSrc}
+                      id={line} draggable={false} onClick={(ev) => this.setActiveLine(ev, line, lines)}
+                    />
+                  )
+                })
+              }
+            </div>
           </div>
         </div>
         <div

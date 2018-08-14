@@ -1,4 +1,5 @@
 import UUID from 'uuid'
+import util from './util'
 import { drawAImage } from './draw/drawUtil'
 
 function checkIsBelongPosition (point, belongPoints) {
@@ -32,14 +33,18 @@ export default function(oprateData) {
           width: (material.assemblies[assembly].size && material.assemblies[assembly].size.width) || 100,
           height: (material.assemblies[assembly].size && material.assemblies[assembly].size.height) || 100
         },
+        lines: {
+          from: [],
+          to: []
+        },
         draw: material.assemblies[assembly].draw ? material.assemblies[assembly].draw() : function(ctx, position, size, imgUrl) {
           drawAImage(ctx, imgUrl, position, size)
         }
       })
     },
     chooseAssmbly: function(position) {
-      const { assemblies } = oprateData
-      oprateData.choosenAssembly = {}
+      const { assemblies, choosenAssembly } = oprateData
+      util.clearObj(choosenAssembly)
       assemblies.forEach(element => {
         if (checkIsBelongPosition(position, {
           x: element.position.x,
@@ -47,15 +52,24 @@ export default function(oprateData) {
           y: element.position.y,
           endY: element.position.y + element.size.height,
         })) {
-          oprateData.choosenAssembly = {
-            [element.id]: true
-          }
+          choosenAssembly[element.id] = true
         }
       })
     },
-    addAbleMoveAssembly: function(position) {
+    findAssmblyByPosition: function(position) {
       const { assemblies } = oprateData
-      oprateData.ableMoveAssembly = {}
+      return assemblies.find(element => {
+        return checkIsBelongPosition(position, {
+          x: element.position.x,
+          endX: element.position.x + element.size.width,
+          y: element.position.y,
+          endY: element.position.y + element.size.height,
+        })
+      })
+    },
+    addAbleMoveAssembly: function(position) {
+      const { assemblies, ableMoveAssembly } = oprateData
+      util.clearObj(ableMoveAssembly)
       assemblies.forEach(element => {
         if (checkIsBelongPosition(position, {
           x: element.position.x,
@@ -63,9 +77,7 @@ export default function(oprateData) {
           y: element.position.y,
           endY: element.position.y + element.size.height,
         })) {
-          oprateData.ableMoveAssembly = {
-            [element.id]: true
-          }
+          ableMoveAssembly[element.id] = true
         }
       })
     },
@@ -73,10 +85,78 @@ export default function(oprateData) {
       const { assemblies, ableMoveAssembly } = oprateData
       assemblies.forEach(element => {
         if (ableMoveAssembly[element.id]) {
-          console.log(position)
-          element.position = position
+          element.position = {
+            x: position.x - element.size.width / 2,
+            y: position.y - element.size.height / 2
+          }
+          element.lines.from.forEach(line => {
+            line.line.from.position.x = position.x
+            line.line.from.position.y = position.y
+          })
+          element.lines.to.forEach(line => {
+            line.line.to.position.x = position.x
+            line.line.to.position.y = position.y
+          })
         }
       })
+    },
+    setActiveLine: function(lineType) {
+      let { mode, activeLine } = oprateData
+      if (activeLine[lineType]) {
+        mode.setTo('assembly')
+        util.clearObj(activeLine)
+      } else {
+        mode.setTo('line')
+        util.clearObj(activeLine)
+        activeLine[lineType] = true
+      }
+    },
+    addTemLine: function(position) {
+      const fromAssembly = this.findAssmblyByPosition(position)
+      if (fromAssembly && Object.keys(fromAssembly).length) {
+        const { temLine, material, activeLine } = oprateData
+        temLine.id = UUID()
+        temLine.type = Object.keys(activeLine)[0]
+        temLine.from = {
+          assembly: fromAssembly,
+          position: {
+            x: fromAssembly.position.x + fromAssembly.size.width / 2,
+            y: fromAssembly.position.y + fromAssembly.size.height / 2,
+          }
+        }
+        temLine.to = {
+          assembly: null,
+          position: {
+            x: fromAssembly.position.x + fromAssembly.size.width / 2,
+            y: fromAssembly.position.y + fromAssembly.size.height / 2,
+          }
+        }
+        temLine.draw = material.lines[Object.keys(activeLine)[0]].draw()
+      }
+    },
+    addLine: function(assembly) {
+      const { temLine, lines } = oprateData
+      temLine.to.position = {
+        x: assembly.position.x + assembly.size.width / 2,
+        y: assembly.position.y + assembly.size.height / 2,
+      }
+      temLine.to.assembly = assembly
+      const cloneLine = Object.assign({}, temLine)
+      temLine.from.assembly.lines.from.push({
+        id: temLine.id,
+        line: cloneLine
+      })
+      temLine.to.assembly.lines.to.push({
+        id: temLine.id,
+        line: cloneLine
+      })
+      lines.push(cloneLine)
+    },
+    moveTemLine: function(position) {
+      const { temLine } = oprateData
+      temLine.to.position = {
+        ...position
+      }
     }
   }
 }

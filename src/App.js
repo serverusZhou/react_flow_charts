@@ -305,7 +305,6 @@ class Chart extends Component {
         lineMode: false
       }
     }
-    console.log('modemode', mode)
   }
   render() {
     return (

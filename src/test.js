@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom'
 import Chart from './chart'
 
 import assemblies from './material/assemblies'
+import lines from './material/lines'
 import { typeSummary } from './dict'
 
 ReactDOM.render(
@@ -12,6 +13,7 @@ ReactDOM.render(
     <Chart
       typeSummary = {typeSummary}
       assemblies={assemblies}
+      lines = {lines}
     />
   </div>,
   document.getElementById('app')

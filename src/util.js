@@ -15,7 +15,14 @@ function keysSwith (swithObj) { // 对象key切换
     }
   }
 }
+
+function clearObj (obj) {
+  Object.keys(obj).forEach(key => {
+    delete obj[key]
+  })
+}
   
 export default {
   keysSwith,
+  clearObj,
 }
