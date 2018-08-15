@@ -6,30 +6,36 @@
 }
 .left_side{
     width: 180px;
-    border: 1px #ccc solid;
+    border: 2px dotted #d9dadc;
+    border-right: none;
     border-radius: 3px;
     overflow-y: auto;
     padding: 0 10px;
     div{
         width: 94%;
+        border-bottom: 1px solid #e7e7eb;
         p{
-            font-size: 18px;
+            font-size: 14px;
             padding: 10px 0 5px;
         }
         div{
             display: flex;
             flex-wrap: wrap;
-            img{
+            border: none;
+            div{
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 width: 30%;
                 height: 30%;
                 border-radius: 3px;
                 margin: 5px 1.5%;
+                img{
+                    width: 30px;
+                    height: 30px
+                }
             }
         }
-    }
-    div.name{
-        width: 150%;
-        height: 150%
     }
 }
 .assembly-img{
@@ -48,8 +54,7 @@
 }
 .content{
     width: calc(100% - 201px);
-    box-shadow: #ccc 0 0 5px;
-    border-left:1px #ccc solid;
+    border:1px solid #e7e7eb;
     canvas{
         width: 100%;
         height: 100%;

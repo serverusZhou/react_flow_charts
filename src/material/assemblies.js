@@ -45,5 +45,53 @@ export default {
       width: 50,
       height: 50
     }
-  }
+  },
+  pool2: {
+    imageUrl: '/assets/pool.png',
+    typeBelong: 'advanced',
+    size: {
+      width: 50,
+      height: 50
+    }
+  },
+  pool3: {
+    imageUrl: '/assets/pool.png',
+    typeBelong: 'advanced',
+    size: {
+      width: 50,
+      height: 50
+    }
+  },
+  pool4: {
+    imageUrl: '/assets/pool.png',
+    typeBelong: 'advanced',
+    size: {
+      width: 50,
+      height: 50
+    }
+  },
+  pool5: {
+    imageUrl: '/assets/pool.png',
+    typeBelong: 'advanced',
+    size: {
+      width: 50,
+      height: 50
+    }
+  },
+  pool6: {
+    imageUrl: '/assets/pool.png',
+    typeBelong: 'advanced',
+    size: {
+      width: 50,
+      height: 50
+    }
+  },
+  pool7: {
+    imageUrl: '/assets/pool.png',
+    typeBelong: 'advanced',
+    size: {
+      width: 50,
+      height: 50
+    }
+  },
 }

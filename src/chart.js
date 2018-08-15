@@ -41,13 +41,18 @@ class Chart extends Component {
     })
     actionMehodWapper.addAssmbly(ev.dataTransfer.getData('assembly'), position)
   }
-  chooseAssembly (ev) {
+  chooseAssembly (ev, callBack) {
     const position = actionMehodWapper.transPixelToPos({
       x: ev.clientX,
       y: ev.clientY
     })
     if (mode.is('assembly')) {
-      actionMehodWapper.chooseAssmbly(position)
+      const assembly = actionMehodWapper.chooseAssmbly(position)
+      if (callBack && assembly) {
+        callBack(Object.assign({}, assembly), function(acturalData) {
+          actionMehodWapper.updateChoosenAssemblyActuralData(acturalData)
+        })
+      }
     }
   }
   moveStart (ev) {
@@ -112,7 +117,7 @@ class Chart extends Component {
                       Object.keys(assemblies).map((assembly, i) => {
                         return (
                           assemblies[assembly].typeBelong === type
-                            ? <img className={styles['assembly-img']} key={i} src={assemblies[assembly].imageUrl} id={assembly} draggable={true} onDragStart={(ev) => this.dragAssembly(ev)} /> : ''
+                            ? <div key={i}><img className={styles['assembly-img']} src={assemblies[assembly].imageUrl} id={assembly} draggable={true} onDragStart={(ev) => this.dragAssembly(ev)} /></div> : ''
                         )
                       })
                     }
@@ -127,11 +132,13 @@ class Chart extends Component {
               {
                 Object.keys(lines).map((line, i) => {
                   return (
-                    <img
-                      className={!lines[line].isActive ? styles['line-img'] : styles['line-img-active']}
-                      key={i} src={lines[line].imgSrc}
-                      id={line} draggable={false} onClick={(ev) => this.setActiveLine(ev, line, lines)}
-                    />
+                    <div key={i}>
+                      <img
+                        className={!lines[line].isActive ? styles['line-img'] : styles['line-img-active']}
+                        src={lines[line].imgSrc}
+                        id={line} draggable={false} onClick={(ev) => this.setActiveLine(ev, line, lines)}
+                      />
+                    </div>
                   )
                 })
               }
@@ -145,7 +152,7 @@ class Chart extends Component {
         >
           <canvas
             ref='flow_canvas'
-            onClick={this.chooseAssembly}
+            onClick={(ev) => this.chooseAssembly(ev, this.props.chooseAssembly)}
             onMouseDown={(event) => this.moveStart(event)}
             onMouseUp={event => this.moveEnd(event)}
             onMouseOut={event => this.moveEnd(event)}

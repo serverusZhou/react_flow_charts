@@ -3,11 +3,7 @@ import util from './util'
 import { drawAImage } from './draw/drawUtil'
 
 function checkIsBelongPosition (point, belongPoints) {
-  if (point.x > belongPoints.x && point.x < belongPoints.endX && point.y > belongPoints.y && point.y < belongPoints.endY) {
-    return true
-  } else {
-    return false
-  }
+  return point.x > belongPoints.x && point.x < belongPoints.endX && point.y > belongPoints.y && point.y < belongPoints.endY
 }
 
 export default function(oprateData) {
@@ -39,12 +35,14 @@ export default function(oprateData) {
         },
         draw: material.assemblies[assembly].draw ? material.assemblies[assembly].draw() : function(ctx, position, size, imgUrl) {
           drawAImage(ctx, imgUrl, position, size)
-        }
+        },
+        acturalData: {}
       })
     },
     chooseAssmbly: function(position) {
       const { assemblies, choosenAssembly } = oprateData
       util.clearObj(choosenAssembly)
+      let assembly = null
       assemblies.forEach(element => {
         if (checkIsBelongPosition(position, {
           x: element.position.x,
@@ -53,8 +51,19 @@ export default function(oprateData) {
           endY: element.position.y + element.size.height,
         })) {
           choosenAssembly[element.id] = true
+          assembly = element
         }
       })
+      return assembly
+    },
+    updateChoosenAssemblyActuralData: function(acturalData) {
+      const { assemblies, choosenAssembly } = oprateData
+      assemblies.forEach(element => {
+        if (choosenAssembly[element.id]) {
+          element.acturalData = acturalData
+        }
+      })
+      console.log(assemblies)
     },
     findAssmblyByPosition: function(position) {
       const { assemblies } = oprateData
