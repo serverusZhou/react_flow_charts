@@ -5,14 +5,18 @@ import { drawAImage } from './draw/drawUtil'
 function checkIsBelongPosition (point, belongPoints) {
   return point.x > belongPoints.x && point.x < belongPoints.endX && point.y > belongPoints.y && point.y < belongPoints.endY
 }
+function checkIsBelongLine (point, from, to) {
+  const width = 30
+  return
+}
 
 export default function(oprateData) {
   return {
     transPixelToPos: function(pixel) {
       const { dom } = oprateData
       return {
-        x: (pixel.x - dom.canvas.offsetLeft) / dom.canvas.width * 1000,
-        y: (pixel.y - dom.canvas.offsetTop) / dom.canvas.width * 1000
+        x: (pixel.x - dom.content.offsetLeft - dom.canvas.offsetLeft) / dom.canvas.width * 1000,
+        y: (pixel.y - dom.content.offsetTop - dom.canvas.offsetTop) / dom.canvas.width * 1000
       }
     },
     addAssmbly: function(assembly, position) {
@@ -63,7 +67,6 @@ export default function(oprateData) {
           element.acturalData = acturalData
         }
       })
-      console.log(assemblies)
     },
     findAssmblyByPosition: function(position) {
       const { assemblies } = oprateData
@@ -165,6 +168,41 @@ export default function(oprateData) {
       const { temLine } = oprateData
       temLine.to.position = {
         ...position
+      }
+    },
+    narrowAssembly: function() {
+      const { choosenAssembly, assemblies } = oprateData
+      if (choosenAssembly && Object.keys(choosenAssembly).length) {
+        assemblies.forEach(element => {
+          if (choosenAssembly[element.id]) {
+            element.size.width = element.size.width / 1.1
+            element.size.height = element.size.height / 1.1
+          }
+        })
+      }
+    },
+    enlargeAssembly: function() {
+      const { choosenAssembly, assemblies } = oprateData
+      if (choosenAssembly && Object.keys(choosenAssembly).length) {
+        assemblies.forEach(element => {
+          if (choosenAssembly[element.id]) {
+            element.size.width = element.size.width * 1.1
+            element.size.height = element.size.height * 1.1
+          }
+        })
+      }
+    },
+    deleteAssembly: function() {
+      const { choosenAssembly, assemblies, lines } = oprateData
+      if (choosenAssembly && Object.keys(choosenAssembly).length) {
+        assemblies.forEach((element, index) => {
+          if (choosenAssembly[element.id]) {
+            oprateData.lines = lines.filter(line => {
+              return !element.lines.from.some(fromLine => line.id === fromLine.id) && !element.lines.to.some(fromLine => line.id === fromLine.id)
+            })
+            assemblies.splice(index, 1)
+          }
+        })
       }
     }
   }

@@ -102,10 +102,19 @@ class Chart extends Component {
     this.setState({ lines })
     actionMehodWapper.setActiveLine(ev.target.id)
   }
+  narrowAssembly () {
+    mode.is('assembly') && actionMehodWapper.narrowAssembly()
+  }
+  enlargeAssembly () {
+    mode.is('assembly') && actionMehodWapper.enlargeAssembly()
+  }
+  deleteAssembly () {
+    mode.is('assembly') && actionMehodWapper.deleteAssembly()
+  }
   render() {
     const { typeSummary, assemblies, lines } = this.state
     return (
-      <div className={styles['flow-content']}>
+      <div className={styles['flow-content']} ref='flow_content'>
         <div className={styles['left_side']}>
           {
             Object.keys(typeSummary).map(type => {
@@ -116,8 +125,22 @@ class Chart extends Component {
                     {
                       Object.keys(assemblies).map((assembly, i) => {
                         return (
-                          assemblies[assembly].typeBelong === type
-                            ? <div key={i}><img className={styles['assembly-img']} src={assemblies[assembly].imageUrl} id={assembly} draggable={true} onDragStart={(ev) => this.dragAssembly(ev)} /></div> : ''
+                          assemblies[assembly].typeBelong === type ? <div key={i}>
+                            <img
+                              alt={assemblies[assembly].assemblyName}
+                              className={styles['assembly-img']}
+                              src={assemblies[assembly].imageUrl}
+                              id={assembly}
+                              draggable={true}
+                              onDragStart={(ev) => this.dragAssembly(ev)}
+                              onMouseEnter={() => { assemblies[assembly].showTip = true; this.setState({ assemblies }) }}
+                              onMouseLeave={() => { assemblies[assembly].showTip = false; this.setState({ assemblies }) }}
+                            />
+                            <div className={assemblies[assembly].showTip ? styles.show : styles.hide}>
+                              <p>{assemblies[assembly].assemblyName}</p>
+                              <img src={assemblies[assembly].imageUrl} />
+                            </div>
+                          </div> : ''
                         )
                       })
                     }
@@ -127,7 +150,7 @@ class Chart extends Component {
             })
           }
           <div>
-            <p>线条</p>
+            <p>线条（点击选中进行连线）</p>
             <div>
               {
                 Object.keys(lines).map((line, i) => {
@@ -136,8 +159,15 @@ class Chart extends Component {
                       <img
                         className={!lines[line].isActive ? styles['line-img'] : styles['line-img-active']}
                         src={lines[line].imgSrc}
-                        id={line} draggable={false} onClick={(ev) => this.setActiveLine(ev, line, lines)}
+                        id={line} draggable={false}
+                        onClick={(ev) => this.setActiveLine(ev, line, lines)}
+                        onMouseEnter={() => { lines[line].showTip = true; this.setState({ lines }) }}
+                        onMouseLeave={() => { lines[line].showTip = false; this.setState({ lines }) }}
                       />
+                      <div className={lines[line].showTip ? styles.show : styles.hide}>
+                        <p>{lines[line].lineName}</p>
+                        <img src={lines[line].imgSrc} />
+                      </div>
                     </div>
                   )
                 })
@@ -159,10 +189,16 @@ class Chart extends Component {
             onMouseMove={(event) => this.move(event)}
           />
         </div>
+        <div className={styles['action-field']}>
+          <button onClick={this.narrowAssembly}>Narrow</button>
+          <button onClick={this.enlargeAssembly}>Enlarge</button>
+          <button onClick={this.deleteAssembly}>Delete</button>
+        </div>
       </div>
     )
   }
   componentDidMount() {
+    oprateData.dom.content = this.refs['flow_content']
     oprateData.dom.canvas = this.refs['flow_canvas']
     drawWapper.init()
   }
