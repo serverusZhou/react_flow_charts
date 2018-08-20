@@ -5,10 +5,20 @@ import { drawAImage } from './draw/drawUtil'
 function checkIsBelongPosition (point, belongPoints) {
   return point.x > belongPoints.x && point.x < belongPoints.endX && point.y > belongPoints.y && point.y < belongPoints.endY
 }
-// function checkIsBelongLine (point, from, to) {
-//   const width = 30
-//   return point.x > belongPoints.x && point.x < belongPoints.endX && point.y > belongPoints.y && point.y < belongPoints.endY
-// }
+function checkIsBelongLine (point, from, to) {
+  const length = Math.sqrt(Math.pow(to.x - from.x, 2) + Math.pow(to.y - from.y, 2))
+  const pLength = Math.sqrt(Math.pow(point.x - from.x, 2) + Math.pow(point.y - from.y, 2))
+  const angle = Math.asin((to.y - from.y) / length)
+  const pointAngle = Math.asin((point.y - from.y) / pLength)
+  // 以from为原点
+  const transTo = { x: length, y: 0 }
+  const transPoint = {
+    x: pLength * Math.cos(angle - pointAngle),
+    y: pLength * Math.sin(angle - pointAngle)
+  }
+  const rule = length / 20 > 10 ? length / 20 : 10
+  return Math.abs(transPoint.y) < rule && (transPoint.x < transTo.x && transPoint.x > 0)
+}
 
 export default function(oprateData) {
   return {
@@ -59,6 +69,19 @@ export default function(oprateData) {
         }
       })
       return assembly
+    },
+    chooseLine: function(position) {
+      const { lines, choosenLine } = oprateData
+      util.clearObj(choosenLine)
+      let chooseLine = null
+      lines.forEach(line => {
+        if (checkIsBelongLine(position, line.from.position, line.to.position)) {
+          choosenLine[line.id] = true
+          chooseLine = line
+          console.log('linelineline', line)
+        }
+      })
+      return chooseLine
     },
     updateChoosenAssemblyActuralData: function(acturalData) {
       const { assemblies, choosenAssembly } = oprateData

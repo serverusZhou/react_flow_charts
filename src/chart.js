@@ -13,6 +13,7 @@ const oprateData = {
   choosenAssembly: {},
   ableMoveAssembly: {},
   lines: [],
+  choosenLine: {},
   activeLine: {},
   temLine: {},
   material: {
@@ -48,6 +49,7 @@ class Chart extends Component {
     })
     if (mode.is('assembly')) {
       const assembly = actionMehodWapper.chooseAssmbly(position)
+      actionMehodWapper.chooseLine(position)
       if (callBack && assembly) {
         callBack(Object.assign({}, assembly), function(acturalData) {
           actionMehodWapper.updateChoosenAssemblyActuralData(acturalData)

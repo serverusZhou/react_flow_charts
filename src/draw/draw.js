@@ -16,7 +16,7 @@ export default function(oprateData) {
       mainLoop()
     },
     draw: function() {
-      const { assemblies, choosenAssembly, ctx, lines, temLine } = oprateData
+      const { assemblies, choosenAssembly, choosenLine, ctx, lines, temLine } = oprateData
       assemblies.forEach(element => {
         element.draw(ctx, element.position, element.size, element.imageUrl)
         if (choosenAssembly[element.id]) {
@@ -35,6 +35,15 @@ export default function(oprateData) {
       })
       lines.forEach(element => {
         element.draw(ctx, element.from.position, element.to.position, element.from.assembly.size, element.to.assembly.size)
+        if (choosenLine[element.id]) {
+          ctx.beginPath()
+          ctx.lineWidth = 1
+          ctx.strokeStyle = 'rgba(0,0,0,.3)'
+          ctx.moveTo(element.from.position.x, element.from.position.y)
+          ctx.lineTo(element.to.position.x, element.to.position.y)
+          ctx.stroke()
+          ctx.closePath()
+        }
       })
       if (Object.keys(temLine).length) {
         temLine.draw(ctx, temLine.from.position, temLine.to.position)
