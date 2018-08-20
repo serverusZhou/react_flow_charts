@@ -5,10 +5,10 @@ import { drawAImage } from './draw/drawUtil'
 function checkIsBelongPosition (point, belongPoints) {
   return point.x > belongPoints.x && point.x < belongPoints.endX && point.y > belongPoints.y && point.y < belongPoints.endY
 }
-function checkIsBelongLine (point, from, to) {
-  const width = 30
-  return
-}
+// function checkIsBelongLine (point, from, to) {
+//   const width = 30
+//   return point.x > belongPoints.x && point.x < belongPoints.endX && point.y > belongPoints.y && point.y < belongPoints.endY
+// }
 
 export default function(oprateData) {
   return {

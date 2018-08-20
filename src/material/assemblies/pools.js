@@ -49,7 +49,25 @@ export default {
     size: defaultSize
   },
   pool3: {
-    imageUrl: '/assets/pool.png',
+    imageUrl: '/assets/pool3.jpg',
+    typeBelong: 'pool',
+    assemblyName: '酸析池',
+    size: defaultSize
+  },
+  pool4: {
+    imageUrl: '/assets/pool4.jpg',
+    typeBelong: 'pool',
+    assemblyName: '酸析池',
+    size: defaultSize
+  },
+  pool5: {
+    imageUrl: '/assets/pool5.jpg',
+    typeBelong: 'pool',
+    assemblyName: '酸析池',
+    size: defaultSize
+  },
+  pool6: {
+    imageUrl: '/assets/pool6.gif',
     typeBelong: 'pool',
     assemblyName: '酸析池',
     size: defaultSize

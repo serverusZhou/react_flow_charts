@@ -6,12 +6,12 @@ const defaultSize = {
 
 export default{
   medicine1: {
-    imageUrl: '/assets/pool.png',
+    imageUrl: '/assets/medicine1.jpg',
     typeBelong,
     size: defaultSize
   },
   medicine2: {
-    imageUrl: '/assets/pool.png',
+    imageUrl: '/assets/medicine2.jpg',
     typeBelong,
     size: defaultSize
   },
