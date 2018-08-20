@@ -227,6 +227,28 @@ export default function(oprateData) {
           }
         })
       }
+    },
+    deleteLine: function() {
+      const { choosenLine, lines, mode } = oprateData
+      if (choosenLine && Object.keys(choosenLine).length) {
+        lines.forEach((line, index) => {
+          if (choosenLine[line.id]) {
+            line.from.assembly.lines.from.forEach((fromLine, fromLineIndex) => {
+              if (line.id === fromLine.id) {
+                line.from.assembly.lines.from.splice(fromLineIndex, 1)
+              }
+            })
+            line.to.assembly.lines.to.forEach((toLine, toLineIndex) => {
+              if (line.id === toLine.id) {
+                line.to.assembly.lines.to.splice(toLineIndex, 1)
+              }
+            })
+            lines.splice(index, 1)
+          }
+        })
+      }
+      util.clearObj(choosenLine)
+      mode.setTo('assembly')
     }
   }
 }

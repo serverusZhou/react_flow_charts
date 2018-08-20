@@ -48,8 +48,11 @@ class Chart extends Component {
       y: ev.clientY
     })
     if (mode.is('assembly')) {
+      const line = actionMehodWapper.chooseLine(position)
+      if (line) {
+        mode.setTo('line')
+      }
       const assembly = actionMehodWapper.chooseAssmbly(position)
-      actionMehodWapper.chooseLine(position)
       if (callBack && assembly) {
         callBack(Object.assign({}, assembly), function(acturalData) {
           actionMehodWapper.updateChoosenAssemblyActuralData(acturalData)
@@ -110,8 +113,10 @@ class Chart extends Component {
   enlargeAssembly () {
     mode.is('assembly') && actionMehodWapper.enlargeAssembly()
   }
-  deleteAssembly () {
+  deleteAssemblyOrLine () {
+    console.log(mode.getCurrentMode())
     mode.is('assembly') && actionMehodWapper.deleteAssembly()
+    mode.is('line') && actionMehodWapper.deleteLine()
   }
   render() {
     const { typeSummary, assemblies, lines } = this.state
@@ -194,7 +199,7 @@ class Chart extends Component {
         <div className={styles['action-field']}>
           <button onClick={this.narrowAssembly}>Narrow</button>
           <button onClick={this.enlargeAssembly}>Enlarge</button>
-          <button onClick={this.deleteAssembly}>Delete</button>
+          <button onClick={this.deleteAssemblyOrLine}>Delete</button>
         </div>
       </div>
     )

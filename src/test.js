@@ -7,7 +7,7 @@ import lines from './material/lines'
 import { typeSummary } from './dict'
 
 function chooseAssemblyCallBakTest(assembly, updateActuralData) {
-  console.log(assembly)
+  // console.log(assembly)
   updateActuralData({
     tip: 'shibai'
   })
