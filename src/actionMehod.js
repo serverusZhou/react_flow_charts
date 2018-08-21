@@ -5,7 +5,7 @@ import { drawAImage } from './draw/drawUtil'
 function checkIsBelongPosition (point, belongPoints) {
   return point.x > belongPoints.x && point.x < belongPoints.endX && point.y > belongPoints.y && point.y < belongPoints.endY
 }
-function checkIsBelongLine (point, from, to) {
+function checkIsBelongLine (point, from, to, fromSize, toSize) {
   const length = Math.sqrt(Math.pow(to.x - from.x, 2) + Math.pow(to.y - from.y, 2))
   const pLength = Math.sqrt(Math.pow(point.x - from.x, 2) + Math.pow(point.y - from.y, 2))
   const angle = Math.asin((to.y - from.y) / length)
@@ -17,7 +17,7 @@ function checkIsBelongLine (point, from, to) {
     y: pLength * Math.sin(angle - pointAngle)
   }
   const rule = length / 20 > 10 ? length / 20 : 10
-  return Math.abs(transPoint.y) < rule && (transPoint.x < transTo.x && transPoint.x > 0)
+  return Math.abs(transPoint.y) < rule && (transPoint.x < (transTo.x - Math.sqrt(Math.pow(toSize.width, 2) + Math.pow(toSize.height, 2)) / 2) && transPoint.x > Math.sqrt(Math.pow(fromSize.width, 2) + Math.pow(fromSize.height, 2)) / 2)
 }
 
 export default function(oprateData) {
@@ -75,7 +75,8 @@ export default function(oprateData) {
       util.clearObj(choosenLine)
       let chooseLine = null
       lines.forEach(line => {
-        if (checkIsBelongLine(position, line.from.position, line.to.position)) {
+        console.log('sizesize', line)
+        if (checkIsBelongLine(position, line.from.position, line.to.position, line.from.assembly.size, line.to.assembly.size)) {
           choosenLine[line.id] = true
           chooseLine = line
           console.log('linelineline', line)

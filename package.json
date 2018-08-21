@@ -1,6 +1,6 @@
 {
   "name": "react_flow_charts",
-  "version": "1.0.0",
+  "version": "1.0.9",
   "description": "A react flow chart component",
   "main": "dist/index.js",
   "scripts": {
@@ -40,6 +40,7 @@
     "lint"
   ],
   "devDependencies": {
+    "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.6",
     "babel-loader": "^7.1.5",
@@ -64,6 +65,7 @@
     "style-loader": "^0.21.0",
     "webpack": "^4.16.4",
     "webpack-cli": "^3.1.0",
-    "webpack-dev-server": "^3.1.5"
+    "webpack-dev-server": "^3.1.5",
+    "webpack-node-externals": "^1.7.2"
   }
 }

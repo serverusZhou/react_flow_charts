@@ -4,7 +4,7 @@ import draw from './draw/draw'
 import util from './util'
 import actionMethod from './actionMehod'
 
-const mode = util.keysSwith({ 'assembly': true, 'line': false })
+const mode = util.keysSwith({ 'assembly': true, 'line': false, 'inLineChoosen': false })
 const oprateData = {
   mode, // 用来判断当前处于哪个操作模式中（组件还是连线或者其它）
   ctx: null,
@@ -43,14 +43,19 @@ class Chart extends Component {
     actionMehodWapper.addAssmbly(ev.dataTransfer.getData('assembly'), position)
   }
   chooseAssembly (ev, callBack) {
+    const { mode, choosenLine, choosenAssembly } = oprateData
     const position = actionMehodWapper.transPixelToPos({
       x: ev.clientX,
       y: ev.clientY
     })
-    if (mode.is('assembly')) {
+    if (!mode.is('line')) {
+      mode.setTo('assembly')
+      util.clearObj(choosenLine)
+      util.clearObj(choosenAssembly)
       const line = actionMehodWapper.chooseLine(position)
       if (line) {
-        mode.setTo('line')
+        mode.setTo('inLineChoosen')
+        return
       }
       const assembly = actionMehodWapper.chooseAssmbly(position)
       if (callBack && assembly) {
@@ -116,7 +121,7 @@ class Chart extends Component {
   deleteAssemblyOrLine () {
     console.log(mode.getCurrentMode())
     mode.is('assembly') && actionMehodWapper.deleteAssembly()
-    mode.is('line') && actionMehodWapper.deleteLine()
+    mode.is('inLineChoosen') && actionMehodWapper.deleteLine()
   }
   render() {
     const { typeSummary, assemblies, lines } = this.state

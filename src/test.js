@@ -1,10 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import Chart from './chart'
-
+// import Chart from './index'
+import ReactFlowChart from '../dist/index'
 import assemblies from './material/assemblies'
 import lines from './material/lines'
 import { typeSummary } from './dict'
+
+console.log('ChartChartChartChart', ReactFlowChart)
 
 function chooseAssemblyCallBakTest(assembly, updateActuralData) {
   // console.log(assembly)
@@ -22,7 +24,7 @@ ReactDOM.render(
   <div
     style={{ width: '1200px', height: '800px', margin: '0 auto', paddingTop: '20px' }}
   >
-    <Chart
+    <ReactFlowChart
       typeSummary = {typeSummary}
       assemblies={assemblies}
       lines = {lines}

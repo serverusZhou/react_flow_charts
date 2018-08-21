@@ -2,13 +2,15 @@
 const webpack = require('webpack')
 const path = require('path')
 const ProgressBarPlugin = require('progress-bar-webpack-plugin')
+const nodeExternals = require('webpack-node-externals')
 
 const config = {
   mode: 'production',
   entry: { index: path.resolve(__dirname, '../src/index') },
   output: {
     path: path.resolve(__dirname, '../dist'),
-    filename: '[name].js'
+    filename: '[name].js',
+    libraryTarget: 'commonjs2'
   },
   module: {
     rules: [
@@ -30,6 +32,7 @@ const config = {
       },
     ]
   },
+  externals: [nodeExternals()],
   plugins: [
     new ProgressBarPlugin({
       format: '  已经构建 [:bar] :percent (:elapsed seconds)',
