@@ -1,8 +1,11 @@
 {
   "name": "react_flow_charts",
-  "version": "1.0.9",
+  "version": "1.1.5",
   "description": "A react flow chart component",
   "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "node build/build",
     "start": "webpack-dev-server --inline --progress --config build/test.conf.js",
@@ -29,8 +32,8 @@
   "homepage": "https://github.com/serverusZhou/react_flow_charts#readme",
   "dependencies": {
     "prop-types": "^15.6.2",
-    "react": "^16.4.2",
-    "react-dom": "^16.4.2",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
     "uuid": "^3.3.2"
   },
   "eslintConfig": {
@@ -56,6 +59,7 @@
     "eslint": "^5.2.0",
     "eslint-plugin-import": "^2.13.0",
     "eslint-plugin-react": "^7.10.0",
+    "file-loader": "^2.0.0",
     "html-webpack-plugin": "^3.2.0",
     "i": "^0.3.6",
     "less": "^3.8.0",
@@ -63,6 +67,7 @@
     "npm": "^6.3.0",
     "progress-bar-webpack-plugin": "^1.11.0",
     "style-loader": "^0.21.0",
+    "url-loader": "^1.1.1",
     "webpack": "^4.16.4",
     "webpack-cli": "^3.1.0",
     "webpack-dev-server": "^3.1.5",

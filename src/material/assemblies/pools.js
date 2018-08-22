@@ -1,5 +1,9 @@
 
 import { drawAImage } from '../drawUtils'
+import pool from '../../../assets/pool.png'
+import timg from '../../../assets/timg.jpg'
+import pool3 from '../../../assets/pool3.jpg'
+import pool4 from '../../../assets/pool4.jpg'
 
 const typeBelong = 'pool'
 const defaultSize = {
@@ -9,7 +13,7 @@ const defaultSize = {
 
 export default {
   pool: {
-    imageUrl: '/assets/pool.png',
+    imageUrl: pool,
     typeBelong,
     assemblyName: '油墨废水调节池',
     size: defaultSize,
@@ -19,7 +23,7 @@ export default {
         ctx, position, size = {
           width: 100,
           height: 100
-        }, imgUrl = '/assets/pool.png'
+        }, imgUrl = pool
       ) {
         drawAImage(ctx, imgUrl, position, {
           ...size
@@ -43,31 +47,31 @@ export default {
     }
   },
   pool2: {
-    imageUrl: '/assets/timg.jpg',
+    imageUrl: timg,
     typeBelong: 'pool',
     assemblyName: '综合废水调节池',
     size: defaultSize
   },
   pool3: {
-    imageUrl: '/assets/pool3.jpg',
+    imageUrl: pool3,
     typeBelong: 'pool',
     assemblyName: '酸析池',
     size: defaultSize
   },
   pool4: {
-    imageUrl: '/assets/pool4.jpg',
+    imageUrl: pool4,
     typeBelong: 'pool',
     assemblyName: '酸析池',
     size: defaultSize
   },
   pool5: {
-    imageUrl: '/assets/pool5.jpg',
+    imageUrl: pool4,
     typeBelong: 'pool',
     assemblyName: '酸析池',
     size: defaultSize
   },
   pool6: {
-    imageUrl: '/assets/pool6.gif',
+    imageUrl: pool4,
     typeBelong: 'pool',
     assemblyName: '酸析池',
     size: defaultSize

@@ -1,4 +1,6 @@
 import { getLinePositionWithoutAssembly } from './drawUtils'
+import arrow from '../../assets/arrow.png'
+import pipe from '../../assets/pipe.png'
 
 function lineExtendFunc(from, to) {
   const x = to.x - from.x
@@ -27,7 +29,7 @@ function lineExtendFunc(from, to) {
 
 export default {
   arrow: {
-    imgSrc: '/assets/arrow.png',
+    imgSrc: arrow,
     lineName: '连接线',
     draw: () => {
       return function(ctx, fromPosition, toPosition, fromSize, toSize) {
@@ -78,7 +80,7 @@ export default {
     }
   },
   pipe: {
-    imgSrc: '/assets/pipe.png',
+    imgSrc: pipe,
     lineName: '管道',
     draw: () => {
       return function(ctx, fromPosition, toPosition, fromSize, toSize) {

@@ -22,6 +22,10 @@ const config = {
         }
       },
       {
+        test: /\.(png|jpg)$/,
+        loader: 'url-loader?limit=8192&name=images/[hash:8].[name].[ext]'
+      },
+      {
         test: /\.less$/,
         use: [
           'style-loader',

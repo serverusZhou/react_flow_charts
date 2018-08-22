@@ -1,12 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-// import Chart from './index'
-import ReactFlowChart from '../dist/index'
+import ReactFlowChart from './index'
 import assemblies from './material/assemblies'
 import lines from './material/lines'
 import { typeSummary } from './dict'
 
-console.log('ChartChartChartChart', ReactFlowChart)
+console.log('assembliesassemblies', assemblies)
 
 function chooseAssemblyCallBakTest(assembly, updateActuralData) {
   // console.log(assembly)

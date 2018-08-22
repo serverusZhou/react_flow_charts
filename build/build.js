@@ -23,6 +23,10 @@ const config = {
         }
       },
       {
+        test: /\.(png|jpg)$/,
+        loader: 'url-loader?limit=819200&name=images/[hash:8].[name].[ext]'
+      },
+      {
         test: /\.less$/,
         use: [
           'style-loader',
@@ -32,7 +36,7 @@ const config = {
       },
     ]
   },
-  externals: [nodeExternals()],
+  externals: [nodeExternals(), 'React'],
   plugins: [
     new ProgressBarPlugin({
       format: '  已经构建 [:bar] :percent (:elapsed seconds)',

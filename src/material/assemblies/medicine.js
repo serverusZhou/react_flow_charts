@@ -1,3 +1,7 @@
+import medicine1 from '../../../assets/medicine1.jpg'
+import medicine2 from '../../../assets/medicine2.jpg'
+import pool from '../../../assets/pool.png'
+
 const typeBelong = 'medicine'
 const defaultSize = {
   width: 50,
@@ -6,37 +10,37 @@ const defaultSize = {
 
 export default{
   medicine1: {
-    imageUrl: '/assets/medicine1.jpg',
+    imageUrl: medicine1,
     typeBelong,
     size: defaultSize
   },
   medicine2: {
-    imageUrl: '/assets/medicine2.jpg',
+    imageUrl: medicine2,
     typeBelong,
     size: defaultSize
   },
   medicine3: {
-    imageUrl: '/assets/pool.png',
+    imageUrl: pool,
     typeBelong,
     size: defaultSize
   },
   medicine4: {
-    imageUrl: '/assets/pool.png',
+    imageUrl: pool,
     typeBelong,
     size: defaultSize
   },
   medicine5: {
-    imageUrl: '/assets/pool.png',
+    imageUrl: pool,
     typeBelong,
     size: defaultSize
   },
   medicine6: {
-    imageUrl: '/assets/pool.png',
+    imageUrl: pool,
     typeBelong,
     size: defaultSize
   },
   medicine7: {
-    imageUrl: '/assets/pool.png',
+    imageUrl: pool,
     typeBelong,
     size: defaultSize
   },

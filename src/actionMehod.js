@@ -20,13 +20,25 @@ function checkIsBelongLine (point, from, to, fromSize, toSize) {
   return Math.abs(transPoint.y) < rule && (transPoint.x < (transTo.x - Math.sqrt(Math.pow(toSize.width, 2) + Math.pow(toSize.height, 2)) / 2) && transPoint.x > Math.sqrt(Math.pow(fromSize.width, 2) + Math.pow(fromSize.height, 2)) / 2)
 }
 
+function getPosition(obj) {
+  let l = 0
+  let t = 0
+  while (obj) {
+    l += obj.offsetLeft
+    t += obj.offsetTop
+    obj = obj.offsetParent
+  }
+  return { left: l, top: t }
+}
+
 export default function(oprateData) {
   return {
     transPixelToPos: function(pixel) {
       const { dom } = oprateData
+      const canvasPosition = getPosition(dom.canvas)
       return {
-        x: (pixel.x - dom.content.offsetLeft - dom.canvas.offsetLeft) / dom.canvas.width * 1000,
-        y: (pixel.y - dom.content.offsetTop - dom.canvas.offsetTop) / dom.canvas.width * 1000
+        x: (pixel.x - canvasPosition.left) / dom.canvas.width * 1000,
+        y: (pixel.y - canvasPosition.top) / dom.canvas.width * 1000
       }
     },
     addAssmbly: function(assembly, position) {
