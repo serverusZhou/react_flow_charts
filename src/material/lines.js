@@ -20,9 +20,17 @@ function lineExtendFunc(from, to) {
         y: from.y + verticalDistenceY + distenceY
       }]
     },
+    getLineMiddlePosition: function(distence) {
+      const distenceX = distence * x / length
+      const distenceY = distence * y / length
+      return {
+        x: from.x + distenceX,
+        y: from.y + distenceY
+      }
+    },
     getElement: function() {
       const angle = Math.asin(y / length)
-      return { x, y, length, angle }
+      return { x, y, length, angle, from, to }
     }
   }
 }
@@ -136,6 +144,51 @@ export default {
           ctx.fillText('管道', 0, 0)
           ctx.closePath()
           ctx.restore()
+        } else {
+          from = { ...fromPosition }
+          to = { ...toPosition }
+          ctx.beginPath()
+          ctx.strokeStyle = 'rgba(0,0,0,1)'
+          ctx.lineWidth = 2
+          ctx.moveTo(from.x, from.y)
+          ctx.lineTo(to.x, to.y)
+          ctx.stroke()
+          ctx.closePath()
+        }
+      }
+    }
+  },
+  flow: {
+    imgSrc: pipe,
+    lineName: '流动',
+    draw: () => {
+      let distence = 1
+      return function(ctx, fromPosition, toPosition, fromSize, toSize) {
+        let from = {}
+        let to = {}
+        if (fromSize && toSize) {
+          const linePosition = getLinePositionWithoutAssembly(fromPosition, toPosition, fromSize, toSize)
+          const lineExtend = lineExtendFunc(linePosition.from, linePosition.to)
+          const elements = lineExtend.getElement()
+          if (distence < 30) {
+            distence = distence + 1
+          } else {
+            distence = 1
+          }
+          ctx.beginPath()
+          ctx.fillStyle = '#5eccdf'
+          ctx.lineWidth = 2
+          for (let mark = 0; mark < (elements.length / 20) - 1; mark++) {
+            const pAnyAND1D20 = lineExtend.getLineExtendPosition(1 / 40 * elements.length, mark * 20 + distence)
+            const dAnyplus1AND1D20 = lineExtend.getLineExtendPosition(1 / 40 * elements.length, mark * 20 + 15 + distence)
+            ctx.moveTo(pAnyAND1D20[0].x, pAnyAND1D20[0].y)
+            ctx.lineTo(dAnyplus1AND1D20[0].x, dAnyplus1AND1D20[0].y)
+            ctx.lineTo(dAnyplus1AND1D20[1].x, dAnyplus1AND1D20[1].y)
+            ctx.lineTo(pAnyAND1D20[1].x, pAnyAND1D20[1].y)
+            ctx.lineTo(pAnyAND1D20[0].x, pAnyAND1D20[0].y)
+          }
+          ctx.fill()
+          ctx.closePath()
         } else {
           from = { ...fromPosition }
           to = { ...toPosition }

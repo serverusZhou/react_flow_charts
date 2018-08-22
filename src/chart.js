@@ -75,11 +75,6 @@ class Chart extends Component {
     mode.is('line') && actionMehodWapper.addTemLine(position)
   }
   moveEnd (ev) {
-    console.log('evevev', ev)
-    console.log(ev.clientX, ev.clientY)
-    console.log(ev.pageX, ev.pageY)
-    console.log(ev.screenX, ev.screenY)
-    console.log(document.body.scrollHeight - document.body.clientHeight)
     const { mode, ableMoveAssembly, temLine } = oprateData
     mode.is('assembly') && util.clearObj(ableMoveAssembly)
     if (mode.is('line')) {
@@ -124,7 +119,6 @@ class Chart extends Component {
     mode.is('assembly') && actionMehodWapper.enlargeAssembly()
   }
   deleteAssemblyOrLine () {
-    console.log(mode.getCurrentMode())
     mode.is('assembly') && actionMehodWapper.deleteAssembly()
     mode.is('inLineChoosen') && actionMehodWapper.deleteLine()
   }

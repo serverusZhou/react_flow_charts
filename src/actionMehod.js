@@ -98,11 +98,9 @@ export default function(oprateData) {
       util.clearObj(choosenLine)
       let chooseLine = null
       lines.forEach(line => {
-        console.log('sizesize', line)
         if (checkIsBelongLine(position, line.from.position, line.to.position, line.from.assembly.size, line.to.assembly.size)) {
           choosenLine[line.id] = true
           chooseLine = line
-          console.log('linelineline', line)
         }
       })
       return chooseLine
