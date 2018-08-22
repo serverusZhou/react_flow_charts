@@ -5,8 +5,6 @@ import assemblies from './material/assemblies'
 import lines from './material/lines'
 import { typeSummary } from './dict'
 
-console.log('assembliesassemblies', assemblies)
-
 function chooseAssemblyCallBakTest(assembly, updateActuralData) {
   // console.log(assembly)
   updateActuralData({
@@ -21,7 +19,7 @@ function chooseAssemblyCallBakTest(assembly, updateActuralData) {
 
 ReactDOM.render(
   <div
-    style={{ width: '1200px', height: '800px', margin: '0 auto', paddingTop: '20px' }}
+    style={{ width: '1500px', height: '800px', margin: '0 auto', paddingTop: '20px' }}
   >
     <ReactFlowChart
       typeSummary = {typeSummary}

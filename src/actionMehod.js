@@ -48,8 +48,8 @@ export default function(oprateData) {
       const canvasPosition = getPosition(dom.canvas)
       const scrollTop = getScrollTop()
       return {
-        x: (pixel.x - canvasPosition.left) / dom.canvas.width * 1000,
-        y: (pixel.y - canvasPosition.top + scrollTop) / dom.canvas.width * 1000
+        x: (pixel.x - canvasPosition.left) / dom.canvas.offsetWidth * 1000,
+        y: (pixel.y - canvasPosition.top + scrollTop) / dom.canvas.offsetWidth * 1000
       }
     },
     addAssmbly: function(assembly, position) {
