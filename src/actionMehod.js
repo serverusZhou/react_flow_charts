@@ -31,14 +31,25 @@ function getPosition(obj) {
   return { left: l, top: t }
 }
 
+function getScrollTop() {
+  let scrollTop = 0
+  if (document.documentElement && document.documentElement.scrollTop) {
+    scrollTop = document.documentElement.scrollTop
+  } else if (document.body) {
+    scrollTop = document.body.scrollTop
+  }
+  return scrollTop
+}
+
 export default function(oprateData) {
   return {
     transPixelToPos: function(pixel) {
       const { dom } = oprateData
       const canvasPosition = getPosition(dom.canvas)
+      const scrollTop = getScrollTop()
       return {
         x: (pixel.x - canvasPosition.left) / dom.canvas.width * 1000,
-        y: (pixel.y - canvasPosition.top) / dom.canvas.width * 1000
+        y: (pixel.y - canvasPosition.top + scrollTop) / dom.canvas.width * 1000
       }
     },
     addAssmbly: function(assembly, position) {
