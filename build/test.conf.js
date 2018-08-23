@@ -6,7 +6,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 const config = {
   mode: 'development',
-  entry: { test: path.resolve(__dirname, '../src/test') },
+  entry: { test: path.resolve(__dirname, '../src/examples/test') },
   output: {
     path: path.resolve(__dirname, '../dist'),
     filename: '[name][hash].js',

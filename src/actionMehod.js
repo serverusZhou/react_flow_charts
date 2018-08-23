@@ -193,6 +193,17 @@ export default function(oprateData) {
     },
     addLine: function(assembly) {
       const { temLine, lines } = oprateData
+      const alreadyHasLine = lines.some(line => {
+        return (line.from.assembly.id === temLine.from.assembly.id && line.to.assembly.id === assembly.id) || (line.to.assembly.id === temLine.from.assembly.id && line.from.assembly.id === assembly.id)
+      })
+      if (alreadyHasLine) {
+        console.log('已经存在了---------------')
+        return
+      }
+      if (temLine.from.assembly.id === assembly.id) {
+        console.log('回到了原点了---------------')
+        return
+      }
       temLine.to.position = {
         x: assembly.position.x + assembly.size.width / 2,
         y: assembly.position.y + assembly.size.height / 2,
@@ -271,6 +282,21 @@ export default function(oprateData) {
       }
       util.clearObj(choosenLine)
       mode.setTo('assembly')
+    },
+    resetAssembliesAndLines: function(assemblies, lines) {
+      const { material } = oprateData
+      assemblies.forEach(assembly => {
+        assembly.draw = material.assemblies[assembly.assemblyName].draw ? material.assemblies[assembly.assemblyName].draw() : function(ctx, position, size, imgUrl) {
+          drawAImage(ctx, imgUrl, position, size)
+        }
+      })
+      lines.forEach(line => {
+        line.draw = material.lines[line.type].draw()
+      })
+      return {
+        assemblies,
+        lines
+      }
     }
   }
 }

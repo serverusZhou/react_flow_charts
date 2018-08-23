@@ -31,6 +31,7 @@
   },
   "homepage": "https://github.com/serverusZhou/react_flow_charts#readme",
   "dependencies": {
+    "circular-json": "^0.5.5",
     "prop-types": "^15.6.2",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",

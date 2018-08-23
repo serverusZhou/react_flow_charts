@@ -29,8 +29,10 @@ class Chart extends Component {
   constructor (props) {
     super(props)
     this.state = { ...props }
-    oprateData.material.assemblies = props.assemblies
-    oprateData.material.lines = props.lines
+    oprateData.material = props.material
+    const resetMeterail = actionMehodWapper.resetAssembliesAndLines(props.assemblies, props.lines)
+    oprateData.assemblies = resetMeterail.assemblies
+    oprateData.lines = resetMeterail.lines
   }
   dragAssembly (ev) {
     ev.dataTransfer.setData('assembly', ev.target.id)
@@ -122,8 +124,17 @@ class Chart extends Component {
     mode.is('assembly') && actionMehodWapper.deleteAssembly()
     mode.is('inLineChoosen') && actionMehodWapper.deleteLine()
   }
+  getData = () => {
+    if (this.props.getData) {
+      this.props.getData({
+        lines: oprateData.lines,
+        assemblies: oprateData.assemblies
+      })
+    }
+  }
   render() {
-    const { typeSummary, assemblies, lines } = this.state
+    const { material, typeSummary } = this.state
+    const { assemblies, lines } = material
     return (
       <div className={styles['flow-content']} ref='flow_content'>
         <div className={styles['left_side']}>
@@ -198,12 +209,14 @@ class Chart extends Component {
             onMouseUp={event => this.moveEnd(event)}
             onMouseOut={event => this.moveEnd(event)}
             onMouseMove={(event) => this.move(event)}
+            className={this.props.device === 'mobile' ? styles['canvas_mobile'] : styles['canvas_pc']}
           />
         </div>
         <div className={styles['action-field']}>
           <button onClick={this.narrowAssembly}>Narrow</button>
           <button onClick={this.enlargeAssembly}>Enlarge</button>
           <button onClick={this.deleteAssemblyOrLine}>Delete</button>
+          <button onClick={this.getData}>Save</button>
         </div>
       </div>
     )
