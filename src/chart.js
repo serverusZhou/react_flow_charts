@@ -5,6 +5,7 @@ import util from './util'
 import actionMethod from './actionMehod'
 
 const mode = util.keysSwith({ 'assembly': true, 'line': false, 'inLineChoosen': false })
+let flag = false
 const oprateData = {
   mode, // 用来判断当前处于哪个操作模式中（组件还是连线或者其它）
   ctx: null,
@@ -12,9 +13,11 @@ const oprateData = {
   assemblies: [],
   choosenAssembly: {},
   ableMoveAssembly: {},
+  hoverAssembly: {},
   lines: [],
   choosenLine: {},
   activeLine: {},
+  ableAddPointLine: {},
   temLine: {},
   material: {
     assemblies: {},
@@ -68,27 +71,38 @@ class Chart extends Component {
     }
   }
   moveStart (ev) {
+    flag = true
     const { mode } = oprateData
     const position = actionMehodWapper.transPixelToPos({
       x: ev.clientX,
       y: ev.clientY
     })
-    mode.is('assembly') && actionMehodWapper.addAbleMoveAssembly(position)
+    if (mode.is('assembly')) {
+      !actionMehodWapper.addAbleAddPointLine(position) && actionMehodWapper.addAbleMoveAssembly(position)
+    }
     mode.is('line') && actionMehodWapper.addTemLine(position)
   }
   moveEnd (ev) {
-    const { mode, ableMoveAssembly, temLine } = oprateData
-    mode.is('assembly') && util.clearObj(ableMoveAssembly)
-    if (mode.is('line')) {
-      const position = actionMehodWapper.transPixelToPos({
-        x: ev.clientX,
-        y: ev.clientY
-      })
-      const assemblyAtPosition = actionMehodWapper.findAssmblyByPosition(position)
-      if (assemblyAtPosition && Object.keys(assemblyAtPosition).length) {
-        actionMehodWapper.addLine(assemblyAtPosition)
+    const { mode, ableMoveAssembly, temLine, ableAddPointLine } = oprateData
+    const position = actionMehodWapper.transPixelToPos({
+      x: ev.clientX,
+      y: ev.clientY
+    })
+    if (flag) {
+      if (mode.is('assembly')) {
+        util.clearObj(ableMoveAssembly)
+        if (ableAddPointLine && Object.keys(ableAddPointLine).length) {
+          actionMehodWapper.updateLinePositions(position)
+        }
       }
-      util.clearObj(temLine)
+      if (mode.is('line')) {
+        const assemblyAtPosition = actionMehodWapper.findAssmblyByPosition(position)
+        if (assemblyAtPosition && Object.keys(assemblyAtPosition).length) {
+          actionMehodWapper.addLine(assemblyAtPosition)
+        }
+        util.clearObj(temLine)
+      }
+      flag = false
     }
   }
   move (ev) {
@@ -97,11 +111,19 @@ class Chart extends Component {
       x: ev.clientX,
       y: ev.clientY
     })
-    if (mode.is('assembly') && Object.keys(ableMoveAssembly).length) {
-      actionMehodWapper.updateAssemblyPosition(position)
-    }
-    if (mode.is('line') && Object.keys(temLine).length) {
-      actionMehodWapper.moveTemLine(position)
+    if (flag) {
+      if (mode.is('assembly')) {
+        if (Object.keys(ableMoveAssembly).length) {
+          actionMehodWapper.updateAssemblyPosition(position)
+        }
+      }
+      if (mode.is('line') && Object.keys(temLine).length) {
+        actionMehodWapper.moveTemLine(position)
+      }
+    } else {
+      if (mode.is('assembly')) {
+        actionMehodWapper.showHoverAssembly()(position)
+      }
     }
   }
   setActiveLine (ev, lineKey, lines) {

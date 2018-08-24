@@ -97,3 +97,14 @@ export function drawAImage(ctx, imgUrl, position, size) {
   ctx.drawImage(image, 0, 0, image.width, image.height, position.x, position.y, size.width, size.height)
   ctx.closePath()
 }
+
+export function drawATip(ctx, position = { x: 0, y: 0 }, words = '哈哈哈') {
+  ctx.beginPath()
+  ctx.fillStyle = 'rgba(0,0,0,1)'
+  ctx.font = "12px '宋体'"
+  ctx.textAlign = 'left'
+  ctx.textBaseline = 'top'
+  ctx.translate(position.x, position.y)
+  ctx.fillText(words, 0, 0)
+  ctx.closePath()
+}

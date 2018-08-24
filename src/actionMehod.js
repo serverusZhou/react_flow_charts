@@ -20,6 +20,29 @@ function checkIsBelongLine (point, from, to, fromSize, toSize) {
   return Math.abs(transPoint.y) < rule && (transPoint.x < (transTo.x - Math.sqrt(Math.pow(toSize.width, 2) + Math.pow(toSize.height, 2)) / 2) && transPoint.x > Math.sqrt(Math.pow(fromSize.width, 2) + Math.pow(fromSize.height, 2)) / 2)
 }
 
+function checkIsBelongBrokenLine (point, allPoints, fromSize, toSize) {
+  let isBelong = false
+  let belongIndex = 0
+  for (let i = 0; i < allPoints.length - 1; i++) {
+    let beginSize = { width: 0, height: 0 }
+    let endSize = { width: 0, height: 0 }
+    if (i === 0) {
+      beginSize = fromSize
+    }
+    if (i === allPoints.length - 2) {
+      endSize = toSize
+    }
+    if (checkIsBelongLine(point, allPoints[i], allPoints[i + 1], beginSize, endSize)) {
+      isBelong = true
+      belongIndex = i
+    }
+  }
+  return {
+    isBelong,
+    belongIndex
+  }
+}
+
 function getPosition(obj) {
   let l = 0
   let t = 0
@@ -56,6 +79,7 @@ export default function(oprateData) {
       const { assemblies, material } = oprateData
       assemblies.push({
         id: UUID(),
+        name: material.assemblies[assembly].assemblyName,
         assemblyName: assembly,
         imageUrl: material.assemblies[assembly].imageUrl,
         position: {
@@ -98,7 +122,8 @@ export default function(oprateData) {
       util.clearObj(choosenLine)
       let chooseLine = null
       lines.forEach(line => {
-        if (checkIsBelongLine(position, line.from.position, line.to.position, line.from.assembly.size, line.to.assembly.size)) {
+        const allPoints = [{ ...line.from.position }].concat(line.middlePoints).concat({ ...line.to.position })
+        if (checkIsBelongBrokenLine(position, allPoints, line.from.assembly.size, line.to.assembly.size).isBelong) {
           choosenLine[line.id] = true
           chooseLine = line
         }
@@ -138,6 +163,24 @@ export default function(oprateData) {
         }
       })
     },
+    addAbleAddPointLine: function(position) {
+      const { ableAddPointLine, lines } = oprateData
+      util.clearObj(ableAddPointLine)
+      let findLine = null
+      let findNum = 0
+      lines.forEach(line => {
+        const allPoints = [{ ...line.from.position }].concat(line.middlePoints).concat({ ...line.to.position })
+        const belongObj = checkIsBelongBrokenLine(position, allPoints, line.from.assembly.size, line.to.assembly.size)
+        if (belongObj.isBelong) {
+          findLine = line
+          findNum = belongObj.belongIndex
+        }
+      })
+      if (findLine && Object.keys(findLine)) {
+        ableAddPointLine[findLine.id] = findNum
+        return true
+      }
+    },
     updateAssemblyPosition: function(position) {
       const { assemblies, ableMoveAssembly } = oprateData
       assemblies.forEach(element => {
@@ -156,6 +199,28 @@ export default function(oprateData) {
           })
         }
       })
+    },
+    updateLinePositions: function(position) {
+      const { lines, ableAddPointLine } = oprateData
+      const line = lines.find(line => !isNaN(ableAddPointLine[line.id]))
+      const allPoints = [{ ...line.from.position }].concat(line.middlePoints).concat({ ...line.to.position })
+      const checkObj = checkIsBelongBrokenLine(position, allPoints, line.from.assembly.size, line.to.assembly.size)
+      if (!checkObj.isBelong) {
+        line.middlePoints.splice(ableAddPointLine[line.id], 0, position)
+      }
+    },
+    showHoverAssembly: function() {
+      const that = this
+      const { hoverAssembly } = oprateData
+      return (position) => {
+        const assembly = that.findAssmblyByPosition(position)
+        if (!assembly) {
+          util.clearObj(hoverAssembly)
+          return
+        }
+        util.clearObj(hoverAssembly)
+        hoverAssembly[assembly.id] = true
+      }
     },
     setActiveLine: function(lineType) {
       let { mode, activeLine } = oprateData
@@ -188,6 +253,7 @@ export default function(oprateData) {
             y: fromAssembly.position.y + fromAssembly.size.height / 2,
           }
         }
+        temLine.middlePoints = []
         temLine.draw = material.lines[Object.keys(activeLine)[0]].draw()
       }
     },
