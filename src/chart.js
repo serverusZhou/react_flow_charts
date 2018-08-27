@@ -14,6 +14,7 @@ const oprateData = {
   choosenAssembly: {},
   ableMoveAssembly: {},
   hoverAssembly: {},
+  parasiticAssemblies: [],
   lines: [],
   choosenLine: {},
   activeLine: {},
@@ -21,7 +22,8 @@ const oprateData = {
   temLine: {},
   material: {
     assemblies: {},
-    lines: {}
+    parasiticAssemblies: {},
+    lines: {},
   }
 }
 
@@ -33,19 +35,26 @@ class Chart extends Component {
     super(props)
     this.state = { ...props }
     oprateData.material = props.material
-    const resetMeterail = actionMehodWapper.resetAssembliesAndLines(props.assemblies, props.lines)
+    const resetMeterail = actionMehodWapper.resetAssembliesAndLines(props.assemblies, props.lines, props.parasiticAssemblies)
     oprateData.assemblies = resetMeterail.assemblies
     oprateData.lines = resetMeterail.lines
+    oprateData.parasiticAssemblies = resetMeterail.parasiticAssemblies
+    oprateData.device = props.device
   }
-  dragAssembly (ev) {
+  dragAssembly (ev, assemblyType) {
     ev.dataTransfer.setData('assembly', ev.target.id)
+    ev.dataTransfer.setData('assemblyType', assemblyType)
   }
   materialDrop (ev) {
     const position = actionMehodWapper.transPixelToPos({
       x: ev.clientX,
       y: ev.clientY
     })
-    actionMehodWapper.addAssmbly(ev.dataTransfer.getData('assembly'), position)
+    if (ev.dataTransfer.getData('assemblyType') !== 'PA') {
+      actionMehodWapper.addAssmbly(ev.dataTransfer.getData('assembly'), position)
+    } else {
+      actionMehodWapper.addPAssmbly(ev.dataTransfer.getData('assembly'), position)
+    }
   }
   chooseAssembly (ev, callBack) {
     const { mode, choosenLine, choosenAssembly } = oprateData
@@ -155,8 +164,8 @@ class Chart extends Component {
     }
   }
   render() {
-    const { material, typeSummary } = this.state
-    const { assemblies, lines } = material
+    const { material, typeSummary, parasiticAssembliseTypeSummary } = this.state
+    const { assemblies, lines, parasiticAssemblies } = material
     return (
       <div className={styles['flow-content']} ref='flow_content'>
         <div className={styles['left_side']}>
@@ -169,7 +178,7 @@ class Chart extends Component {
                     {
                       Object.keys(assemblies).map((assembly, i) => {
                         return (
-                          assemblies[assembly].typeBelong === type ? <div key={i}>
+                          assemblies[assembly].typeBelong === type ? <div key={i} className={styles['big_assembly']}>
                             <img
                               alt={assemblies[assembly].assemblyName}
                               className={styles['assembly-img']}
@@ -180,9 +189,46 @@ class Chart extends Component {
                               onMouseEnter={() => { assemblies[assembly].showTip = true; this.setState({ assemblies }) }}
                               onMouseLeave={() => { assemblies[assembly].showTip = false; this.setState({ assemblies }) }}
                             />
-                            <div className={assemblies[assembly].showTip ? styles.show : styles.hide}>
+                            <div className={assemblies[assembly].showTip ? (`${styles['hover_div']} ${styles.show}`) : `${styles['hover_div']} ${styles.hide}`}>
                               <p>{assemblies[assembly].assemblyName}</p>
                               <img src={assemblies[assembly].imageUrl} />
+                            </div>
+                            <div className={styles['display_name']}>
+                              {assemblies[assembly].assemblyName}
+                            </div>
+                          </div> : ''
+                        )
+                      })
+                    }
+                  </div>
+                </div>
+              )
+            })
+          }
+          {
+            Object.keys(parasiticAssembliseTypeSummary).map(type => {
+              return (
+                <div key = {type}>
+                  <p>{parasiticAssembliseTypeSummary[type]}</p>
+                  <div>
+                    {
+                      Object.keys(parasiticAssemblies).map((assembly, i) => {
+                        return (
+                          parasiticAssemblies[assembly].typeBelong === type ? <div key={i} className={styles['small_assembly']}>
+                            <img
+                              alt={parasiticAssemblies[assembly].assemblyName}
+                              className={styles['assembly-img']}
+                              src={parasiticAssemblies[assembly].imageUrl}
+                              id={assembly}
+                              draggable={true}
+                              onDragStart={(ev) => this.dragAssembly(ev, 'PA')}
+                              onMouseEnter={() => { parasiticAssemblies[assembly].showTip = true; this.setState({ parasiticAssemblies }) }}
+                              onMouseLeave={() => { parasiticAssemblies[assembly].showTip = false; this.setState({ parasiticAssemblies }) }}
+                              style={{ width: '70%', height: '70%' }}
+                            />
+                            <div className={parasiticAssemblies[assembly].showTip ? (`${styles['hover_div']} ${styles.show}`) : `${styles['hover_div']} ${styles.hide}`}>
+                              <p>{parasiticAssemblies[assembly].assemblyName}</p>
+                              <img src={parasiticAssemblies[assembly].imageUrl} />
                             </div>
                           </div> : ''
                         )
@@ -199,7 +245,7 @@ class Chart extends Component {
               {
                 Object.keys(lines).map((line, i) => {
                   return (
-                    <div key={i}>
+                    <div key={i} className={styles['small_assembly']}>
                       <img
                         className={!lines[line].isActive ? styles['line-img'] : styles['line-img-active']}
                         src={lines[line].imgSrc}
@@ -207,8 +253,9 @@ class Chart extends Component {
                         onClick={(ev) => this.setActiveLine(ev, line, lines)}
                         onMouseEnter={() => { lines[line].showTip = true; this.setState({ lines }) }}
                         onMouseLeave={() => { lines[line].showTip = false; this.setState({ lines }) }}
+                        style={{ width: '70%', height: '70%' }}
                       />
-                      <div className={lines[line].showTip ? styles.show : styles.hide}>
+                      <div className={lines[line].showTip ? (`${styles['hover_div']} ${styles.show}`) : `${styles['hover_div']} ${styles.hide}`}>
                         <p>{lines[line].lineName}</p>
                         <img src={lines[line].imgSrc} />
                       </div>

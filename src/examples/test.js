@@ -2,8 +2,9 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import ReactFlowChart from '..'
 import assemblies from '../material/assemblies'
+import parasiticAssemblies from '../material/parasiticAssemblise'
 import lines from '../material/lines'
-import { typeSummary } from './dict'
+import { typeSummary, parasiticAssembliseTypeSummary } from './dict'
 import CircularJSON from 'circular-json'
 
 function chooseAssemblyCallBakTest(assembly, updateActuralData) {
@@ -28,14 +29,17 @@ ReactDOM.render(
   >
     <ReactFlowChart
       typeSummary = {typeSummary}
+      parasiticAssembliseTypeSummary = {parasiticAssembliseTypeSummary}
       material = {
         {
           assemblies,
+          parasiticAssemblies,
           lines
         }
       }
-      assemblies= {cartData && cartData.assemblies}
-      lines= {cartData && cartData.lines}
+      assemblies= {(cartData && cartData.assemblies) || []}
+      lines= {(cartData && cartData.lines) || []}
+      parasiticAssemblies = {(cartData && cartData.parasiticAssemblies) || []}
       chooseAssembly = {chooseAssemblyCallBakTest}
       device = {'mobile'}
       getData = {getData}

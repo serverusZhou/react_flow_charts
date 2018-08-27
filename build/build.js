@@ -34,6 +34,10 @@ const config = {
           'less-loader'
         ]
       },
+      {
+        test: /\.svg/,
+        loader: 'svg-url-loader?limit=8192&name=images/[hash:8].[name].[ext]'
+      }
     ]
   },
   externals: [nodeExternals(), 'React'],

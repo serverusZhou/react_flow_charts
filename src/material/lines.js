@@ -1,6 +1,7 @@
 import { getLinePositionWithoutAssembly } from './drawUtils'
-import arrow from '../../assets/arrow.png'
-import pipe from '../../assets/pipe.png'
+import sewagePipe from '../../assets/png/sewage-pipe.png'
+import sludgeTube from '../../assets/png/sludge-tube.png'
+import medisionLine from '../../assets/png/add-medision-line.png'
 
 function lineExtendFunc(from, to) {
   const x = to.x - from.x
@@ -37,8 +38,8 @@ function lineExtendFunc(from, to) {
 
 export default {
   arrow: {
-    imgSrc: arrow,
-    lineName: '连接线',
+    imgSrc: sewagePipe,
+    lineName: '污水管',
     draw: () => {
       return function(ctx, fromPosition, toPosition, fromSize, toSize) {
         let from = {}
@@ -50,7 +51,7 @@ export default {
           const p4D5AND1D40 = lineExtend.getLineExtendPosition(1 / 40 * elements.length, 4 / 5 * elements.length)
           const p4D5AND1D20 = lineExtend.getLineExtendPosition(1 / 20 * elements.length, 4 / 5 * elements.length)
           ctx.beginPath()
-          ctx.fillStyle = 'rgba(255,87,34,1)'
+          ctx.fillStyle = '#2643ef'
           ctx.lineWidth = 1
           ctx.moveTo(linePosition.from.x, linePosition.from.y)
           ctx.lineTo(p4D5AND1D40[0].x, p4D5AND1D40[0].y)
@@ -63,7 +64,7 @@ export default {
           ctx.closePath()
           ctx.save()
           ctx.beginPath()
-          ctx.fillStyle = 'rgba(255,87,34,1)'
+          ctx.fillStyle = '#2643ef'
           ctx.font = "12px '宋体'"
           ctx.textAlign = 'left'
           ctx.textBaseline = 'top'
@@ -88,8 +89,8 @@ export default {
     }
   },
   pipe: {
-    imgSrc: pipe,
-    lineName: '管道',
+    imgSrc: sludgeTube,
+    lineName: '污泥管',
     draw: () => {
       return function(ctx, fromPosition, toPosition, fromSize, toSize) {
         let from = {}
@@ -159,8 +160,8 @@ export default {
     }
   },
   flow: {
-    imgSrc: pipe,
-    lineName: '流动',
+    imgSrc: medisionLine,
+    lineName: '加药管',
     draw: () => {
       let distence = 1
       return function(ctx, fromPosition, toPosition, fromSize, toSize) {

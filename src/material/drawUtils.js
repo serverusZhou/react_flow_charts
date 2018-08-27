@@ -6,6 +6,13 @@ function drawAImage(ctx, imgUrl, position, size) {
   ctx.drawImage(image, 0, 0, 512, 512, position.x, position.y, size.width, size.height)
   ctx.closePath()
 }
+function drawASvgImage(ctx, imgUrl, position, size) {
+  ctx.beginPath()
+  const image = new Image()
+  image.src = imgUrl
+  ctx.drawImage(image, 0, 0, 512, 512, position.x, position.y, size.width, size.height)
+  ctx.closePath()
+}
 function getLinePositionWithoutAssembly(from, to, fromSize, toSize) {
   let x = to.x - from.x
   let y = to.y - from.y
@@ -25,5 +32,6 @@ function getLinePositionWithoutAssembly(from, to, fromSize, toSize) {
 }
 export {
   drawAImage,
-  getLinePositionWithoutAssembly
+  getLinePositionWithoutAssembly,
+  drawASvgImage
 }

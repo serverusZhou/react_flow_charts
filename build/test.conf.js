@@ -22,7 +22,7 @@ const config = {
         }
       },
       {
-        test: /\.(png|jpg)$/,
+        test: /\.(png|jpg|svg)$/,
         loader: 'url-loader?limit=8192&name=images/[hash:8].[name].[ext]'
       },
       {
@@ -32,7 +32,7 @@ const config = {
           { loader: 'css-loader', options: { importLoaders: 1, modules: true }},
           'less-loader'
         ]
-      },
+      }
     ]
   },
   plugins: [

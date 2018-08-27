@@ -43,6 +43,16 @@ function checkIsBelongBrokenLine (point, allPoints, fromSize, toSize) {
   }
 }
 
+function checkIsNearAPosition (position, points, distence = 10) {
+  let nearIndex = NaN
+  points.forEach((point, index) => {
+    if (Math.abs(point.x - position.x) < distence && Math.abs(point.y - position.y) < distence) {
+      nearIndex = index
+    }
+  })
+  return nearIndex
+}
+
 function getPosition(obj) {
   let l = 0
   let t = 0
@@ -76,29 +86,62 @@ export default function(oprateData) {
       }
     },
     addAssmbly: function(assembly, position) {
-      const { assemblies, material } = oprateData
+      const { assemblies, material, device } = oprateData
+      const size = (function() {
+        let width = (material.assemblies[assembly].size && material.assemblies[assembly].size.width) || 100
+        let height = (material.assemblies[assembly].size && material.assemblies[assembly].size.height) || 100
+        return {
+          width: (device === 'mobile') ? width * 2 : width,
+          height: (device === 'mobile') ? height * 2 : height
+        }
+      })()
       assemblies.push({
         id: UUID(),
         name: material.assemblies[assembly].assemblyName,
         assemblyName: assembly,
         imageUrl: material.assemblies[assembly].imageUrl,
         position: {
-          x: position.x - ((material.assemblies[assembly].size && material.assemblies[assembly].size.width) || 100) / 2,
-          y: position.y - ((material.assemblies[assembly].size && material.assemblies[assembly].size.height) || 100) / 2,
+          x: position.x - size.width / 2,
+          y: position.y - size.height / 2,
         },
         size: {
-          width: (material.assemblies[assembly].size && material.assemblies[assembly].size.width) || 100,
-          height: (material.assemblies[assembly].size && material.assemblies[assembly].size.height) || 100
+          width: size.width,
+          height: size.height
         },
         lines: {
           from: [],
           to: []
         },
+        belongs: [],
         draw: material.assemblies[assembly].draw ? material.assemblies[assembly].draw() : function(ctx, position, size, imgUrl) {
           drawAImage(ctx, imgUrl, position, size)
         },
         acturalData: {}
       })
+    },
+    addPAssmbly: function(parasiticAssembly, position) {
+      const { assemblies, material, parasiticAssemblies } = oprateData
+      console.log('parasiticAssemblies', parasiticAssemblies)
+      const belongToAssembly = assemblies.find(element => checkIsBelongPosition(position, {
+        x: element.position.x,
+        endX: element.position.x + element.size.width,
+        y: element.position.y,
+        endY: element.position.y + element.size.height,
+      }))
+      if (belongToAssembly && Object.keys(belongToAssembly)) {
+        const addParasiticAssembly = {
+          id: UUID(),
+          name: material.parasiticAssemblies[parasiticAssembly].assemblyName,
+          assemblyName: parasiticAssembly,
+          imageUrl: material.parasiticAssemblies[parasiticAssembly].imageUrl,
+          belongsTo: belongToAssembly,
+          acturalData: {}
+        }
+        parasiticAssemblies.push(addParasiticAssembly)
+        belongToAssembly.belongs.push(addParasiticAssembly)
+        console.log('assemblies', assemblies)
+        console.log('parasiticAssembly', parasiticAssembly)
+      }
     },
     chooseAssmbly: function(position) {
       const { assemblies, choosenAssembly } = oprateData
@@ -177,7 +220,10 @@ export default function(oprateData) {
         }
       })
       if (findLine && Object.keys(findLine)) {
-        ableAddPointLine[findLine.id] = findNum
+        ableAddPointLine[findLine.id] = {
+          positionAtLine: position,
+          belongIndex: findNum
+        }
         return true
       }
     },
@@ -202,11 +248,16 @@ export default function(oprateData) {
     },
     updateLinePositions: function(position) {
       const { lines, ableAddPointLine } = oprateData
-      const line = lines.find(line => !isNaN(ableAddPointLine[line.id]))
+      const line = lines.find(line => !!ableAddPointLine[line.id])
       const allPoints = [{ ...line.from.position }].concat(line.middlePoints).concat({ ...line.to.position })
       const checkObj = checkIsBelongBrokenLine(position, allPoints, line.from.assembly.size, line.to.assembly.size)
       if (!checkObj.isBelong) {
-        line.middlePoints.splice(ableAddPointLine[line.id], 0, position)
+        const _num = checkIsNearAPosition(ableAddPointLine[line.id].positionAtLine, allPoints)
+        if (isNaN(_num)) {
+          line.middlePoints.splice(ableAddPointLine[line.id].belongIndex, 0, position)
+        } else {
+          line.middlePoints[_num - 1 ] = position
+        }
       }
     },
     showHoverAssembly: function() {
@@ -349,7 +400,7 @@ export default function(oprateData) {
       util.clearObj(choosenLine)
       mode.setTo('assembly')
     },
-    resetAssembliesAndLines: function(assemblies, lines) {
+    resetAssembliesAndLines: function(assemblies, lines, parasiticAssemblies) {
       const { material } = oprateData
       assemblies.forEach(assembly => {
         assembly.draw = material.assemblies[assembly.assemblyName].draw ? material.assemblies[assembly.assemblyName].draw() : function(ctx, position, size, imgUrl) {
@@ -361,7 +412,8 @@ export default function(oprateData) {
       })
       return {
         assemblies,
-        lines
+        lines,
+        parasiticAssemblies
       }
     }
   }
