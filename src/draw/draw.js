@@ -73,7 +73,7 @@ export default function(oprateData) {
       mainLoop()
     },
     draw: function() {
-      const { assemblies, choosenAssembly, hoverAssembly, choosenLine, ctx, lines, temLine } = oprateData
+      const { assemblies, choosenAssembly, hoverAssembly, parasiticAssemblies, choosenLine, ctx, lines, temLine } = oprateData
       assemblies.forEach(element => {
         element.draw(ctx, element.position, element.size, element.imageUrl)
         drawATip(ctx, {
@@ -101,16 +101,22 @@ export default function(oprateData) {
             { x: position.x - 5, y: position.y - 5 },
           ], '#39b54a')
         }
-        element.belongs.forEach((pAssembly, index) => {
-          ctx.save()
-          drawAImage(ctx, pAssembly.imageUrl, {
-            x: element.position.x + element.size.width * 0.3,
-            y: element.position.y + element.size.height * (1 - 0.2 * (1 + index)) - 10,
-          }, {
-            width: element.size.width * 0.4,
-          })
-          ctx.restore()
-        })
+        // element.belongs.forEach((pAssembly, index) => {
+        //   ctx.save()
+        //   drawAImage(ctx, pAssembly.imageUrl, {
+        //     x: element.position.x + element.size.width * 0.25,
+        //     y: element.position.y + element.size.height * (1 - 0.15 * (1 + index)) - 22,
+        //   }, {
+        //     width: element.size.width * 0.5,
+        //   })
+        //   ctx.restore()
+        // })
+      })
+
+      parasiticAssemblies.forEach((pAssembly, index) => {
+        if (pAssembly.isOccupyInternalSpace) {
+          drawAImage(ctx, pAssembly.imageUrl, pAssembly.position, pAssembly.size)
+        }
       })
       lines.forEach(element => {
         const allPoints = [{ ...element.from.position }].concat(element.middlePoints).concat({ ...element.to.position })

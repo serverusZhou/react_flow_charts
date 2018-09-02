@@ -178,7 +178,7 @@ class Chart extends Component {
                     {
                       Object.keys(assemblies).map((assembly, i) => {
                         return (
-                          assemblies[assembly].typeBelong === type ? <div key={i} className={styles['big_assembly']}>
+                          assemblies[assembly].typeBelong === type ? <div key={i} className={styles['small_assembly']}>
                             <img
                               alt={assemblies[assembly].assemblyName}
                               className={styles['assembly-img']}

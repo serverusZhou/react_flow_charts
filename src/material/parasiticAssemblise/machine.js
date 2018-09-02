@@ -28,6 +28,7 @@ export default {
     assemblyType,
     assemblyName: '空压机',
     size: defaultSize,
+    isOccupyInternalSpace: true,
   },
   whirlwindMachine: {
     imageUrl: blowerOpen,
@@ -35,6 +36,7 @@ export default {
     assemblyType,
     assemblyName: '鼓风机',
     size: defaultSize,
+    isOccupyInternalSpace: true,
   },
   dosingPpump: {
     imageUrl: dosingPumpOpen,
@@ -56,5 +58,6 @@ export default {
     assemblyType,
     assemblyName: '搅拌机',
     size: defaultSize,
+    isOccupyInternalSpace: true,
   },
 }

@@ -74,6 +74,12 @@ function getScrollTop() {
   return scrollTop
 }
 
+function imageRatio(imgUrl) {
+  const image = new Image()
+  image.src = imgUrl
+  return image.height / image.width
+}
+
 export default function(oprateData) {
   return {
     transPixelToPos: function(pixel) {
@@ -108,6 +114,7 @@ export default function(oprateData) {
           width: size.width,
           height: size.height
         },
+        insizeSpacePercent: material.assemblies[assembly].insizeSpacePercent,
         lines: {
           from: [],
           to: []
@@ -121,7 +128,6 @@ export default function(oprateData) {
     },
     addPAssmbly: function(parasiticAssembly, position) {
       const { assemblies, material, parasiticAssemblies } = oprateData
-      console.log('parasiticAssemblies', parasiticAssemblies)
       const belongToAssembly = assemblies.find(element => checkIsBelongPosition(position, {
         x: element.position.x,
         endX: element.position.x + element.size.width,
@@ -129,18 +135,32 @@ export default function(oprateData) {
         endY: element.position.y + element.size.height,
       }))
       if (belongToAssembly && Object.keys(belongToAssembly)) {
+        const ratio = imageRatio(material.parasiticAssemblies[parasiticAssembly].imageUrl)
+        const remainPosition = belongToAssembly.belongs.reduce((ev, belong) => {
+          if (belong.isOccupyInternalSpace) {
+            ev.position.y = ev.position.y - belong.size.height
+          }
+          return ev
+        }, { position: {
+          x: belongToAssembly.position.x + belongToAssembly.insizeSpacePercent[3] * belongToAssembly.size.width,
+          y: belongToAssembly.position.y + belongToAssembly.size.height - belongToAssembly.insizeSpacePercent[2] * belongToAssembly.size.height - belongToAssembly.size.width * (1 - belongToAssembly.insizeSpacePercent[1] - belongToAssembly.insizeSpacePercent[3]) * ratio,
+        }, size: {
+          width: belongToAssembly.size.width * (1 - belongToAssembly.insizeSpacePercent[1] - belongToAssembly.insizeSpacePercent[3]),
+          height: belongToAssembly.size.width * (1 - belongToAssembly.insizeSpacePercent[1] - belongToAssembly.insizeSpacePercent[3]) * ratio
+        }})
         const addParasiticAssembly = {
           id: UUID(),
           name: material.parasiticAssemblies[parasiticAssembly].assemblyName,
           assemblyName: parasiticAssembly,
           imageUrl: material.parasiticAssemblies[parasiticAssembly].imageUrl,
           belongsTo: belongToAssembly,
-          acturalData: {}
+          ratio: imageRatio(material.parasiticAssemblies[parasiticAssembly].imageUrl),
+          isOccupyInternalSpace: material.parasiticAssemblies[parasiticAssembly].isOccupyInternalSpace,
+          acturalData: {},
+          ...remainPosition
         }
         parasiticAssemblies.push(addParasiticAssembly)
         belongToAssembly.belongs.push(addParasiticAssembly)
-        console.log('assemblies', assemblies)
-        console.log('parasiticAssembly', parasiticAssembly)
       }
     },
     chooseAssmbly: function(position) {
@@ -229,23 +249,40 @@ export default function(oprateData) {
     },
     updateAssemblyPosition: function(position) {
       const { assemblies, ableMoveAssembly } = oprateData
-      assemblies.forEach(element => {
-        if (ableMoveAssembly[element.id]) {
-          element.position = {
-            x: position.x - element.size.width / 2,
-            y: position.y - element.size.height / 2
-          }
-          element.lines.from.forEach(line => {
-            line.line.from.position.x = position.x
-            line.line.from.position.y = position.y
-          })
-          element.lines.to.forEach(line => {
-            line.line.to.position.x = position.x
-            line.line.to.position.y = position.y
-          })
-        }
+      const moveAssembly = assemblies.find(element => ableMoveAssembly[element.id])
+      if (!moveAssembly) { return }
+      moveAssembly.position = {
+        x: position.x - moveAssembly.size.width / 2,
+        y: position.y - moveAssembly.size.height / 2
+      }
+      moveAssembly.lines.from.forEach(line => {
+        line.line.from.position.x = position.x
+        line.line.from.position.y = position.y
       })
+      moveAssembly.lines.to.forEach(line => {
+        line.line.to.position.x = position.x
+        line.line.to.position.y = position.y
+      })
+      this.updatePAssemblyPosition(moveAssembly)
+
+      // assemblies.forEach(element => {
+      //   if (ableMoveAssembly[element.id]) {
+      //     element.position = {
+      //       x: position.x - element.size.width / 2,
+      //       y: position.y - element.size.height / 2
+      //     }
+      //     element.lines.from.forEach(line => {
+      //       line.line.from.position.x = position.x
+      //       line.line.from.position.y = position.y
+      //     })
+      //     element.lines.to.forEach(line => {
+      //       line.line.to.position.x = position.x
+      //       line.line.to.position.y = position.y
+      //     })
+      //   }
+      // })
     },
+
     updateLinePositions: function(position) {
       const { lines, ableAddPointLine } = oprateData
       const line = lines.find(line => !!ableAddPointLine[line.id])
@@ -259,6 +296,23 @@ export default function(oprateData) {
           line.middlePoints[_num - 1 ] = position
         }
       }
+    },
+    updatePAssemblyPosition: function(assembly) {
+      let lessHeight = 0
+      assembly.belongs.forEach(belong => {
+        const updateInfo = {
+          position: {
+            x: assembly.position.x + assembly.insizeSpacePercent[3] * assembly.size.width,
+            y: assembly.position.y + assembly.size.height - assembly.insizeSpacePercent[2] * assembly.size.height - assembly.size.width * (1 - assembly.insizeSpacePercent[1] - assembly.insizeSpacePercent[3]) * belong.ratio - lessHeight,
+          }, size: {
+            width: assembly.size.width * (1 - assembly.insizeSpacePercent[1] - assembly.insizeSpacePercent[3]),
+            height: assembly.size.width * (1 - assembly.insizeSpacePercent[1] - assembly.insizeSpacePercent[3]) * belong.ratio
+          }
+        }
+        lessHeight = lessHeight + assembly.size.width * (1 - assembly.insizeSpacePercent[1] - assembly.insizeSpacePercent[3]) * belong.ratio
+        belong.position = updateInfo.position
+        belong.size = updateInfo.size
+      })
     },
     showHoverAssembly: function() {
       const that = this
@@ -346,32 +400,33 @@ export default function(oprateData) {
     narrowAssembly: function() {
       const { choosenAssembly, assemblies } = oprateData
       if (choosenAssembly && Object.keys(choosenAssembly).length) {
-        assemblies.forEach(element => {
-          if (choosenAssembly[element.id]) {
-            element.size.width = element.size.width / 1.1
-            element.size.height = element.size.height / 1.1
-          }
-        })
+        const aTAssembly = assemblies.find(element => choosenAssembly[element.id])
+        if (!aTAssembly) return
+        aTAssembly.size.width = aTAssembly.size.width / 1.1
+        aTAssembly.size.height = aTAssembly.size.height / 1.1
+        this.updatePAssemblyPosition(aTAssembly)
       }
     },
     enlargeAssembly: function() {
       const { choosenAssembly, assemblies } = oprateData
       if (choosenAssembly && Object.keys(choosenAssembly).length) {
-        assemblies.forEach(element => {
-          if (choosenAssembly[element.id]) {
-            element.size.width = element.size.width * 1.1
-            element.size.height = element.size.height * 1.1
-          }
-        })
+        const aTAssembly = assemblies.find(element => choosenAssembly[element.id])
+        if (!aTAssembly) return
+        aTAssembly.size.width = aTAssembly.size.width * 1.1
+        aTAssembly.size.height = aTAssembly.size.height * 1.1
+        this.updatePAssemblyPosition(aTAssembly)
       }
     },
     deleteAssembly: function() {
-      const { choosenAssembly, assemblies, lines } = oprateData
+      const { choosenAssembly, assemblies, parasiticAssemblies, lines } = oprateData
       if (choosenAssembly && Object.keys(choosenAssembly).length) {
         assemblies.forEach((element, index) => {
           if (choosenAssembly[element.id]) {
             oprateData.lines = lines.filter(line => {
               return !element.lines.from.some(fromLine => line.id === fromLine.id) && !element.lines.to.some(fromLine => line.id === fromLine.id)
+            })
+            oprateData.parasiticAssemblies = parasiticAssemblies.filter(parasiticAssembly => {
+              return !element.belongs.some(belong => belong.id === parasiticAssembly.id)
             })
             assemblies.splice(index, 1)
           }
