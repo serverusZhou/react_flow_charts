@@ -11,6 +11,7 @@ const config = {
     path: path.resolve(__dirname, '../dist'),
     filename: '[name][hash].js',
   },
+  devtool: 'cheap-module-eval-source-map',
   module: {
     rules: [
       {

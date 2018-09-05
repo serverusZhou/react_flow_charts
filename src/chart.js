@@ -3,9 +3,11 @@ import styles from './index.less'
 import draw from './draw/draw'
 import util from './util'
 import actionMethod from './actionMehod'
+import { btns, draftingPoints } from './material/btns'
 
 const mode = util.keysSwith({ 'assembly': true, 'line': false, 'inLineChoosen': false })
 let flag = false
+let setTime = null
 const oprateData = {
   mode, // 用来判断当前处于哪个操作模式中（组件还是连线或者其它）
   ctx: null,
@@ -15,11 +17,20 @@ const oprateData = {
   ableMoveAssembly: {},
   hoverAssembly: {},
   parasiticAssemblies: [],
+  ableMovePAssembly: [],
   lines: [],
   choosenLine: {},
   activeLine: {},
   ableAddPointLine: {},
   temLine: {},
+  actionBtns: {
+    enable: false,
+    btns,
+    draftingPoints,
+    position: { x: 0, y: 0 },
+    size: { width: 0, height: 0 }
+  },
+  ableDrafPoint: {},
   material: {
     assemblies: {},
     parasiticAssemblies: {},
@@ -57,7 +68,8 @@ class Chart extends Component {
     }
   }
   chooseAssembly (ev, callBack) {
-    const { mode, choosenLine, choosenAssembly } = oprateData
+    if (flag) { flag = false; return false }
+    const { mode, choosenLine, choosenAssembly, ableMovePAssembly } = oprateData
     const position = actionMehodWapper.transPixelToPos({
       x: ev.clientX,
       y: ev.clientY
@@ -65,6 +77,12 @@ class Chart extends Component {
     if (!mode.is('line')) {
       mode.setTo('assembly')
       util.clearObj(choosenLine)
+      util.clearObj(ableMovePAssembly)
+      if (choosenAssembly && Object.keys(choosenAssembly).length) {
+        if (actionMehodWapper.takeAction(position)) {
+          return
+        }
+      }
       util.clearObj(choosenAssembly)
       const line = actionMehodWapper.chooseLine(position)
       if (line) {
@@ -80,19 +98,24 @@ class Chart extends Component {
     }
   }
   moveStart (ev) {
-    flag = true
-    const { mode } = oprateData
+    setTime = setTimeout(() => { flag = true }, 150)
+    const { mode, choosenAssembly } = oprateData
     const position = actionMehodWapper.transPixelToPos({
       x: ev.clientX,
       y: ev.clientY
     })
     if (mode.is('assembly')) {
-      !actionMehodWapper.addAbleAddPointLine(position) && actionMehodWapper.addAbleMoveAssembly(position)
+      if (choosenAssembly && Object.keys(choosenAssembly).length) {
+        !actionMehodWapper.addAbleMovePAssembly(position) && actionMehodWapper.addAbleMoveDragingPoint(position)
+      } else {
+        !actionMehodWapper.addAbleAddPointLine(position) && actionMehodWapper.addAbleMoveAssembly(position)
+      }
     }
     mode.is('line') && actionMehodWapper.addTemLine(position)
   }
   moveEnd (ev) {
-    const { mode, ableMoveAssembly, temLine, ableAddPointLine } = oprateData
+    clearTimeout(setTime)
+    const { mode, ableMoveAssembly, ableMovePAssembly, choosenAssembly, temLine, ableAddPointLine, ableDrafPoint } = oprateData
     const position = actionMehodWapper.transPixelToPos({
       x: ev.clientX,
       y: ev.clientY
@@ -100,8 +123,17 @@ class Chart extends Component {
     if (flag) {
       if (mode.is('assembly')) {
         util.clearObj(ableMoveAssembly)
+        if (choosenAssembly && Object.keys(choosenAssembly)) {
+          actionMehodWapper.dealWithPAssemblyAction(position)
+        }
         if (ableAddPointLine && Object.keys(ableAddPointLine).length) {
           actionMehodWapper.updateLinePositions(position)
+        }
+        if (ableMovePAssembly && Object.keys(ableMovePAssembly)) {
+          util.clearObj(ableMovePAssembly)
+        }
+        if (ableDrafPoint && Object.keys(ableDrafPoint)) {
+          util.clearObj(ableDrafPoint)
         }
       }
       if (mode.is('line')) {
@@ -111,11 +143,10 @@ class Chart extends Component {
         }
         util.clearObj(temLine)
       }
-      flag = false
     }
   }
   move (ev) {
-    const { mode, ableMoveAssembly, temLine } = oprateData
+    const { mode, ableMoveAssembly, ableMovePAssembly, temLine, ableDrafPoint } = oprateData
     const position = actionMehodWapper.transPixelToPos({
       x: ev.clientX,
       y: ev.clientY
@@ -124,6 +155,12 @@ class Chart extends Component {
       if (mode.is('assembly')) {
         if (Object.keys(ableMoveAssembly).length) {
           actionMehodWapper.updateAssemblyPosition(position)
+        }
+        if (Object.keys(ableMovePAssembly).length) {
+          actionMehodWapper.updatePAssemblyPosition(position)
+        }
+        if (Object.keys(ableDrafPoint).length) {
+          actionMehodWapper.updateDrafPointPosition(position)
         }
       }
       if (mode.is('line') && Object.keys(temLine).length) {
@@ -159,7 +196,8 @@ class Chart extends Component {
     if (this.props.getData) {
       this.props.getData({
         lines: oprateData.lines,
-        assemblies: oprateData.assemblies
+        assemblies: oprateData.assemblies,
+        parasiticAssemblies: oprateData.parasiticAssemblies,
       })
     }
   }

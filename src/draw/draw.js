@@ -43,9 +43,6 @@ function drawAImage(ctx, imgUrl, position, size) {
   ctx.beginPath()
   const image = new Image()
   image.src = imgUrl
-  // ctx.fillStyle = '#fff'
-  // ctx.rect(position.x, position.y, size.width, size.width * image.height / image.width)
-  // ctx.fill()
   ctx.drawImage(image, 0, 0, image.width, image.height, position.x, position.y, size.width, size.width * image.height / image.width)
   ctx.closePath()
 }
@@ -73,7 +70,7 @@ export default function(oprateData) {
       mainLoop()
     },
     draw: function() {
-      const { assemblies, choosenAssembly, hoverAssembly, parasiticAssemblies, choosenLine, ctx, lines, temLine } = oprateData
+      const { assemblies, choosenAssembly, hoverAssembly, parasiticAssemblies, choosenLine, ctx, lines, temLine, actionBtns } = oprateData
       assemblies.forEach(element => {
         element.draw(ctx, element.position, element.size, element.imageUrl)
         drawATip(ctx, {
@@ -101,22 +98,14 @@ export default function(oprateData) {
             { x: position.x - 5, y: position.y - 5 },
           ], '#39b54a')
         }
-        // element.belongs.forEach((pAssembly, index) => {
-        //   ctx.save()
-        //   drawAImage(ctx, pAssembly.imageUrl, {
-        //     x: element.position.x + element.size.width * 0.25,
-        //     y: element.position.y + element.size.height * (1 - 0.15 * (1 + index)) - 22,
-        //   }, {
-        //     width: element.size.width * 0.5,
-        //   })
-        //   ctx.restore()
-        // })
       })
-
-      parasiticAssemblies.forEach((pAssembly, index) => {
-        if (pAssembly.isOccupyInternalSpace) {
-          drawAImage(ctx, pAssembly.imageUrl, pAssembly.position, pAssembly.size)
+      parasiticAssemblies.filter(pA => !pA.isOccupyInternalSpace).forEach((pAssembly, index) => {
+        if (pAssembly.draw) {
+          pAssembly.draw(ctx, pAssembly.imageUrl, pAssembly.ratio, pAssembly.belongsTo.position, pAssembly.belongsTo.size)
         }
+      })
+      parasiticAssemblies.filter(pA => pA.isOccupyInternalSpace).forEach((pAssembly, index) => {
+        drawAImage(ctx, pAssembly.imageUrl, pAssembly.position, pAssembly.size)
       })
       lines.forEach(element => {
         const allPoints = [{ ...element.from.position }].concat(element.middlePoints).concat({ ...element.to.position })
@@ -143,6 +132,14 @@ export default function(oprateData) {
       })
       if (Object.keys(temLine).length) {
         temLine.draw(ctx, temLine.from.position, temLine.to.position)
+      }
+      if (actionBtns.enable) {
+        actionBtns.btns.forEach((btn, index) => {
+          drawAImage(ctx, btn.imageUrl, btn.position, btn.size)
+        })
+        actionBtns.draftingPoints.forEach((draftingPoint, index) => {
+          drawAImage(ctx, draftingPoint.imageUrl, draftingPoint.position, draftingPoint.size)
+        })
       }
     }
   }

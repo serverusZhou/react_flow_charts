@@ -80,6 +80,10 @@ function imageRatio(imgUrl) {
   return image.height / image.width
 }
 
+function checkoutIsOutBox(insideBox, outsideBox) {
+  return insideBox[0].x > outsideBox[1].x || insideBox[1].x < outsideBox[0].x || insideBox[0].y > outsideBox[1].y || insideBox[1].y < outsideBox[0].y
+}
+
 export default function(oprateData) {
   return {
     transPixelToPos: function(pixel) {
@@ -157,27 +161,29 @@ export default function(oprateData) {
           ratio: imageRatio(material.parasiticAssemblies[parasiticAssembly].imageUrl),
           isOccupyInternalSpace: material.parasiticAssemblies[parasiticAssembly].isOccupyInternalSpace,
           acturalData: {},
-          ...remainPosition
+          ...remainPosition,
+          draw: material.parasiticAssemblies[parasiticAssembly].draw ? material.parasiticAssemblies[parasiticAssembly].draw() : null
         }
         parasiticAssemblies.push(addParasiticAssembly)
         belongToAssembly.belongs.push(addParasiticAssembly)
       }
     },
     chooseAssmbly: function(position) {
-      const { assemblies, choosenAssembly } = oprateData
+      const { assemblies, choosenAssembly, actionBtns, ableMoveAssembly } = oprateData
       util.clearObj(choosenAssembly)
-      let assembly = null
-      assemblies.forEach(element => {
-        if (checkIsBelongPosition(position, {
-          x: element.position.x,
-          endX: element.position.x + element.size.width,
-          y: element.position.y,
-          endY: element.position.y + element.size.height,
-        })) {
-          choosenAssembly[element.id] = true
-          assembly = element
-        }
-      })
+      actionBtns.enable = false
+      let assembly = assemblies.find(element => checkIsBelongPosition(position, {
+        x: element.position.x,
+        endX: element.position.x + element.size.width,
+        y: element.position.y,
+        endY: element.position.y + element.size.height,
+      }))
+      if (assembly) {
+        choosenAssembly[assembly.id] = true
+        actionBtns.enable = true
+        util.clearObj(ableMoveAssembly)
+        this.updateActionBtnPosition()
+      }
       return assembly
     },
     chooseLine: function(position) {
@@ -200,6 +206,24 @@ export default function(oprateData) {
           element.acturalData = acturalData
         }
       })
+    },
+    dealWithPAssemblyAction: function(position) {
+      const { parasiticAssemblies, ableMovePAssembly, assemblies, choosenAssembly } = oprateData
+      const movePAssembly = parasiticAssemblies.find(pAssembly => ableMovePAssembly[pAssembly.id])
+      const choosenA = assemblies.find(assembly => choosenAssembly[assembly.id])
+      if (movePAssembly && Object.keys(movePAssembly).length) {
+        if (checkoutIsOutBox([
+          { x: movePAssembly.position.x, y: movePAssembly.position.y },
+          { x: movePAssembly.position.x + movePAssembly.size.width, y: movePAssembly.position.y + movePAssembly.size.height }
+        ], [
+          { x: choosenA.position.x, y: choosenA.position.y },
+          { x: choosenA.position.x + choosenA.size.width, y: choosenA.position.y + choosenA.size.height }
+        ])) {
+          oprateData.parasiticAssemblies = parasiticAssemblies.filter(pAssembly => pAssembly.id !== movePAssembly.id)
+          choosenA.belongs = choosenA.belongs.filter(belong => belong.id !== movePAssembly.id)
+        }
+        this.updateAllPAssemblyPosition(choosenA)
+      }
     },
     findAssmblyByPosition: function(position) {
       const { assemblies } = oprateData
@@ -226,6 +250,28 @@ export default function(oprateData) {
         }
       })
     },
+    addAbleMovePAssembly: function(position) {
+      const { parasiticAssemblies, ableMovePAssembly } = oprateData
+      const pAssembly = parasiticAssemblies.find(element => checkIsBelongPosition(position, {
+        x: element.position.x,
+        endX: element.position.x + element.size.width,
+        y: element.position.y,
+        endY: element.position.y + element.size.height,
+      }))
+      if (pAssembly) { ableMovePAssembly[pAssembly.id] = true; return true }
+    },
+    addAbleMoveDragingPoint: function(position) {
+      const { actionBtns, ableDrafPoint } = oprateData
+      const draftingPoint = actionBtns.draftingPoints.find(point => checkIsBelongPosition(position, {
+        x: point.position.x,
+        endX: point.position.x + point.size.width,
+        y: point.position.y,
+        endY: point.position.y + point.size.height,
+      }))
+      if (draftingPoint && Object.keys(draftingPoint).length) {
+        ableDrafPoint[draftingPoint.type] = true
+      }
+    },
     addAbleAddPointLine: function(position) {
       const { ableAddPointLine, lines } = oprateData
       util.clearObj(ableAddPointLine)
@@ -239,7 +285,7 @@ export default function(oprateData) {
           findNum = belongObj.belongIndex
         }
       })
-      if (findLine && Object.keys(findLine)) {
+      if (findLine && Object.keys(findLine).length) {
         ableAddPointLine[findLine.id] = {
           positionAtLine: position,
           belongIndex: findNum
@@ -263,26 +309,59 @@ export default function(oprateData) {
         line.line.to.position.x = position.x
         line.line.to.position.y = position.y
       })
-      this.updatePAssemblyPosition(moveAssembly)
-
-      // assemblies.forEach(element => {
-      //   if (ableMoveAssembly[element.id]) {
-      //     element.position = {
-      //       x: position.x - element.size.width / 2,
-      //       y: position.y - element.size.height / 2
-      //     }
-      //     element.lines.from.forEach(line => {
-      //       line.line.from.position.x = position.x
-      //       line.line.from.position.y = position.y
-      //     })
-      //     element.lines.to.forEach(line => {
-      //       line.line.to.position.x = position.x
-      //       line.line.to.position.y = position.y
-      //     })
-      //   }
-      // })
+      this.updateAllPAssemblyPosition(moveAssembly)
     },
 
+    updatePAssemblyPosition: function(position) {
+      const { parasiticAssemblies, ableMovePAssembly } = oprateData
+      const movePAssembly = parasiticAssemblies.find(element => ableMovePAssembly[element.id])
+      if (!movePAssembly) { return }
+      movePAssembly.position = {
+        x: position.x - movePAssembly.size.width / 2,
+        y: position.y - movePAssembly.size.height / 2
+      }
+    },
+    updateDrafPointPosition: function(position) {
+      const { assemblies, choosenAssembly, actionBtns, ableDrafPoint } = oprateData
+      const aTAssembly = assemblies.find(assembly => choosenAssembly[assembly.id])
+      const draftingPoint = actionBtns.draftingPoints.find(point => ableDrafPoint[point.type])
+      if (!draftingPoint) { return }
+      if (draftingPoint.type === 'topLeft') {
+        aTAssembly.size = {
+          width: aTAssembly.size.width - (position.x - aTAssembly.position.x),
+          height: aTAssembly.size.height - (position.y - aTAssembly.position.y),
+        }
+        aTAssembly.position = position
+      }
+      if (draftingPoint.type === 'topRight') {
+        aTAssembly.size = {
+          width: position.x - aTAssembly.position.x,
+          height: aTAssembly.size.height - (position.y - aTAssembly.position.y),
+        }
+        aTAssembly.position = {
+          x: aTAssembly.position.x,
+          y: position.y
+        }
+      }
+      if (draftingPoint.type === 'bottomLeft') {
+        aTAssembly.size = {
+          width: aTAssembly.size.width - (position.x - aTAssembly.position.x),
+          height: position.y - aTAssembly.position.y,
+        }
+        aTAssembly.position = {
+          y: aTAssembly.position.y,
+          x: position.x
+        }
+      }
+      if (draftingPoint.type === 'bottomRight') {
+        aTAssembly.size = {
+          width: position.x - aTAssembly.position.x,
+          height: position.y - aTAssembly.position.y,
+        }
+      }
+      this.updateAllPAssemblyPosition(aTAssembly)
+      this.updateActionBtnPosition()
+    },
     updateLinePositions: function(position) {
       const { lines, ableAddPointLine } = oprateData
       const line = lines.find(line => !!ableAddPointLine[line.id])
@@ -297,9 +376,9 @@ export default function(oprateData) {
         }
       }
     },
-    updatePAssemblyPosition: function(assembly) {
+    updateAllPAssemblyPosition: function(assembly) {
       let lessHeight = 0
-      assembly.belongs.forEach(belong => {
+      assembly.belongs.filter(belong => belong.isOccupyInternalSpace).forEach(belong => {
         const updateInfo = {
           position: {
             x: assembly.position.x + assembly.insizeSpacePercent[3] * assembly.size.width,
@@ -312,6 +391,41 @@ export default function(oprateData) {
         lessHeight = lessHeight + assembly.size.width * (1 - assembly.insizeSpacePercent[1] - assembly.insizeSpacePercent[3]) * belong.ratio
         belong.position = updateInfo.position
         belong.size = updateInfo.size
+      })
+    },
+    updateActionBtnPosition: function() {
+      const { assemblies, choosenAssembly, actionBtns } = oprateData
+      const aTAssembly = assemblies.find(assembly => choosenAssembly[assembly.id])
+      actionBtns.position = {
+        x: aTAssembly.position.x,
+        y: aTAssembly.position.y - 30
+      }
+      actionBtns.size = {
+        width: aTAssembly.size.width,
+        height: 30
+      }
+      actionBtns.btns.forEach((btn, index) => {
+        btn.position = {
+          x: aTAssembly.position.x + index * 50,
+          y: aTAssembly.position.y - 50
+        }
+        btn.size = {
+          width: 30,
+          height: 30
+        }
+      })
+      actionBtns.draftingPoints.forEach((draftingPoint, index) => {
+        const map = {
+          'topLeft': [0, 0],
+          'topRight': [1, 0],
+          'bottomLeft': [0, 1],
+          'bottomRight': [1, 1],
+        }
+        
+        draftingPoint.position = {
+          x: aTAssembly.position.x - 10 + aTAssembly.size.width * map[draftingPoint.type][0],
+          y: aTAssembly.position.y - 10 + aTAssembly.size.height * map[draftingPoint.type][1]
+        }
       })
     },
     showHoverAssembly: function() {
@@ -404,7 +518,7 @@ export default function(oprateData) {
         if (!aTAssembly) return
         aTAssembly.size.width = aTAssembly.size.width / 1.1
         aTAssembly.size.height = aTAssembly.size.height / 1.1
-        this.updatePAssemblyPosition(aTAssembly)
+        this.updateAllPAssemblyPosition(aTAssembly)
       }
     },
     enlargeAssembly: function() {
@@ -414,11 +528,11 @@ export default function(oprateData) {
         if (!aTAssembly) return
         aTAssembly.size.width = aTAssembly.size.width * 1.1
         aTAssembly.size.height = aTAssembly.size.height * 1.1
-        this.updatePAssemblyPosition(aTAssembly)
+        this.updateAllPAssemblyPosition(aTAssembly)
       }
     },
     deleteAssembly: function() {
-      const { choosenAssembly, assemblies, parasiticAssemblies, lines } = oprateData
+      const { choosenAssembly, assemblies, parasiticAssemblies, lines, actionBtns } = oprateData
       if (choosenAssembly && Object.keys(choosenAssembly).length) {
         assemblies.forEach((element, index) => {
           if (choosenAssembly[element.id]) {
@@ -431,6 +545,7 @@ export default function(oprateData) {
             assemblies.splice(index, 1)
           }
         })
+        actionBtns.enable = false
       }
     },
     deleteLine: function() {
@@ -462,6 +577,9 @@ export default function(oprateData) {
           drawAImage(ctx, imgUrl, position, size)
         }
       })
+      parasiticAssemblies.forEach(pAssembly => {
+        pAssembly.draw = material.parasiticAssemblies[pAssembly.assemblyName].draw ? material.parasiticAssemblies[pAssembly.assemblyName].draw() : null
+      })
       lines.forEach(line => {
         line.draw = material.lines[line.type].draw()
       })
@@ -470,6 +588,21 @@ export default function(oprateData) {
         lines,
         parasiticAssemblies
       }
+    },
+    takeAction: function(position) {
+      const { actionBtns, choosenAssembly } = oprateData
+      let btn = actionBtns.btns.find(btn => checkIsBelongPosition(position, {
+        x: btn.position.x,
+        endX: btn.position.x + btn.size.width,
+        y: btn.position.y,
+        endY: btn.position.y + btn.size.height,
+      }))
+      if (btn) {
+        if (btn.type === 'deleteBtn') { this.deleteAssembly() }
+        if (btn.type === 'cancelChooseBtn') { util.clearObj(choosenAssembly); actionBtns.enable = false }
+        return true
+      }
+      return false
     }
   }
 }

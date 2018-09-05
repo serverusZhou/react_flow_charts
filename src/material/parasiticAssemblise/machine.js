@@ -1,4 +1,4 @@
-
+import { drawAImage } from '../drawUtils'
 import waterPumpOpen from '../../../assets/png/water-pump-open.png'
 import airCompressorOpend from '../../../assets/png/air-compressor-opend.png'
 import blowerOpen from '../../../assets/png/blower-open.png'
@@ -28,7 +28,6 @@ export default {
     assemblyType,
     assemblyName: '空压机',
     size: defaultSize,
-    isOccupyInternalSpace: true,
   },
   whirlwindMachine: {
     imageUrl: blowerOpen,
@@ -36,7 +35,6 @@ export default {
     assemblyType,
     assemblyName: '鼓风机',
     size: defaultSize,
-    isOccupyInternalSpace: true,
   },
   dosingPpump: {
     imageUrl: dosingPumpOpen,
@@ -51,6 +49,18 @@ export default {
     assemblyType,
     assemblyName: '加药搅拌机',
     size: defaultSize,
+    draw: () => {
+      return function(ctx, image, ratio, belongsToAssemblyPosition, belongsToAssemblySize) {
+        drawAImage(ctx, image, {
+          x: belongsToAssemblyPosition.x + 1 / 4 * belongsToAssemblySize.width,
+          y: belongsToAssemblyPosition.y - 2 / 5 * belongsToAssemblySize.height,
+        }, {
+          width: belongsToAssemblySize.width * 1 / 2,
+          height: belongsToAssemblySize.width * 1 / 2 * ratio
+        })
+        ctx.restore()
+      }
+    }
   },
   blender: {
     imageUrl: blenderOpen,
