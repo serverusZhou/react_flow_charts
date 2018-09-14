@@ -379,6 +379,7 @@ class Chart extends Component {
               {this.props.btns}
             </div>
           }
+          <p className={styles.charts_title}>{this.props.title}</p>
           <canvas
             ref='flow_canvas'
             onClick={(ev) => this.chooseAssembly(ev, this.props.chooseAssembly)}

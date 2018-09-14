@@ -43,6 +43,7 @@ ReactDOM.render(
       chooseAssembly = {chooseAssemblyCallBakTest}
       device = {'mobile'}
       getData = {getData}
+      title = {'污水处理流程'}
       btns = {<p>12222</p>}
     />
   </div>,

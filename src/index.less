@@ -47,7 +47,6 @@
 .content{
     width: calc(100% - 380px);
     border:1px solid #e7e7eb;
-    text-align: center;
 }
 .show{
     display: block;
@@ -75,7 +74,7 @@
 }
 
 .canvas_pc{
-    width: 100%;
+    width: calc(100% - 90px);
     height: 100%;
     border: none;
     &:focus{
@@ -86,7 +85,7 @@
 .canvas_mobile{
     width: 480px;
     height: 100%;
-    margin: 0 auto;
+    margin: 0 0 0 90px;
     border: 1px #ccc solid;
     min-height: 852px;
     border: none;
@@ -185,4 +184,22 @@
 }
 .extra_btn {
     height: 45px;
+    border-bottom: 1px solid #e7e7eb;
+    margin-bottom: 10px;
+}
+.charts_title {
+    position: absolute;
+    left: 330px;
+    top: 60px;
+    -webkit-writing-mode: vertical-lr;      
+    writing-mode: vertical-lr;
+    letter-spacing: 7px;
+    font-size: 10px;
+    width:16px;
+    pointer-events:none;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: green;
 }
