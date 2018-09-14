@@ -374,6 +374,11 @@ class Chart extends Component {
           onDrop={(event) => this.materialDrop(event)}
           onDragOver={(ev) => ev.preventDefault()}
         >
+          {
+            this.props.btns && <div className={styles.extra_btn}>
+              {this.props.btns}
+            </div>
+          }
           <canvas
             ref='flow_canvas'
             onClick={(ev) => this.chooseAssembly(ev, this.props.chooseAssembly)}

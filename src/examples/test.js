@@ -43,9 +43,8 @@ ReactDOM.render(
       chooseAssembly = {chooseAssemblyCallBakTest}
       device = {'mobile'}
       getData = {getData}
-    >
-      <div>78787878</div>
-    </ReactFlowChart>
+      btns = {<p>12222</p>}
+    />
   </div>,
   document.getElementById('app')
 )
