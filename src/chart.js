@@ -44,13 +44,18 @@ const actionMehodWapper = actionMethod(oprateData)
 class Chart extends Component {
   constructor (props) {
     super(props)
-    this.state = { ...props }
     oprateData.material = props.material
     const resetMeterail = actionMehodWapper.resetAssembliesAndLines(props.assemblies, props.lines, props.parasiticAssemblies)
     oprateData.assemblies = resetMeterail.assemblies
     oprateData.lines = resetMeterail.lines
     oprateData.parasiticAssemblies = resetMeterail.parasiticAssemblies
     oprateData.device = props.device
+    const openMap = {
+      ...Object.keys(this.props.typeSummary).reduce((ev, type) => { ev[type] = false; return ev }, {}),
+      ...Object.keys(this.props.parasiticAssembliseTypeSummary).reduce((ev, type) => { ev[type] = false; return ev }, {}),
+      line: false
+    }
+    this.state = { ...props, openMap }
   }
   dragAssembly (ev, assemblyType) {
     ev.dataTransfer.setData('assembly', ev.target.id)
@@ -69,7 +74,7 @@ class Chart extends Component {
   }
   chooseAssembly (ev, callBack) {
     if (flag) { flag = false; return false }
-    const { mode, choosenLine, choosenAssembly, ableMovePAssembly } = oprateData
+    const { mode, choosenLine, choosenAssembly, ableMovePAssembly, lines, ableAddPointLine } = oprateData
     const position = actionMehodWapper.transPixelToPos({
       x: ev.clientX,
       y: ev.clientY
@@ -81,6 +86,13 @@ class Chart extends Component {
       if (choosenAssembly && Object.keys(choosenAssembly).length) {
         if (actionMehodWapper.takeAction(position)) {
           return
+        }
+      }
+      if (ableAddPointLine && Object.keys(ableAddPointLine).length) {
+        const line = lines.find(element => !!ableAddPointLine[element.id])
+        if (line) {
+          line.middlePoints.splice(ableAddPointLine[line.id].belongIndex, 1)
+          util.clearObj(ableAddPointLine)
         }
       }
       util.clearObj(choosenAssembly)
@@ -123,16 +135,17 @@ class Chart extends Component {
     if (flag) {
       if (mode.is('assembly')) {
         util.clearObj(ableMoveAssembly)
-        if (choosenAssembly && Object.keys(choosenAssembly)) {
+        if (choosenAssembly && Object.keys(choosenAssembly).length) {
           actionMehodWapper.dealWithPAssemblyAction(position)
         }
         if (ableAddPointLine && Object.keys(ableAddPointLine).length) {
-          actionMehodWapper.updateLinePositions(position)
+          actionMehodWapper.setLinePositions(position)
+          util.clearObj(ableAddPointLine)
         }
-        if (ableMovePAssembly && Object.keys(ableMovePAssembly)) {
+        if (ableMovePAssembly && Object.keys(ableMovePAssembly).length) {
           util.clearObj(ableMovePAssembly)
         }
-        if (ableDrafPoint && Object.keys(ableDrafPoint)) {
+        if (ableDrafPoint && Object.keys(ableDrafPoint).length) {
           util.clearObj(ableDrafPoint)
         }
       }
@@ -146,7 +159,7 @@ class Chart extends Component {
     }
   }
   move (ev) {
-    const { mode, ableMoveAssembly, ableMovePAssembly, temLine, ableDrafPoint } = oprateData
+    const { mode, ableMoveAssembly, ableMovePAssembly, temLine, ableDrafPoint, ableAddPointLine } = oprateData
     const position = actionMehodWapper.transPixelToPos({
       x: ev.clientX,
       y: ev.clientY
@@ -155,6 +168,9 @@ class Chart extends Component {
       if (mode.is('assembly')) {
         if (Object.keys(ableMoveAssembly).length) {
           actionMehodWapper.updateAssemblyPosition(position)
+        }
+        if (ableAddPointLine && Object.keys(ableAddPointLine).length) {
+          actionMehodWapper.updateLinePositions(position)
         }
         if (Object.keys(ableMovePAssembly).length) {
           actionMehodWapper.updatePAssemblyPosition(position)
@@ -201,18 +217,49 @@ class Chart extends Component {
       })
     }
   }
+  handelKeyboardAction = (keyCode) => {
+    const { choosenAssembly } = oprateData
+    if (keyCode === 187) {
+      if (choosenAssembly && Object.keys(choosenAssembly)) {
+        this.enlargeAssembly()
+      }
+    }
+    if (keyCode === 189) {
+      if (choosenAssembly && Object.keys(choosenAssembly)) {
+        this.narrowAssembly()
+      }
+    }
+    if (keyCode === 46) {
+      if (choosenAssembly && Object.keys(choosenAssembly)) {
+        this.deleteAssemblyOrLine()
+      }
+    }
+  }
   render() {
-    const { material, typeSummary, parasiticAssembliseTypeSummary } = this.state
+    const { material, typeSummary, parasiticAssembliseTypeSummary, openMap } = this.state
     const { assemblies, lines, parasiticAssemblies } = material
     return (
       <div className={styles['flow-content']} ref='flow_content'>
         <div className={styles['left_side']}>
+          <div>
+            {
+              this.props.children
+            }
+          </div>
           {
             Object.keys(typeSummary).map(type => {
               return (
                 <div key = {type}>
-                  <p>{typeSummary[type]}</p>
-                  <div>
+                  <p
+                    className={openMap[type] ? styles.up : styles.down}
+                    onClick={() => this.setState({ openMap: {
+                      ...openMap,
+                      [type]: !openMap[type]
+                    }})}
+                  >
+                    {typeSummary[type]}
+                  </p>
+                  <div className={openMap[type] ? '' : styles.hidden}>
                     {
                       Object.keys(assemblies).map((assembly, i) => {
                         return (
@@ -247,8 +294,16 @@ class Chart extends Component {
             Object.keys(parasiticAssembliseTypeSummary).map(type => {
               return (
                 <div key = {type}>
-                  <p>{parasiticAssembliseTypeSummary[type]}</p>
-                  <div>
+                  <p
+                    className={openMap[type] ? styles.up : styles.down}
+                    onClick={() => this.setState({ openMap: {
+                      ...openMap,
+                      [type]: !openMap[type]
+                    }})}
+                  >
+                    {parasiticAssembliseTypeSummary[type]}
+                  </p>
+                  <div className={openMap[type] ? '' : styles.hidden}>
                     {
                       Object.keys(parasiticAssemblies).map((assembly, i) => {
                         return (
@@ -278,8 +333,18 @@ class Chart extends Component {
             })
           }
           <div>
-            <p>线条（点击选中进行连线）</p>
-            <div>
+            <p
+              className={openMap['line'] ? styles.up : styles.down}
+              onClick={() => {
+                this.setState({
+                  openMap: {
+                    ...openMap,
+                    line: !openMap['line']
+                  }
+                })
+              }}
+            >线条（点击选中进行连线）</p>
+            <div className={openMap['line'] ? '' : styles.hidden}>
               {
                 Object.keys(lines).map((line, i) => {
                   return (
@@ -317,13 +382,8 @@ class Chart extends Component {
             onMouseOut={event => this.moveEnd(event)}
             onMouseMove={(event) => this.move(event)}
             className={this.props.device === 'mobile' ? styles['canvas_mobile'] : styles['canvas_pc']}
+            tabIndex='0'
           />
-        </div>
-        <div className={styles['action-field']}>
-          <button onClick={this.narrowAssembly}>Narrow</button>
-          <button onClick={this.enlargeAssembly}>Enlarge</button>
-          <button onClick={this.deleteAssemblyOrLine}>Delete</button>
-          <button onClick={this.getData}>Save</button>
         </div>
       </div>
     )
@@ -331,6 +391,10 @@ class Chart extends Component {
   componentDidMount() {
     oprateData.dom.content = this.refs['flow_content']
     oprateData.dom.canvas = this.refs['flow_canvas']
+    oprateData.dom.canvas.addEventListener('keydown', (ev) => {
+      this.handelKeyboardAction(ev.keyCode)
+    }, true)
+    oprateData.dom.canvas.focus()
     drawWapper.init()
   }
 }

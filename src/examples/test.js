@@ -25,7 +25,7 @@ function getData (data) {
 const cartData = CircularJSON.parse(localStorage.getItem('cartData'))
 ReactDOM.render(
   <div
-    style={{ width: '1500px', margin: '0 auto', paddingTop: '20px' }}
+    style={{ width: '1200px', margin: '0 auto', paddingTop: '20px' }}
   >
     <ReactFlowChart
       typeSummary = {typeSummary}
@@ -43,7 +43,9 @@ ReactDOM.render(
       chooseAssembly = {chooseAssemblyCallBakTest}
       device = {'mobile'}
       getData = {getData}
-    />
+    >
+      <div>78787878</div>
+    </ReactFlowChart>
   </div>,
   document.getElementById('app')
 )

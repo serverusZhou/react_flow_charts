@@ -20,8 +20,9 @@ function checkIsBelongLine (point, from, to, fromSize, toSize) {
   return Math.abs(transPoint.y) < rule && (transPoint.x < (transTo.x - Math.sqrt(Math.pow(toSize.width, 2) + Math.pow(toSize.height, 2)) / 2) && transPoint.x > Math.sqrt(Math.pow(fromSize.width, 2) + Math.pow(fromSize.height, 2)) / 2)
 }
 
-function checkIsBelongBrokenLine (point, allPoints, fromSize, toSize) {
+function checkIsBelongBrokenLine (point, allPoints, fromSize, toSize, isNearDistence = 20) {
   let isBelong = false
+  let isNear = false
   let belongIndex = 0
   for (let i = 0; i < allPoints.length - 1; i++) {
     let beginSize = { width: 0, height: 0 }
@@ -34,16 +35,25 @@ function checkIsBelongBrokenLine (point, allPoints, fromSize, toSize) {
     }
     if (checkIsBelongLine(point, allPoints[i], allPoints[i + 1], beginSize, endSize)) {
       isBelong = true
-      belongIndex = i
+      if (Math.abs(allPoints[i].x - point.x) < isNearDistence && Math.abs(allPoints[i].y - point.y) < isNearDistence) {
+        isNear = true
+        belongIndex = i
+      } else if (Math.abs(allPoints[i + 1].x - point.x) < isNearDistence && Math.abs(allPoints[i + 1].x - point.x) < isNearDistence) {
+        isNear = true
+        belongIndex = i + 1
+      } else {
+        belongIndex = i
+      }
     }
   }
   return {
     isBelong,
-    belongIndex
+    belongIndex,
+    isNear,
   }
 }
 
-function checkIsNearAPosition (position, points, distence = 10) {
+function checkIsNearAPosition (position, points, distence = 20) {
   let nearIndex = NaN
   points.forEach((point, index) => {
     if (Math.abs(point.x - position.x) < distence && Math.abs(point.y - position.y) < distence) {
@@ -82,6 +92,12 @@ function imageRatio(imgUrl) {
 
 function checkoutIsOutBox(insideBox, outsideBox) {
   return insideBox[0].x > outsideBox[1].x || insideBox[1].x < outsideBox[0].x || insideBox[0].y > outsideBox[1].y || insideBox[1].y < outsideBox[0].y
+}
+
+function checkIsThreePointsLine(point1, point2, point3) {
+  const angle1 = Math.atan((point2.y - point1.y) / (point2.x - point1.x))
+  const angle2 = Math.atan((point3.y - point2.y) / (point3.x - point2.x))
+  return Math.abs(angle2 - angle1) < 0.15
 }
 
 export default function(oprateData) {
@@ -283,6 +299,15 @@ export default function(oprateData) {
         if (belongObj.isBelong) {
           findLine = line
           findNum = belongObj.belongIndex
+          if (belongObj.isNear && findNum !== 0 && findNum !== line.middlePoints.length + 1) {
+            findNum--
+            line.middlePoints[findNum] = position
+          } else if (findNum === 1 && findNum === line.middlePoints.length + 1) {
+            findNum = 0
+            line.middlePoints.splice(findNum, 0, position)
+          } else {
+            line.middlePoints.splice(findNum, 0, position)
+          }
         }
       })
       if (findLine && Object.keys(findLine).length) {
@@ -365,16 +390,51 @@ export default function(oprateData) {
     updateLinePositions: function(position) {
       const { lines, ableAddPointLine } = oprateData
       const line = lines.find(line => !!ableAddPointLine[line.id])
-      const allPoints = [{ ...line.from.position }].concat(line.middlePoints).concat({ ...line.to.position })
-      const checkObj = checkIsBelongBrokenLine(position, allPoints, line.from.assembly.size, line.to.assembly.size)
-      if (!checkObj.isBelong) {
-        const _num = checkIsNearAPosition(ableAddPointLine[line.id].positionAtLine, allPoints)
-        if (isNaN(_num)) {
-          line.middlePoints.splice(ableAddPointLine[line.id].belongIndex, 0, position)
-        } else {
-          line.middlePoints[_num - 1 ] = position
-        }
+      if (line && Object.keys(line).length) {
+        line.middlePoints[ableAddPointLine[line.id].belongIndex] = position
       }
+      // const allPoints = [{ ...line.from.position }].concat(line.middlePoints).concat({ ...line.to.position })
+      // const checkObj = checkIsBelongBrokenLine(position, allPoints, line.from.assembly.size, line.to.assembly.size)
+      // if (!checkObj.isBelong) {
+      //   const _num = checkIsNearAPosition(ableAddPointLine[line.id].positionAtLine, allPoints)
+      //   if (isNaN(_num)) {
+      //     line.middlePoints.splice(ableAddPointLine[line.id].belongIndex, 0, position)
+      //   } else {
+      //     line.middlePoints[_num - 1 ] = position
+      //   }
+      // }
+    },
+    setLinePositions: function(position) {
+      const { lines, ableAddPointLine } = oprateData
+      const line = lines.find(line => !!ableAddPointLine[line.id])
+      const allPoints = [line.from.position].concat(line.middlePoints).concat([line.to.position])
+      if (checkIsThreePointsLine(
+        allPoints[ableAddPointLine[line.id].belongIndex],
+        allPoints[ableAddPointLine[line.id].belongIndex + 1],
+        allPoints[ableAddPointLine[line.id].belongIndex + 2]
+      )) {
+        line.middlePoints.splice(ableAddPointLine[line.id].belongIndex, 1)
+      } else {
+        line.middlePoints[ableAddPointLine[line.id].belongIndex ] = position
+      }
+      // const allPoints = [{ ...line.from.position }].concat(line.middlePoints).concat({ ...line.to.position })
+      // const checkObj = checkIsBelongBrokenLine(position, allPoints, line.from.assembly.size, line.to.assembly.size)
+      // if (!checkObj.isBelong) {
+      //   const _num = checkIsNearAPosition(ableAddPointLine[line.id].positionAtLine, allPoints)
+      //   if (isNaN(_num)) {
+      //     line.middlePoints.splice(ableAddPointLine[line.id].belongIndex, 0, position)
+      //   } else {
+      //     if (checkIsThreePointsLine(
+      //       _num === 1 ? line.from.position : line.middlePoints[_num - 2 ],
+      //       position,
+      //       _num === line.middlePoints.length ? line.to.position : line.middlePoints[_num]
+      //     )) {
+      //       line.middlePoints.splice(_num - 1, 1)
+      //     } else {
+      //       line.middlePoints[_num - 1 ] = position
+      //     }
+      //   }
+      // }
     },
     updateAllPAssemblyPosition: function(assembly) {
       let lessHeight = 0

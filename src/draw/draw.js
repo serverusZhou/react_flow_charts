@@ -108,17 +108,20 @@ export default function(oprateData) {
         drawAImage(ctx, pAssembly.imageUrl, pAssembly.position, pAssembly.size)
       })
       lines.forEach(element => {
-        const allPoints = [{ ...element.from.position }].concat(element.middlePoints).concat({ ...element.to.position })
-        for (let i = 0; i < allPoints.length - 1; i++) {
-          let fromSize = { width: 0, height: 0 }
-          let toSize = { width: 0, height: 0 }
-          if (i === 0) {
-            fromSize = element.from.assembly.size
-          }
-          if (i === allPoints.length - 2) {
-            toSize = element.to.assembly.size
-          }
-          element.draw(ctx, allPoints[i], allPoints[i + 1], fromSize, toSize)
+        // const allPoints = [{ ...element.from.position }].concat(element.middlePoints).concat({ ...element.to.position })
+        // for (let i = 0; i < allPoints.length - 1; i++) {
+        //   let fromSize = { width: 0, height: 0 }
+        //   let toSize = { width: 0, height: 0 }
+        //   if (i === 0) {
+        //     fromSize = element.from.assembly.size
+        //   }
+        //   if (i === allPoints.length - 2) {
+        //     toSize = element.to.assembly.size
+        //   }
+        //   element.draw(ctx, allPoints[i], allPoints[i + 1], fromSize, toSize)
+        // }
+        if (element.draw) {
+          element.draw(ctx, element.from.position, element.to.position, element.from.assembly.size, element.to.assembly.size, element.middlePoints)
         }
         if (choosenLine[element.id]) {
           ctx.beginPath()

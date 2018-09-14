@@ -1,79 +1,27 @@
-import { getLinePositionWithoutAssembly } from './drawUtils'
+import { getLinePositionWithoutAssembly, lineExtendFunc, drawAArrow, drawALineWithWidth } from './drawUtils'
 import sewagePipe from '../../assets/png/sewage-pipe.png'
 import sludgeTube from '../../assets/png/sludge-tube.png'
 import medisionLine from '../../assets/png/add-medision-line.png'
-
-function lineExtendFunc(from, to) {
-  const x = to.x - from.x
-  const y = to.y - from.y
-  const length = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
-  return {
-    getLineExtendPosition: function(verticalDistence, distence) {
-      const verticalDistenceX = verticalDistence * y / length
-      const verticalDistenceY = verticalDistence * x / length
-      const distenceX = distence * x / length
-      const distenceY = distence * y / length
-      return [{
-        x: from.x + verticalDistenceX + distenceX,
-        y: from.y - verticalDistenceY + distenceY
-      }, {
-        x: from.x - verticalDistenceX + distenceX,
-        y: from.y + verticalDistenceY + distenceY
-      }]
-    },
-    getLineMiddlePosition: function(distence) {
-      const distenceX = distence * x / length
-      const distenceY = distence * y / length
-      return {
-        x: from.x + distenceX,
-        y: from.y + distenceY
-      }
-    },
-    getElement: function() {
-      const angle = Math.asin(y / length)
-      return { x, y, length, angle, from, to }
-    }
-  }
-}
 
 export default {
   arrow: {
     imgSrc: sewagePipe,
     lineName: '污水管',
     draw: () => {
-      return function(ctx, fromPosition, toPosition, fromSize, toSize) {
+      return function(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints) {
         let from = {}
         let to = {}
+        const allPoints = [fromPosition].concat(middlePoints).concat([toPosition])
         if (fromSize && toSize) {
-          const linePosition = getLinePositionWithoutAssembly(fromPosition, toPosition, fromSize, toSize)
-          const lineExtend = lineExtendFunc(linePosition.from, linePosition.to)
-          const elements = lineExtend.getElement()
-          const p4D5AND1D40 = lineExtend.getLineExtendPosition(1 / 40 * elements.length, 4 / 5 * elements.length)
-          const p4D5AND1D20 = lineExtend.getLineExtendPosition(1 / 20 * elements.length, 4 / 5 * elements.length)
-          ctx.beginPath()
-          ctx.fillStyle = '#2643ef'
-          ctx.lineWidth = 1
-          ctx.moveTo(linePosition.from.x, linePosition.from.y)
-          ctx.lineTo(p4D5AND1D40[0].x, p4D5AND1D40[0].y)
-          ctx.lineTo(p4D5AND1D20[0].x, p4D5AND1D20[0].y)
-          ctx.lineTo(linePosition.to.x, linePosition.to.y)
-          ctx.lineTo(p4D5AND1D20[1].x, p4D5AND1D20[1].y)
-          ctx.lineTo(p4D5AND1D40[1].x, p4D5AND1D40[1].y)
-          ctx.lineTo(linePosition.from.x, linePosition.from.y)
-          ctx.fill()
-          ctx.closePath()
-          ctx.save()
-          ctx.beginPath()
-          ctx.fillStyle = '#2643ef'
-          ctx.font = "12px '宋体'"
-          ctx.textAlign = 'left'
-          ctx.textBaseline = 'top'
-          const p1D3AND1D10 = lineExtend.getLineExtendPosition(1 / 10 * elements.length, 1 / 3 * elements.length)
-          ctx.translate(p1D3AND1D10[1].x, p1D3AND1D10[1].y)
-          ctx.rotate(elements.x > 0 ? elements.angle : 2 * Math.PI - elements.angle)
-          ctx.fillText('连接线', 0, 0)
-          ctx.closePath()
-          ctx.restore()
+          for (let index = 0; index < allPoints.length - 1; index++) {
+            if (index === (allPoints.length - 2)) {
+              const linePosition = getLinePositionWithoutAssembly(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 0, height: 0 }, toSize)
+              drawAArrow(ctx, linePosition.from, linePosition.to, 20, 10, 20)
+            } else {
+              const linePosition = getLinePositionWithoutAssembly(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 0, height: 0 }, { width: 0, height: 0 })
+              drawALineWithWidth(ctx, linePosition.from, linePosition.to, 10)
+            }
+          }
         } else {
           from = { ...fromPosition }
           to = { ...toPosition }
