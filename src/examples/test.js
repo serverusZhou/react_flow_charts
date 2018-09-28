@@ -25,7 +25,7 @@ function getData (data) {
 const cartData = CircularJSON.parse(localStorage.getItem('cartData'))
 ReactDOM.render(
   <div
-    style={{ width: '1200px', margin: '0 auto', paddingTop: '20px' }}
+    style={{ width: '1100px', margin: '0 auto', paddingTop: '20px' }}
   >
     <ReactFlowChart
       typeSummary = {typeSummary}
@@ -44,7 +44,8 @@ ReactDOM.render(
       device = {'mobile'}
       getData = {getData}
       title = {'污水处理流程'}
-      btns = {<p>12222</p>}
+      disabled = {false}
+      btns = {<div><button>新建流程</button><button>新建流程</button><button>新建流程</button><button>新建流程</button></div>}
     />
   </div>,
   document.getElementById('app')

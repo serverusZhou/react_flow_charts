@@ -8,6 +8,7 @@ import { btns, draftingPoints } from './material/btns'
 const mode = util.keysSwith({ 'assembly': true, 'line': false, 'inLineChoosen': false })
 let flag = false
 let setTime = null
+let alreadyInit = false
 const oprateData = {
   mode, // 用来判断当前处于哪个操作模式中（组件还是连线或者其它）
   ctx: null,
@@ -235,6 +236,31 @@ class Chart extends Component {
       }
     }
   }
+  componentWillReceiveProps(nextProps) {
+    oprateData.material = nextProps.material
+    // const resetMeterail = actionMehodWapper.resetAssembliesAndLines(
+    //   !nextProps.assemblies.length ? nextProps.assemblies : preProps.assemblies,
+    //   !nextProps.lines.length ? nextProps.lines : preProps.lines,
+    //   !nextProps.parasiticAssemblies.length ? nextProps.parasiticAssemblies : preProps.parasiticAssemblies)
+    // oprateData.assemblies = resetMeterail.assemblies
+    // oprateData.lines = resetMeterail.lines
+    // oprateData.parasiticAssemblies = resetMeterail.parasiticAssemblies
+    oprateData.device = nextProps.device
+  }
+  componentDidUpdate() {
+    if (!this.props.disabled && !alreadyInit && this.refs['flow_canvas']) {
+      this.flowInit()
+    }
+  }
+  flowInit = () => {
+    oprateData.dom.content = this.refs['flow_content']
+    oprateData.dom.canvas = this.refs['flow_canvas']
+    oprateData.dom.canvas.addEventListener('keydown', (ev) => {
+      this.handelKeyboardAction(ev.keyCode)
+    }, true)
+    oprateData.dom.canvas.focus()
+    drawWapper.init()
+  }
   render() {
     const { material, typeSummary, parasiticAssembliseTypeSummary, openMap } = this.state
     const { assemblies, lines, parasiticAssemblies } = material
@@ -380,28 +406,32 @@ class Chart extends Component {
             </div>
           }
           <p className={styles.charts_title}>{this.props.title}</p>
-          <canvas
-            ref='flow_canvas'
-            onClick={(ev) => this.chooseAssembly(ev, this.props.chooseAssembly)}
-            onMouseDown={(event) => this.moveStart(event)}
-            onMouseUp={event => this.moveEnd(event)}
-            onMouseOut={event => this.moveEnd(event)}
-            onMouseMove={(event) => this.move(event)}
-            className={this.props.device === 'mobile' ? styles['canvas_mobile'] : styles['canvas_pc']}
-            tabIndex='0'
-          />
+          {
+            !this.props.disabled ? <div className={this.props.device === 'mobile' ? styles['canvas_mobile'] : styles['canvas_pc']}>
+              <canvas
+                ref='flow_canvas'
+                onClick={(ev) => this.chooseAssembly(ev, this.props.chooseAssembly)}
+                onMouseDown={(event) => this.moveStart(event)}
+                onMouseUp={event => this.moveEnd(event)}
+                onMouseOut={event => this.moveEnd(event)}
+                onMouseMove={(event) => this.move(event)}
+                style={{ width: '100%', height: '100%' }}
+                tabIndex='0'
+              />
+            </div> : <div className={this.props.device === 'mobile' ? styles['canvas_mobile'] : styles['canvas_pc']}>
+              <div style={{ width: '100%', height: '100%' }} className={styles.forbid} />
+            </div>
+          }
         </div>
       </div>
     )
   }
   componentDidMount() {
-    oprateData.dom.content = this.refs['flow_content']
-    oprateData.dom.canvas = this.refs['flow_canvas']
-    oprateData.dom.canvas.addEventListener('keydown', (ev) => {
-      this.handelKeyboardAction(ev.keyCode)
-    }, true)
-    oprateData.dom.canvas.focus()
-    drawWapper.init()
+    if (!this.refs['flow_canvas']) {
+      return
+    }
+    this.flowInit()
+    alreadyInit = true
   }
 }
 export default Chart
