@@ -5,31 +5,38 @@
     display: flex;
     position: relative;
 }
-.left_side{
-    width: 380px;
-    border: 1px solid #d9dadc;
-    border-right: none;
-    border-radius: 3px;
-    padding: 0 10px;
-    &>div{
-        width: 94%;
-        &>p{
-            font-size: 12px;
-            height: 30px;
-            line-height: 30px;
-            padding-left: 10px;
-            color: #666;
-            background-color: #F8F5F5;
-            margin-bottom: 1px;
-            margin-top: 0;
-        }
+@media screen {
+    .left_side{
+        width: 300px;
+        border: 1px solid #d9dadc;
+        border-right: none;
+        border-radius: 3px;
+        padding: 0 10px;
         &>div{
-            display: flex;
-            flex-wrap: wrap;
-            border: none;
-            max-height: 220px;
-            overflow-y: scroll;
+            width: 94%;
+            &>p{
+                font-size: 12px;
+                height: 30px;
+                line-height: 30px;
+                padding-left: 10px;
+                color: #666;
+                background-color: #F8F5F5;
+                margin-bottom: 1px;
+                margin-top: 0;
+            }
+            &>div{
+                display: flex;
+                flex-wrap: wrap;
+                border: none;
+                max-height: 220px;
+                overflow-y: scroll;
+            }
         }
+    }
+    @media (min-width:1555px) {
+        .left_side {
+            width:380px;
+          }
     }
 }
 .assembly-img{
@@ -171,54 +178,77 @@
         max-height: 100px
     }
 }
-
-.up {
-    background: url(../assets/icon//arrow_up.png) no-repeat;
-    background-size: 10px 6px;
-    cursor: pointer;
-    background-position: 300px center;
-}
-.down {
-    background: url(../assets/icon//arrow_down.png) no-repeat;
-    background-size: 10px 6px;
-    cursor: pointer;
-    background-position: 300px center;
+@media screen {
+    .up {
+        background: url(../assets/icon//arrow_up.png) no-repeat;
+        background-size: 10px 6px;
+        cursor: pointer;
+        background-position: 240px center;
+    }
+    .down {
+        background: url(../assets/icon//arrow_down.png) no-repeat;
+        background-size: 10px 6px;
+        cursor: pointer;
+        background-position: 240px center;
+    }
+    @media (min-width:1555px) {
+        .up {
+            background-position: 300px center;
+          }
+          .down {
+            background-position: 300px center;
+          }
+    }
 }
 
 .hidden {
     height: 0;
     overflow: hidden;
 }
-.extra_btn {
-    height: 100%;
-    width: 205px;
-    &>div{
-        padding-right: 7px;
-        padding-top: 50px;
-        display: flex;
-        align-items: flex-end;
-        flex-direction: column;
-        justify-content: flex-start;
-        &>button{
-            margin-top: 7px;
+@media screen {
+    .extra_btn {
+        height: 100%;
+        width: 145px;
+        &>div{
+            padding-right: 7px;
+            padding-top: 50px;
+            display: flex;
+            align-items: flex-end;
+            flex-direction: column;
+            justify-content: flex-start;
+            &>button{
+                margin-top: 7px;
+            }
         }
     }
+    @media (min-width:1555px) {
+        .extra_btn {
+            width:205px;
+          }
+    }
 }
-.charts_title {
-    position: absolute;
-    left: 400px;
-    top: 60px;
-    -webkit-writing-mode: vertical-lr;      
-    writing-mode: vertical-lr;
-    letter-spacing: 7px;
-    font-size: 10px;
-    width:16px;
-    pointer-events:none;
-    display:flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    color: green;
+@media screen {
+    .charts_title {
+        position: absolute;
+        left: 330px;
+        top: 60px;
+        -webkit-writing-mode: vertical-lr;      
+        writing-mode: vertical-lr;
+        letter-spacing: 7px;
+        font-size: 10px;
+        width:16px;
+        pointer-events:none;
+        display:flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: green;
+    }
+    @media (min-width:1555px) {
+        .charts_title {
+            left: 440px;
+          }
+    }
 }
 
 .forbid {

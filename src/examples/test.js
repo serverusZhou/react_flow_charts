@@ -7,8 +7,8 @@ import lines from '../material/lines'
 import { typeSummary, parasiticAssembliseTypeSummary } from './dict'
 import CircularJSON from 'circular-json'
 
-function chooseAssemblyCallBakTest(assembly, updateActuralData) {
-  // console.log(assembly)
+function chooseAssemblyCallBakTest(assembly, updateActuralData, handleJumpPoint) {
+  console.log(assembly)
   updateActuralData({
     tip: 'shibai'
   })
@@ -16,6 +16,7 @@ function chooseAssemblyCallBakTest(assembly, updateActuralData) {
     updateActuralData({
       tip: '成功啦'
     })
+    handleJumpPoint('in')
   }, 3000)
 }
 

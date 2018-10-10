@@ -3,8 +3,8 @@ import reactionPool from '../../assets/png/reaction_pool.png'
 
 const typeBelong = 'pool'
 const defaultSize = {
-  width: 60,
-  height: 100
+  width: 60.5,
+  height: 135.5
 }
 
 const mostInsizeSpacePercent = [0, 0.2, 0.06, 0.2]

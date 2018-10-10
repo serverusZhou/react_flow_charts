@@ -4,6 +4,7 @@ import draw from './draw/draw'
 import util from './util'
 import actionMethod from './actionMehod'
 import { btns, draftingPoints } from './material/btns'
+import { others } from './material/other'
 
 const mode = util.keysSwith({ 'assembly': true, 'line': false, 'inLineChoosen': false })
 let flag = false
@@ -36,6 +37,7 @@ const oprateData = {
     assemblies: {},
     parasiticAssemblies: {},
     lines: {},
+    others
   }
 }
 
@@ -46,6 +48,7 @@ class Chart extends Component {
   constructor (props) {
     super(props)
     oprateData.material = props.material
+    oprateData.material.others = others
     const resetMeterail = actionMehodWapper.resetAssembliesAndLines(props.assemblies, props.lines, props.parasiticAssemblies)
     oprateData.assemblies = resetMeterail.assemblies
     oprateData.lines = resetMeterail.lines
@@ -54,7 +57,8 @@ class Chart extends Component {
     const openMap = {
       ...Object.keys(this.props.typeSummary).reduce((ev, type) => { ev[type] = false; return ev }, {}),
       ...Object.keys(this.props.parasiticAssembliseTypeSummary).reduce((ev, type) => { ev[type] = false; return ev }, {}),
-      line: false
+      line: false,
+      other: false
     }
     this.state = { ...props, openMap }
   }
@@ -106,6 +110,13 @@ class Chart extends Component {
       if (callBack && assembly) {
         callBack(Object.assign({}, assembly), function(acturalData) {
           actionMehodWapper.updateChoosenAssemblyActuralData(acturalData)
+        }, function(inOrOut) {
+          if (inOrOut === 'in') {
+            actionMehodWapper.addPAssmbly('jumppingIntPoint', { x: assembly.position.x + 10, y: assembly.position.y + 10 })
+          }
+          if (inOrOut === 'out') {
+            actionMehodWapper.addPAssmbly('jumppingOutPoint', { x: assembly.position.x + 10, y: assembly.position.y + 10 })
+          }
         })
       }
     }
@@ -263,7 +274,7 @@ class Chart extends Component {
   }
   render() {
     const { material, typeSummary, parasiticAssembliseTypeSummary, openMap } = this.state
-    const { assemblies, lines, parasiticAssemblies } = material
+    const { assemblies, lines, parasiticAssemblies, others } = material
     return (
       <div className={styles['flow-content']} ref='flow_content'>
         <div className={styles['left_side']}>
@@ -387,6 +398,42 @@ class Chart extends Component {
                       <div className={lines[line].showTip ? (`${styles['hover_div']} ${styles.show}`) : `${styles['hover_div']} ${styles.hide}`}>
                         <p>{lines[line].lineName}</p>
                         <img src={lines[line].imgSrc} />
+                      </div>
+                    </div>
+                  )
+                })
+              }
+            </div>
+          </div>
+          <div>
+            <p
+              className={openMap['other'] ? styles.up : styles.down}
+              onClick={() => {
+                this.setState({
+                  openMap: {
+                    ...openMap,
+                    other: !openMap['other']
+                  }
+                })
+              }}
+            >其它</p>
+            <div className={openMap['other'] ? '' : styles.hidden}>
+              {
+                Object.keys(others).map((item, i) => {
+                  return (
+                    <div key={i} className={styles['small_assembly']}>
+                      <img
+                        className={styles['assembly-img']}
+                        src={others[item].imgSrc}
+                        id={item} draggable={true}
+                        onDragStart={(ev) => this.dragAssembly(ev)}
+                        onMouseEnter={() => { others[item].showTip = true; this.setState({ others }) }}
+                        onMouseLeave={() => { others[item].showTip = false; this.setState({ others }) }}
+                        style={{ width: '70%', height: '70%' }}
+                      />
+                      <div className={others[item].showTip ? (`${styles['hover_div']} ${styles.show}`) : `${styles['hover_div']} ${styles.hide}`}>
+                        <p>{others[item].lineName}</p>
+                        <img src={others[item].imgSrc} />
                       </div>
                     </div>
                   )

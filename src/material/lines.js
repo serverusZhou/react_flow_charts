@@ -15,10 +15,10 @@ export default {
         if (fromSize && toSize) {
           for (let index = 0; index < allPoints.length - 1; index++) {
             if (index === (allPoints.length - 2)) {
-              const linePosition = getLinePositionWithoutAssembly(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 0, height: 0 }, toSize)
+              const linePosition = getLinePositionWithoutAssembly(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
               drawAArrow(ctx, linePosition.from, linePosition.to, 20, 10, 20)
             } else {
-              const linePosition = getLinePositionWithoutAssembly(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 0, height: 0 }, { width: 0, height: 0 })
+              const linePosition = getLinePositionWithoutAssembly(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
               drawALineWithWidth(ctx, linePosition.from, linePosition.to, 10)
             }
           }

@@ -13,21 +13,206 @@ function drawASvgImage(ctx, imgUrl, position, size) {
   ctx.drawImage(image, 0, 0, 512, 512, position.x, position.y, size.width, size.height)
   ctx.closePath()
 }
-function getLinePositionWithoutAssembly(from, to, fromSize, toSize) {
-  let x = to.x - from.x
-  let y = to.y - from.y
-  let length = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
-  let fromR = Math.sqrt(Math.pow(fromSize.width, 2) + Math.pow(fromSize.height, 2)) / 2
-  let toR = Math.sqrt(Math.pow(toSize.width, 2) + Math.pow(toSize.height, 2)) / 2
-  return {
-    from: {
-      x: from.x + fromR * x / length,
-      y: from.y + fromR * y / length,
-    },
-    to: {
-      x: to.x - toR * x / length,
-      y: to.y - toR * y / length,
+// function getLinePositionWithoutAssembly(from, to, fromSize, toSize) {
+//   let x = to.x - from.x
+//   let y = to.y - from.y
+//   let fJudge = 0
+//   let tJudge = 0
+//   let fSide = 'LR'
+//   let tSide = 'LR'
+//   if (x !== 0) {
+//     if (Math.abs(y / x) > fromSize.height / fromSize.width) {
+//       fSide = 'TB'
+//       fJudge = (y > 0) ? 1 : -1
+//     } else {
+//       fJudge = (x > 0) ? 1 : -1
+//     }
+//     if (Math.abs(y / x) > toSize.height / toSize.width) {
+//       tJudge = (y > 0) ? 1 : -1
+//       tSide = 'TB'
+//     } else {
+//       tJudge = (x > 0) ? 1 : -1
+//     }
+//   }
+//   if (fSide === 'LR' && tSide === 'LR') {
+//     return {
+//       from: {
+//         x: from.x + ((fromSize.width / 2) * fJudge),
+//         y: from.y + (fromSize.width / 2 * y / x) * tJudge,
+//       },
+//       to: {
+//         x: to.x - ((toSize.width / 2) * fJudge),
+//         y: to.y - (toSize.width / 2 * y / x) * tJudge,
+//       }
+//     }
+//   }
+//   if (fSide === 'LR' && tSide === 'TB') {
+//     return {
+//       from: {
+//         x: from.x + ((fromSize.width / 2) * fJudge),
+//         y: from.y + (fromSize.width / 2 * y / x) * tJudge,
+//       },
+//       to: {
+//         x: to.x - ((toSize.height / 2 * x / y) * fJudge),
+//         y: to.y - (toSize.height / 2) * tJudge,
+//       }
+//     }
+//   }
+//   if (fSide === 'TB' && tSide === 'LR') {
+//     return {
+//       from: {
+//         x: from.x + ((fromSize.height / 2 * x / y) * fJudge),
+//         y: from.y + (fromSize.height / 2) * tJudge,
+//       },
+//       to: {
+//         x: to.x - ((toSize.width / 2) * fJudge),
+//         y: to.y - (toSize.width / 2 * y / x) * tJudge,
+//       }
+//     }
+//   }
+//   if (fSide === 'TB' && fSide === 'TB') {
+//     return {
+//       from: {
+//         x: from.x + ((fromSize.height / 2 * x / y) * fJudge),
+//         y: from.y + (fromSize.height / 2) * tJudge,
+//       },
+//       to: {
+//         x: to.x - ((toSize.height / 2 * x / y) * fJudge),
+//         y: to.y - (toSize.height / 2) * tJudge,
+//       }
+//     }
+//   }
+// }
+function getLinePositionWithoutAssembly(fromPosition, toPosition, fromSize, toSize) {
+  const from = {
+    x: fromPosition.x - fromSize.width / 2,
+    y: fromPosition.y - fromSize.height / 2,
+  }
+  const to = {
+    x: toPosition.x - toSize.width / 2,
+    y: toPosition.y - toSize.height / 2,
+  }
+  const fCCenter = {
+    x: from.x + fromSize.width / 2,
+    y: from.y + fromSize.height / 2
+  }
+  const tCCenter = {
+    x: to.x + toSize.width / 2,
+    y: to.y + toSize.height / 2
+  }
+  const returnFrom = { x: 0, y: 0 }
+  // 垂直方向
+  if (fCCenter.x === tCCenter.x) {
+    returnFrom.x = from.x + fromSize.width / 2
+    returnFrom.y = from.y + fromSize.heiht * (tCCenter.y > fCCenter.y ? -1 : 1)
+  }
+  // 右上方
+  if (tCCenter.x > fCCenter.x && tCCenter.y < fCCenter.y) {
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) > fromSize.height / fromSize.width) {
+      returnFrom.x = from.x + fromSize.width / 2 + fromSize.height / 2 * Math.abs((tCCenter.x - fCCenter.x) / (tCCenter.y - fCCenter.y))
+      returnFrom.y = from.y
     }
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) <= fromSize.height / fromSize.width) {
+      returnFrom.x = from.x + fromSize.width
+      returnFrom.y = from.y + fromSize.height / 2 - fromSize.width / 2 * Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x))
+    }
+  }
+  // 右下方
+  if (tCCenter.x > fCCenter.x && tCCenter.y > fCCenter.y) {
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) > fromSize.height / fromSize.width) {
+      returnFrom.x = from.x + fromSize.width / 2 + fromSize.height / 2 * Math.abs((tCCenter.x - fCCenter.x) / (tCCenter.y - fCCenter.y))
+      returnFrom.y = from.y + fromSize.height
+    }
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) <= fromSize.height / fromSize.width) {
+      returnFrom.x = from.x + fromSize.width
+      returnFrom.y = from.y + fromSize.height / 2 + fromSize.width / 2 * Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x))
+    }
+  }
+  // 水平方向
+  if (fCCenter.y === tCCenter.y) {
+    returnFrom.x = from.x + fromSize.width * (tCCenter.x > fCCenter.x ? 1 : -1)
+    returnFrom.y = from.y + fromSize.height / 2
+  }
+  // 左上方
+  if (tCCenter.x < fCCenter.x && tCCenter.y < fCCenter.y) {
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) > fromSize.height / fromSize.width) {
+      returnFrom.x = from.x + fromSize.width / 2 - fromSize.height / 2 * Math.abs((tCCenter.x - fCCenter.x) / (tCCenter.y - fCCenter.y))
+      returnFrom.y = from.y
+    }
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) <= fromSize.height / fromSize.width) {
+      returnFrom.x = from.x
+      returnFrom.y = from.y + fromSize.height / 2 - fromSize.width / 2 * Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x))
+    }
+  }
+  // 左下方
+  if (tCCenter.x < fCCenter.x && tCCenter.y > fCCenter.y) {
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) > fromSize.height / fromSize.width) {
+      returnFrom.x = from.x + fromSize.width / 2 - fromSize.height / 2 * Math.abs((tCCenter.x - fCCenter.x) / (tCCenter.y - fCCenter.y))
+      returnFrom.y = from.y + fromSize.height
+    }
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) <= fromSize.height / fromSize.width) {
+      returnFrom.x = from.x
+      returnFrom.y = from.y + fromSize.height / 2 + fromSize.width / 2 * Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x))
+    }
+  }
+  const returnTo = { x: 0, y: 0 }
+  // 垂直方向
+  if (tCCenter.x === fCCenter.x) {
+    returnTo.x = to.x + toSize.width / 2
+    returnTo.y = to.y + toSize.heiht * (fCCenter.y > tCCenter.y ? 1 : -1)
+  }
+  // 右上方
+  if (fCCenter.x > tCCenter.x && fCCenter.y < tCCenter.y) {
+    if (Math.abs((fCCenter.y - tCCenter.y) / (fCCenter.x - tCCenter.x)) > toSize.height / toSize.width) {
+      returnTo.x = to.x + toSize.width / 2 + toSize.height / 2 * Math.abs((fCCenter.x - tCCenter.x) / (fCCenter.y - tCCenter.y))
+      returnTo.y = to.y
+    }
+    if (Math.abs((fCCenter.y - tCCenter.y) / (fCCenter.x - tCCenter.x)) <= toSize.height / toSize.width) {
+      returnTo.x = to.x + toSize.width
+      returnTo.y = to.y + toSize.height / 2 - toSize.width / 2 * Math.abs((fCCenter.y - tCCenter.y) / (fCCenter.x - tCCenter.x))
+    }
+  }
+  // 右下方
+  if (fCCenter.x > tCCenter.x && fCCenter.y > tCCenter.y) {
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) > toSize.height / toSize.width) {
+      returnTo.x = to.x + toSize.width / 2 + toSize.height / 2 * Math.abs((tCCenter.x - fCCenter.x) / (tCCenter.y - fCCenter.y))
+      returnTo.y = to.y + toSize.height
+    }
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) <= toSize.height / toSize.width) {
+      returnTo.x = to.x + toSize.width
+      returnTo.y = to.y + toSize.height / 2 + toSize.width / 2 * Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x))
+    }
+  }
+  // 水平方向
+  if (fCCenter.y === tCCenter.y) {
+    returnTo.x = to.x + toSize.width * (fCCenter.x > tCCenter.x ? 1 : -1)
+    returnTo.y = to.y + toSize.height / 2
+  }
+  // 左上方
+  if (fCCenter.x < tCCenter.x && fCCenter.y < tCCenter.y) {
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) > toSize.height / toSize.width) {
+      returnTo.x = to.x + toSize.width / 2 - toSize.height / 2 * Math.abs((tCCenter.x - fCCenter.x) / (tCCenter.y - fCCenter.y))
+      returnTo.y = to.y
+    }
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) <= toSize.height / toSize.width) {
+      returnTo.x = to.x
+      returnTo.y = to.y + toSize.height / 2 - toSize.width / 2 * Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x))
+    }
+  }
+  // 左下方
+  if (fCCenter.x < tCCenter.x && fCCenter.y > tCCenter.y) {
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) > toSize.height / toSize.width) {
+      returnTo.x = to.x + toSize.width / 2 - toSize.height / 2 * Math.abs((tCCenter.x - fCCenter.x) / (tCCenter.y - fCCenter.y))
+      returnTo.y = to.y + toSize.height
+    }
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) <= toSize.height / toSize.width) {
+      returnTo.x = to.x
+      returnTo.y = to.y + toSize.height / 2 + toSize.width / 2 * Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x))
+    }
+  }
+  return {
+    from: returnFrom,
+    to: returnTo
   }
 }
 function drawAArrow(ctx, fromPoint, endPoint, arrowWidth, lineWidth, arrowLength) {

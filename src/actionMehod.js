@@ -113,6 +113,10 @@ export default function(oprateData) {
     },
     addAssmbly: function(assembly, position) {
       const { assemblies, material, device } = oprateData
+      if (assembly === 'wapperAssembly') {
+        this.addWAssembly(assembly, position)
+        return
+      }
       const size = (function() {
         let width = (material.assemblies[assembly].size && material.assemblies[assembly].size.width) || 100
         let height = (material.assemblies[assembly].size && material.assemblies[assembly].size.height) || 100
@@ -121,7 +125,7 @@ export default function(oprateData) {
           height: (device === 'mobile') ? height * 2 : height
         }
       })()
-      assemblies.push({
+      const addAssembly = {
         id: UUID(),
         name: material.assemblies[assembly].assemblyName,
         assemblyName: assembly,
@@ -140,11 +144,73 @@ export default function(oprateData) {
           to: []
         },
         belongs: [],
+        wapper: null,
+        children: [],
         draw: material.assemblies[assembly].draw ? material.assemblies[assembly].draw() : function(ctx, position, size, imgUrl) {
           drawAImage(ctx, imgUrl, position, size)
         },
         acturalData: {}
+      }
+      assemblies.push(addAssembly)
+      const wapperAssembly = assemblies.find(element => checkIsBelongPosition(position, {
+        x: element.position.x,
+        endX: element.position.x + element.size.width,
+        y: element.position.y,
+        endY: element.position.y + element.size.height,
+      }) && element.assemblyName === 'wapperAssembly')
+      if (wapperAssembly && Object.keys(wapperAssembly) && wapperAssembly.assemblyName === 'wapperAssembly') {
+        addAssembly.wapper = wapperAssembly
+        wapperAssembly.children.push(addAssembly)
+        this.resetWAssemblyLayout(wapperAssembly)
+      }
+    },
+    resetWAssemblyLayout: function(wapperAssembly) {
+      const childNum = wapperAssembly.children.length
+      const { position, size } = wapperAssembly
+      wapperAssembly.children.forEach((child, i) => {
+        child.size.height = size.height - 50
+        child.size.width = (size.width - 10 - childNum * 4) / childNum
+        child.position.x = position.x + 5 + i * child.size.width + childNum * 2 * (i + 1)
+        child.position.y = position.y + 5
       })
+    },
+    addWAssembly: function(assembly, position) {
+      const { assemblies, material, device } = oprateData
+      const size = (function() {
+        let width = (material.others[assembly].size && material.others[assembly].size.width) || 300
+        let height = (material.others[assembly].size && material.others[assembly].size.height) || 300
+        return {
+          width: (device === 'mobile') ? width * 2 : width,
+          height: (device === 'mobile') ? height * 2 : height
+        }
+      })()
+      const addAssembly = {
+        id: UUID(),
+        name: material.others[assembly].assemblyName,
+        assemblyName: assembly,
+        imageUrl: material.others[assembly].imgSrc,
+        position: {
+          x: position.x - size.width / 2,
+          y: position.y - size.height / 2,
+        },
+        size: {
+          width: size.width,
+          height: size.height
+        },
+        insizeSpacePercent: material.others[assembly].insizeSpacePercent,
+        lines: {
+          from: [],
+          to: []
+        },
+        belongs: [],
+        wapper: null,
+        children: [],
+        draw: material.others[assembly].draw ? material.others[assembly].draw() : function(ctx, position, size, imgUrl) {
+          drawAImage(ctx, imgUrl, position, size)
+        },
+        acturalData: {}
+      }
+      assemblies.push(addAssembly)
     },
     addPAssmbly: function(parasiticAssembly, position) {
       const { assemblies, material, parasiticAssemblies } = oprateData
@@ -153,8 +219,12 @@ export default function(oprateData) {
         endX: element.position.x + element.size.width,
         y: element.position.y,
         endY: element.position.y + element.size.height,
-      }))
+      }) && element.assemblyName !== 'wapperAssembly')
       if (belongToAssembly && Object.keys(belongToAssembly)) {
+        if (material.parasiticAssemblies[parasiticAssembly].isPAndA) {
+          this.toTurnAddPassmbly(belongToAssembly, material.parasiticAssemblies[parasiticAssembly], parasiticAssembly)
+          return
+        }
         const ratio = imageRatio(material.parasiticAssemblies[parasiticAssembly].imageUrl)
         const remainPosition = belongToAssembly.belongs.reduce((ev, belong) => {
           if (belong.isOccupyInternalSpace) {
@@ -184,6 +254,79 @@ export default function(oprateData) {
         belongToAssembly.belongs.push(addParasiticAssembly)
       }
     },
+    toTurnAddPassmbly: function(belongToAssembly, belong, belongName) {
+      const { assemblies, lines, material } = oprateData
+      const turnedAssembly = {
+        id: UUID(),
+        name: belong.assemblyName,
+        assemblyName: belongName,
+        imageUrl: belong.imageUrl,
+        position: {
+          x: belong.offsetPosition.x > 0
+            ? (belongToAssembly.position.x - belong.offsetPosition.x - Math.floor(Math.random() * 60))
+            : belongToAssembly.position.x + belongToAssembly.size.width - belong.offsetPosition.x - Math.floor(Math.random() * 60),
+          y: belong.offsetPosition.x > 0
+            ? belongToAssembly.position.y - belong.offsetPosition.y - Math.floor(Math.random() * 60)
+            : belongToAssembly.position.y + belongToAssembly.size.height - belong.offsetPosition.y - Math.floor(Math.random() * 60),
+        },
+        size: {
+          width: 60,
+          height: 60
+        },
+        lines: {
+          from: [],
+          to: []
+        },
+        belongs: [],
+        draw: belong.draw(),
+        acturalData: {}
+      }
+      console.log('belong.isTobelong.isTobelong.isTo', belong.isTo)
+      assemblies.push(turnedAssembly)
+      const lineId = UUID()
+      const _line = {
+        id: lineId,
+        type: Object.keys(material.lines)[0],
+        from: {
+          assembly: belong.isTo ? belongToAssembly : turnedAssembly,
+          position: {
+            x: belong.isTo ? (belongToAssembly.position.x + belongToAssembly.size.width / 2) : (turnedAssembly.position.x + turnedAssembly.size.width / 2),
+            y: belong.isTo ? (belongToAssembly.position.y + belongToAssembly.size.height / 2) : (turnedAssembly.position.y + turnedAssembly.size.height / 2),
+          }
+        },
+        to: {
+          assembly: belong.isTo ? turnedAssembly : belongToAssembly,
+          position: {
+            x: belong.isTo ? (turnedAssembly.position.x + turnedAssembly.size.width / 2) : (belongToAssembly.position.x + belongToAssembly.size.width / 2),
+            y: belong.isTo ? (turnedAssembly.position.y + turnedAssembly.size.height / 2) : (belongToAssembly.position.y + belongToAssembly.size.height / 2),
+          }
+        },
+        middlePoints: [{
+          x: belong.isTo
+            ? (turnedAssembly.position.x + turnedAssembly.size.width / 2 - 2)
+            : (belongToAssembly.position.x + belongToAssembly.size.width / 2 - 2),
+          y: belong.isTo
+            ? belongToAssembly.position.y + belongToAssembly.size.height / 2
+            : turnedAssembly.position.y + turnedAssembly.size.height / 2,
+        }],
+        draw: material.lines[Object.keys(material.lines)[0]].draw()
+      }
+      belong.isTo ? belongToAssembly.lines.from.push({
+        id: _line.id,
+        line: _line
+      }) : turnedAssembly.lines.from.push({
+        id: _line.id,
+        line: _line
+      })
+      belong.isTo ? turnedAssembly.lines.to.push({
+        id: _line.id,
+        line: _line
+      }) : belongToAssembly.lines.to.push({
+        id: _line.id,
+        line: _line
+      })
+      lines.push(_line)
+    },
     chooseAssmbly: function(position) {
       const { assemblies, choosenAssembly, actionBtns, ableMoveAssembly } = oprateData
       util.clearObj(choosenAssembly)
@@ -195,7 +338,21 @@ export default function(oprateData) {
         endY: element.position.y + element.size.height,
       }))
       if (assembly) {
-        choosenAssembly[assembly.id] = true
+        if (assembly.assemblyName === 'wapperAssembly') {
+          let childAss = assembly.children.find(element => checkIsBelongPosition(position, {
+            x: element.position.x,
+            endX: element.position.x + element.size.width,
+            y: element.position.y,
+            endY: element.position.y + element.size.height,
+          }))
+          if (childAss) {
+            choosenAssembly[childAss.id] = true
+          } else {
+            choosenAssembly[assembly.id] = true
+          }
+        } else {
+          choosenAssembly[assembly.id] = true
+        }
         actionBtns.enable = true
         util.clearObj(ableMoveAssembly)
         this.updateActionBtnPosition()
@@ -321,7 +478,7 @@ export default function(oprateData) {
     updateAssemblyPosition: function(position) {
       const { assemblies, ableMoveAssembly } = oprateData
       const moveAssembly = assemblies.find(element => ableMoveAssembly[element.id])
-      if (!moveAssembly) { return }
+      if (!moveAssembly || moveAssembly.wapper) { return }
       moveAssembly.position = {
         x: position.x - moveAssembly.size.width / 2,
         y: position.y - moveAssembly.size.height / 2
@@ -335,6 +492,23 @@ export default function(oprateData) {
         line.line.to.position.y = position.y
       })
       this.updateAllPAssemblyPosition(moveAssembly)
+
+      const wAssembly = assemblies.find(element => (checkIsBelongPosition(position, {
+        x: element.position.x,
+        endX: element.position.x + element.size.width,
+        y: element.position.y,
+        endY: element.position.y + element.size.height,
+      }) && element.assemblyName === 'wapperAssembly'))
+      if (wAssembly && Object.keys(wAssembly) && wAssembly.assemblyName === 'wapperAssembly' && moveAssembly.assemblyName !== 'wapperAssembly') {
+        moveAssembly.wapper = wAssembly
+        if (!wAssembly.children.find(child => child.id === moveAssembly.id)) {
+          wAssembly.children.push(moveAssembly)
+        }
+        this.resetWAssemblyLayout(wAssembly)
+      }
+      if (moveAssembly.assemblyName === 'wapperAssembly') {
+        this.resetWAssemblyLayout(moveAssembly)
+      }
     },
 
     updatePAssemblyPosition: function(position) {
@@ -386,6 +560,9 @@ export default function(oprateData) {
       }
       this.updateAllPAssemblyPosition(aTAssembly)
       this.updateActionBtnPosition()
+      if (aTAssembly.assemblyName === 'wapperAssembly') {
+        this.resetWAssemblyLayout(aTAssembly)
+      }
     },
     updateLinePositions: function(position) {
       const { lines, ableAddPointLine } = oprateData
@@ -539,7 +716,9 @@ export default function(oprateData) {
     addLine: function(assembly) {
       const { temLine, lines } = oprateData
       const alreadyHasLine = lines.some(line => {
-        return (line.from.assembly.id === temLine.from.assembly.id && line.to.assembly.id === assembly.id) || (line.to.assembly.id === temLine.from.assembly.id && line.from.assembly.id === assembly.id)
+        return (line.from.assembly.id === temLine.from.assembly.id &&
+          line.to.assembly.id === assembly.id) ||
+          (line.to.assembly.id === temLine.from.assembly.id && line.from.assembly.id === assembly.id)
       })
       if (alreadyHasLine) {
         console.log('已经存在了---------------')
@@ -602,6 +781,19 @@ export default function(oprateData) {
             oprateData.parasiticAssemblies = parasiticAssemblies.filter(parasiticAssembly => {
               return !element.belongs.some(belong => belong.id === parasiticAssembly.id)
             })
+            if (element.wapper) {
+              element.wapper.children.forEach((child, i) => {
+                if (child.id === element.id) {
+                  element.wapper.children.splice(i, 1)
+                  this.resetWAssemblyLayout(element.wapper)
+                }
+              })
+            }
+            if (element.children && element.children.length) {
+              element.children.forEach(child => {
+                child.wapper = null
+              })
+            }
             assemblies.splice(index, 1)
           }
         })

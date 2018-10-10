@@ -101,7 +101,7 @@ export default function(oprateData) {
       })
       parasiticAssemblies.filter(pA => !pA.isOccupyInternalSpace).forEach((pAssembly, index) => {
         if (pAssembly.draw) {
-          pAssembly.draw(ctx, pAssembly.imageUrl, pAssembly.ratio, pAssembly.belongsTo.position, pAssembly.belongsTo.size)
+          pAssembly.draw(ctx, pAssembly.imageUrl, pAssembly.ratio, pAssembly.belongsTo.position, pAssembly.belongsTo.size, pAssembly)
         }
       })
       parasiticAssemblies.filter(pA => pA.isOccupyInternalSpace).forEach((pAssembly, index) => {
