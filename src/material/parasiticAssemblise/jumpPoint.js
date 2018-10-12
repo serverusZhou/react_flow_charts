@@ -2,8 +2,8 @@ const typeBelong = 'jumppingPoint'
 const assemblyType = 'PA'
 
 const defaultSize = {
-  width: 75,
-  height: 75
+  width: 200,
+  height: 45
 }
 
 export default {
@@ -19,15 +19,10 @@ export default {
       y: 80
     },
     draw: () => {
-      return function(ctx, position, size, imageUrl) {
+      return function(ctx, position, size, imageUrl, displayName) {
         ctx.beginPath()
         ctx.strokeStyle = 'rgba(0,0,0,1)'
-        ctx.lineWidth = 1
-        ctx.moveTo(position.x, position.y)
-        ctx.lineTo(position.x + size.width, position.y)
-        ctx.lineTo(position.x + size.width, position.y + size.height)
-        ctx.lineTo(position.x, position.y + size.height)
-        ctx.lineTo(position.x, position.y)
+        ctx.fillText(displayName, position.x + size.width / 2, position.y + size.height / 2 - 20)
         ctx.stroke()
         ctx.restore()
       }
@@ -46,7 +41,7 @@ export default {
     },
     isPAndA: true,
     draw: () => {
-      return function(ctx, position, size, imageUrl) {
+      return function(ctx, position, size, imageUrl, displayName) {
         ctx.beginPath()
         ctx.strokeStyle = 'rgba(0,0,0,1)'
         ctx.lineWidth = 1
@@ -55,6 +50,8 @@ export default {
         ctx.lineTo(position.x + size.width, position.y + size.height)
         ctx.lineTo(position.x, position.y + size.height)
         ctx.lineTo(position.x, position.y)
+        ctx.font = "bold 42px '宋体'"
+        ctx.fillText(displayName, position.x + size.width / 2, position.y + size.height / 2 - 20, size.width)
         ctx.stroke()
         ctx.restore()
       }

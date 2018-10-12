@@ -104,7 +104,7 @@ function getLinePositionWithoutAssembly(fromPosition, toPosition, fromSize, toSi
   // 垂直方向
   if (fCCenter.x === tCCenter.x) {
     returnFrom.x = from.x + fromSize.width / 2
-    returnFrom.y = from.y + fromSize.heiht * (tCCenter.y > fCCenter.y ? -1 : 1)
+    returnFrom.y = from.y + fromSize.height * (tCCenter.y > fCCenter.y ? -1 : 1)
   }
   // 右上方
   if (tCCenter.x > fCCenter.x && tCCenter.y < fCCenter.y) {
@@ -159,7 +159,7 @@ function getLinePositionWithoutAssembly(fromPosition, toPosition, fromSize, toSi
   // 垂直方向
   if (tCCenter.x === fCCenter.x) {
     returnTo.x = to.x + toSize.width / 2
-    returnTo.y = to.y + toSize.heiht * (fCCenter.y > tCCenter.y ? 1 : -1)
+    returnTo.y = to.y + toSize.height * (fCCenter.y > tCCenter.y ? 1 : -1)
   }
   // 右上方
   if (fCCenter.x > tCCenter.x && fCCenter.y < tCCenter.y) {
@@ -259,10 +259,12 @@ function lineExtendFunc(from, to) {
   const length = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
   return {
     getLineExtendPosition: function(verticalDistence, distence) {
+      console.log('length', length, 'x', x, 'y', y, 'verticalDistence', verticalDistence, 'distence', distence)
       const verticalDistenceX = verticalDistence * y / length
       const verticalDistenceY = verticalDistence * x / length
       const distenceX = distence * x / length
       const distenceY = distence * y / length
+      console.log('verticalDistenceX', verticalDistenceX, 'distenceX', distenceX)
       return [{
         x: from.x + verticalDistenceX + distenceX,
         y: from.y - verticalDistenceY + distenceY

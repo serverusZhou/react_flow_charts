@@ -2,7 +2,7 @@
 function drawATip(ctx, position = { x: 0, y: 0 }, words = '暂无名称') {
   ctx.beginPath()
   ctx.fillStyle = 'rgba(0,0,0,1)'
-  ctx.font = "24px '宋体'"
+  ctx.font = "bold 36px '宋体'"
   ctx.textAlign = 'center'
   ctx.textBaseline = 'top'
   ctx.fillText(words, position.x, position.y)
@@ -46,6 +46,21 @@ function drawAImage(ctx, imgUrl, position, size) {
   ctx.drawImage(image, 0, 0, image.width, image.height, position.x, position.y, size.width, size.width * image.height / image.width)
   ctx.closePath()
 }
+function drawGrid(ctx, dom) {
+  ctx.beginPath()
+  ctx.lineWidth = 1
+  ctx.strokeStyle = 'rgba(192,192,192,1)'
+  for (let i = 0; i < dom.canvas.width; i += 6) {
+    ctx.moveTo(6 * i, 0)
+    ctx.lineTo(6 * i, dom.canvas.height)
+  }
+  for (let i = 0; i < dom.canvas.height; i += 6) {
+    ctx.moveTo(0, 6 * i)
+    ctx.lineTo(dom.canvas.width, 6 * i)
+  }
+  ctx.stroke()
+  ctx.closePath()
+}
 
 const drawADottedLineWapper = drawADottedLine()
 
@@ -70,13 +85,16 @@ export default function(oprateData) {
       mainLoop()
     },
     draw: function() {
-      const { assemblies, choosenAssembly, hoverAssembly, parasiticAssemblies, choosenLine, ctx, lines, temLine, actionBtns } = oprateData
+      const { assemblies, choosenAssembly, hoverAssembly, parasiticAssemblies, choosenLine, ctx, lines, temLine, actionBtns, dom } = oprateData
+      drawGrid(ctx, dom)
       assemblies.forEach(element => {
-        element.draw(ctx, element.position, element.size, element.imageUrl)
-        drawATip(ctx, {
-          x: element.position.x + element.size.width / 2,
-          y: element.position.y + element.size.height + 10
-        }, element.name)
+        element.draw(ctx, element.position, element.size, element.imageUrl, element.displayName)
+        if (!element.highLevelAssembly) {
+          drawATip(ctx, {
+            x: element.position.x + element.size.width / 2,
+            y: element.position.y + element.size.height + 10
+          }, element.name)
+        }
 
         if (choosenAssembly[element.id]) {
           const { position, size } = element

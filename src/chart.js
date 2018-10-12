@@ -6,6 +6,8 @@ import actionMethod from './actionMehod'
 import { btns, draftingPoints } from './material/btns'
 import { others } from './material/other'
 
+console.log('othersothers', others)
+
 const mode = util.keysSwith({ 'assembly': true, 'line': false, 'inLineChoosen': false })
 let flag = false
 let setTime = null
@@ -110,13 +112,15 @@ class Chart extends Component {
       if (callBack && assembly) {
         callBack(Object.assign({}, assembly), function(acturalData) {
           actionMehodWapper.updateChoosenAssemblyActuralData(acturalData)
-        }, function(inOrOut) {
+        }, function(inOrOut, displayName, acturalData) {
           if (inOrOut === 'in') {
-            actionMehodWapper.addPAssmbly('jumppingIntPoint', { x: assembly.position.x + 10, y: assembly.position.y + 10 })
+            actionMehodWapper.addPAssmbly('jumppingIntPoint', { x: assembly.position.x + 10, y: assembly.position.y + 10 }, displayName, acturalData)
           }
           if (inOrOut === 'out') {
-            actionMehodWapper.addPAssmbly('jumppingOutPoint', { x: assembly.position.x + 10, y: assembly.position.y + 10 })
+            actionMehodWapper.addPAssmbly('jumppingOutPoint', { x: assembly.position.x + 10, y: assembly.position.y + 10 }, displayName, acturalData)
           }
+        }, function(deletePAssembly) {
+          actionMehodWapper.deletePAssembly(deletePAssembly)
         })
       }
     }
@@ -249,6 +253,7 @@ class Chart extends Component {
   }
   componentWillReceiveProps(nextProps) {
     oprateData.material = nextProps.material
+    oprateData.material.others = others
     // const resetMeterail = actionMehodWapper.resetAssembliesAndLines(
     //   !nextProps.assemblies.length ? nextProps.assemblies : preProps.assemblies,
     //   !nextProps.lines.length ? nextProps.lines : preProps.lines,

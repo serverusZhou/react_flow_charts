@@ -16,7 +16,7 @@ function chooseAssemblyCallBakTest(assembly, updateActuralData, handleJumpPoint)
     updateActuralData({
       tip: '成功啦'
     })
-    handleJumpPoint('in')
+    // handleJumpPoint('in')
   }, 3000)
 }
 

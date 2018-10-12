@@ -146,6 +146,7 @@ export default function(oprateData) {
         belongs: [],
         wapper: null,
         children: [],
+        belowLevelAssembly: [],
         draw: material.assemblies[assembly].draw ? material.assemblies[assembly].draw() : function(ctx, position, size, imgUrl) {
           drawAImage(ctx, imgUrl, position, size)
         },
@@ -176,6 +177,7 @@ export default function(oprateData) {
     },
     addWAssembly: function(assembly, position) {
       const { assemblies, material, device } = oprateData
+      console.log('materialmaterialmaterial', material)
       const size = (function() {
         let width = (material.others[assembly].size && material.others[assembly].size.width) || 300
         let height = (material.others[assembly].size && material.others[assembly].size.height) || 300
@@ -205,6 +207,7 @@ export default function(oprateData) {
         belongs: [],
         wapper: null,
         children: [],
+        belowLevelAssembly: [],
         draw: material.others[assembly].draw ? material.others[assembly].draw() : function(ctx, position, size, imgUrl) {
           drawAImage(ctx, imgUrl, position, size)
         },
@@ -212,7 +215,7 @@ export default function(oprateData) {
       }
       assemblies.push(addAssembly)
     },
-    addPAssmbly: function(parasiticAssembly, position) {
+    addPAssmbly: function(parasiticAssembly, position, displayName, acturalData) {
       const { assemblies, material, parasiticAssemblies } = oprateData
       const belongToAssembly = assemblies.find(element => checkIsBelongPosition(position, {
         x: element.position.x,
@@ -222,7 +225,7 @@ export default function(oprateData) {
       }) && element.assemblyName !== 'wapperAssembly')
       if (belongToAssembly && Object.keys(belongToAssembly)) {
         if (material.parasiticAssemblies[parasiticAssembly].isPAndA) {
-          this.toTurnAddPassmbly(belongToAssembly, material.parasiticAssemblies[parasiticAssembly], parasiticAssembly)
+          this.toTurnAddPassmbly(belongToAssembly, material.parasiticAssemblies[parasiticAssembly], parasiticAssembly, displayName, acturalData)
           return
         }
         const ratio = imageRatio(material.parasiticAssemblies[parasiticAssembly].imageUrl)
@@ -254,7 +257,7 @@ export default function(oprateData) {
         belongToAssembly.belongs.push(addParasiticAssembly)
       }
     },
-    toTurnAddPassmbly: function(belongToAssembly, belong, belongName) {
+    toTurnAddPassmbly: function(belongToAssembly, belong, belongName, displayName, acturalData) {
       const { assemblies, lines, material } = oprateData
       const turnedAssembly = {
         id: UUID(),
@@ -270,19 +273,21 @@ export default function(oprateData) {
             : belongToAssembly.position.y + belongToAssembly.size.height - belong.offsetPosition.y - Math.floor(Math.random() * 60),
         },
         size: {
-          width: 60,
-          height: 60
+          width: belong.size.width,
+          height: belong.size.height
         },
         lines: {
           from: [],
           to: []
         },
+        displayName,
         belongs: [],
+        highLevelAssembly: belongToAssembly,
         draw: belong.draw(),
-        acturalData: {}
+        acturalData: acturalData || {}
       }
-      console.log('belong.isTobelong.isTobelong.isTo', belong.isTo)
       assemblies.push(turnedAssembly)
+      belongToAssembly.belowLevelAssembly.push(turnedAssembly)
       const lineId = UUID()
       const _line = {
         id: lineId,
@@ -721,11 +726,11 @@ export default function(oprateData) {
           (line.to.assembly.id === temLine.from.assembly.id && line.from.assembly.id === assembly.id)
       })
       if (alreadyHasLine) {
-        console.log('已经存在了---------------')
+        console.warn('此连线已经存在了')
         return
       }
       if (temLine.from.assembly.id === assembly.id) {
-        console.log('回到了原点了---------------')
+        console.warn('回到起始点了')
         return
       }
       temLine.to.position = {
@@ -794,11 +799,31 @@ export default function(oprateData) {
                 child.wapper = null
               })
             }
+            if (element.highLevelAssembly) {
+              element.highLevelAssembly.belowLevelAssembly.forEach((ba, _index) => {
+                if (ba.id === element.id) {
+                  element.highLevelAssembly.belowLevelAssembly.splice(_index, 1)
+                }
+              })
+            }
             assemblies.splice(index, 1)
           }
         })
         actionBtns.enable = false
       }
+    },
+    deletePAssembly: function(pAssembly) {
+      const { parasiticAssemblies } = oprateData
+      parasiticAssemblies.forEach((pa, index) => {
+        if (pa.id === pAssembly.id) {
+          pAssembly.belongsTo.belongs.forEach((belong, _index) => {
+            if (belong.id === pAssembly.id) {
+              pAssembly.belongsTo.belongs.splice(_index, 1)
+            }
+          })
+          parasiticAssemblies.splice(index, 1)
+        }
+      })
     },
     deleteLine: function() {
       const { choosenLine, lines, mode } = oprateData
