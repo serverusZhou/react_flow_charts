@@ -103,12 +103,22 @@ function checkIsThreePointsLine(point1, point2, point3) {
 export default function(oprateData) {
   return {
     transPixelToPos: function(pixel) {
-      const { dom } = oprateData
+      const pixelMap = {
+        'pc': {
+          width: 2500,
+          height: 2500
+        },
+        'mobile': {
+          width: 1000,
+          height: 1000
+        }
+      }
+      const { dom, device } = oprateData
       const canvasPosition = getPosition(dom.canvas)
       const scrollTop = getScrollTop()
       return {
-        x: (pixel.x - canvasPosition.left) / dom.canvas.offsetWidth * 1000,
-        y: (pixel.y - canvasPosition.top + scrollTop) / dom.canvas.offsetWidth * 1000
+        x: (pixel.x - canvasPosition.left) / dom.canvas.offsetWidth * pixelMap[device].width,
+        y: (pixel.y - canvasPosition.top + scrollTop) / dom.canvas.offsetWidth * pixelMap[device].height
       }
     },
     addAssmbly: function(assembly, position) {
@@ -125,16 +135,27 @@ export default function(oprateData) {
           height: (device === 'mobile') ? height * 2 : height
         }
       })()
+      const image = new Image()
+      image.src = material.assemblies[assembly].imageUrl
       const addAssembly = {
         id: UUID(),
         name: material.assemblies[assembly].assemblyName,
         assemblyName: assembly,
         imageUrl: material.assemblies[assembly].imageUrl,
+        image,
         position: {
           x: position.x - size.width / 2,
           y: position.y - size.height / 2,
         },
         size: {
+          width: size.width,
+          height: size.height
+        },
+        positionPc: {
+          x: position.x - size.width / 2,
+          y: position.y - size.height / 2,
+        },
+        sizePc: {
           width: size.width,
           height: size.height
         },
@@ -177,7 +198,6 @@ export default function(oprateData) {
     },
     addWAssembly: function(assembly, position) {
       const { assemblies, material, device } = oprateData
-      console.log('materialmaterialmaterial', material)
       const size = (function() {
         let width = (material.others[assembly].size && material.others[assembly].size.width) || 300
         let height = (material.others[assembly].size && material.others[assembly].size.height) || 300
@@ -240,12 +260,21 @@ export default function(oprateData) {
         }, size: {
           width: belongToAssembly.size.width * (1 - belongToAssembly.insizeSpacePercent[1] - belongToAssembly.insizeSpacePercent[3]),
           height: belongToAssembly.size.width * (1 - belongToAssembly.insizeSpacePercent[1] - belongToAssembly.insizeSpacePercent[3]) * ratio
+        }, positionPc: {
+          x: belongToAssembly.positionPc.x + belongToAssembly.insizeSpacePercent[3] * belongToAssembly.sizePc.width,
+          y: belongToAssembly.positionPc.y + belongToAssembly.sizePc.height - belongToAssembly.insizeSpacePercent[2] * belongToAssembly.sizePc.height - belongToAssembly.sizePc.width * (1 - belongToAssembly.insizeSpacePercent[1] - belongToAssembly.insizeSpacePercent[3]) * ratio,
+        }, sizePc: {
+          width: belongToAssembly.sizePc.width * (1 - belongToAssembly.insizeSpacePercent[1] - belongToAssembly.insizeSpacePercent[3]),
+          height: belongToAssembly.sizePc.width * (1 - belongToAssembly.insizeSpacePercent[1] - belongToAssembly.insizeSpacePercent[3]) * ratio
         }})
+        const image = new Image()
+        image.src = material.parasiticAssemblies[parasiticAssembly].imageUrl
         const addParasiticAssembly = {
           id: UUID(),
           name: material.parasiticAssemblies[parasiticAssembly].assemblyName,
           assemblyName: parasiticAssembly,
           imageUrl: material.parasiticAssemblies[parasiticAssembly].imageUrl,
+          image,
           belongsTo: belongToAssembly,
           ratio: imageRatio(material.parasiticAssemblies[parasiticAssembly].imageUrl),
           isOccupyInternalSpace: material.parasiticAssemblies[parasiticAssembly].isOccupyInternalSpace,
@@ -276,6 +305,18 @@ export default function(oprateData) {
           width: belong.size.width,
           height: belong.size.height
         },
+        positionPc: {
+          x: belong.offsetPosition.x > 0
+            ? (belongToAssembly.positionPc.x - belong.offsetPosition.x - Math.floor(Math.random() * 60))
+            : belongToAssembly.positionPc.x + belongToAssembly.sizePc.width - belong.offsetPosition.x - Math.floor(Math.random() * 60),
+          y: belong.offsetPosition.x > 0
+            ? belongToAssembly.positionPc.y - belong.offsetPosition.y - Math.floor(Math.random() * 60)
+            : belongToAssembly.positionPc.y + belongToAssembly.sizePc.height - belong.offsetPosition.y - Math.floor(Math.random() * 60),
+        },
+        sizePc: {
+          width: belong.sizePc.width,
+          height: belong.sizePc.height
+        },
         lines: {
           from: [],
           to: []
@@ -297,14 +338,22 @@ export default function(oprateData) {
           position: {
             x: belong.isTo ? (belongToAssembly.position.x + belongToAssembly.size.width / 2) : (turnedAssembly.position.x + turnedAssembly.size.width / 2),
             y: belong.isTo ? (belongToAssembly.position.y + belongToAssembly.size.height / 2) : (turnedAssembly.position.y + turnedAssembly.size.height / 2),
-          }
+          },
+          positionPc: {
+            x: belong.isTo ? (belongToAssembly.positionPc.x + belongToAssembly.sizePc.width / 2) : (turnedAssembly.positionPc.x + turnedAssembly.sizePc.width / 2),
+            y: belong.isTo ? (belongToAssembly.positionPc.y + belongToAssembly.sizePc.height / 2) : (turnedAssembly.positionPc.y + turnedAssembly.sizePc.height / 2),
+          },
         },
         to: {
           assembly: belong.isTo ? turnedAssembly : belongToAssembly,
           position: {
             x: belong.isTo ? (turnedAssembly.position.x + turnedAssembly.size.width / 2) : (belongToAssembly.position.x + belongToAssembly.size.width / 2),
             y: belong.isTo ? (turnedAssembly.position.y + turnedAssembly.size.height / 2) : (belongToAssembly.position.y + belongToAssembly.size.height / 2),
-          }
+          },
+          positionPc: {
+            x: belong.isTo ? (turnedAssembly.positionPc.x + turnedAssembly.sizePc.width / 2) : (belongToAssembly.positionPc.x + belongToAssembly.sizePc.width / 2),
+            y: belong.isTo ? (turnedAssembly.positionPc.y + turnedAssembly.sizePc.height / 2) : (belongToAssembly.positionPc.y + belongToAssembly.sizePc.height / 2),
+          },
         },
         middlePoints: [{
           x: belong.isTo
@@ -313,6 +362,14 @@ export default function(oprateData) {
           y: belong.isTo
             ? belongToAssembly.position.y + belongToAssembly.size.height / 2
             : turnedAssembly.position.y + turnedAssembly.size.height / 2,
+        }],
+        middlePointsPc: [{
+          x: belong.isTo
+            ? (turnedAssembly.positionPc.x + turnedAssembly.sizePc.width / 2 - 2)
+            : (belongToAssembly.positionPc.x + belongToAssembly.sizePc.width / 2 - 2),
+          y: belong.isTo
+            ? belongToAssembly.positionPc.y + belongToAssembly.sizePc.height / 2
+            : turnedAssembly.positionPc.y + turnedAssembly.sizePc.height / 2,
         }],
         draw: material.lines[Object.keys(material.lines)[0]].draw()
       }
@@ -333,23 +390,43 @@ export default function(oprateData) {
       lines.push(_line)
     },
     chooseAssmbly: function(position) {
-      const { assemblies, choosenAssembly, actionBtns, ableMoveAssembly } = oprateData
+      const { assemblies, choosenAssembly, actionBtns, ableMoveAssembly, device } = oprateData
       util.clearObj(choosenAssembly)
       actionBtns.enable = false
-      let assembly = assemblies.find(element => checkIsBelongPosition(position, {
-        x: element.position.x,
-        endX: element.position.x + element.size.width,
-        y: element.position.y,
-        endY: element.position.y + element.size.height,
-      }))
+      let assembly = assemblies.find(element => {
+        let APosition = {}; let ASize = {}
+        if (device === 'mobile') {
+          APosition = element.position
+          ASize = element.size
+        } else if (device === 'pc') {
+          APosition = element.positionPc
+          ASize = element.sizePc
+        }
+        return checkIsBelongPosition(position, {
+          x: APosition.x,
+          endX: APosition.x + ASize.width,
+          y: APosition.y,
+          endY: APosition.y + ASize.height,
+        })
+      })
       if (assembly) {
         if (assembly.assemblyName === 'wapperAssembly') {
-          let childAss = assembly.children.find(element => checkIsBelongPosition(position, {
-            x: element.position.x,
-            endX: element.position.x + element.size.width,
-            y: element.position.y,
-            endY: element.position.y + element.size.height,
-          }))
+          let childAss = assembly.children.find(element => {
+            let APosition = {}; let ASize = {}
+            if (device === 'mobile') {
+              APosition = element.position
+              ASize = element.size
+            } else if (device === 'pc') {
+              APosition = element.positionPc
+              ASize = element.sizePc
+            }
+            return checkIsBelongPosition(position, {
+              x: APosition.x,
+              endX: APosition.x + ASize.width,
+              y: APosition.y,
+              endY: APosition.y + ASize.height,
+            })
+          })
           if (childAss) {
             choosenAssembly[childAss.id] = true
           } else {
@@ -404,74 +481,131 @@ export default function(oprateData) {
       }
     },
     findAssmblyByPosition: function(position) {
-      const { assemblies } = oprateData
+      const { assemblies, device } = oprateData
       return assemblies.find(element => {
+        let APosition = {}; let ASize = {}
+        if (device === 'mobile') {
+          APosition = element.position
+          ASize = element.size
+        } else if (device === 'pc') {
+          APosition = element.positionPc
+          ASize = element.sizePc
+        }
         return checkIsBelongPosition(position, {
-          x: element.position.x,
-          endX: element.position.x + element.size.width,
-          y: element.position.y,
-          endY: element.position.y + element.size.height,
+          x: APosition.x,
+          endX: APosition.x + ASize.width,
+          y: APosition.y,
+          endY: APosition.y + ASize.height,
         })
       })
     },
     addAbleMoveAssembly: function(position) {
-      const { assemblies, ableMoveAssembly } = oprateData
+      const { assemblies, ableMoveAssembly, device } = oprateData
       util.clearObj(ableMoveAssembly)
       assemblies.forEach(element => {
+        let APosition = {}; let ASize = {}
+        if (device === 'mobile') {
+          APosition = element.position
+          ASize = element.size
+        } else if (device === 'pc') {
+          APosition = element.positionPc
+          ASize = element.sizePc
+        }
         if (checkIsBelongPosition(position, {
-          x: element.position.x,
-          endX: element.position.x + element.size.width,
-          y: element.position.y,
-          endY: element.position.y + element.size.height,
+          x: APosition.x,
+          endX: APosition.x + ASize.width,
+          y: APosition.y,
+          endY: APosition.y + ASize.height,
         })) {
           ableMoveAssembly[element.id] = true
         }
       })
     },
     addAbleMovePAssembly: function(position) {
-      const { parasiticAssemblies, ableMovePAssembly } = oprateData
-      const pAssembly = parasiticAssemblies.find(element => checkIsBelongPosition(position, {
-        x: element.position.x,
-        endX: element.position.x + element.size.width,
-        y: element.position.y,
-        endY: element.position.y + element.size.height,
-      }))
+      const { parasiticAssemblies, ableMovePAssembly, device } = oprateData
+      const pAssembly = parasiticAssemblies.find(element => {
+        let APosition = {}; let ASize = {}
+        if (device === 'mobile') {
+          APosition = element.position
+          ASize = element.size
+        } else if (device === 'pc') {
+          APosition = element.positionPc
+          ASize = element.sizePc
+        }
+        return checkIsBelongPosition(position, {
+          x: APosition.x,
+          endX: APosition.x + ASize.width,
+          y: APosition.y,
+          endY: APosition.y + ASize.height,
+        })
+      })
       if (pAssembly) { ableMovePAssembly[pAssembly.id] = true; return true }
     },
     addAbleMoveDragingPoint: function(position) {
-      const { actionBtns, ableDrafPoint } = oprateData
-      const draftingPoint = actionBtns.draftingPoints.find(point => checkIsBelongPosition(position, {
-        x: point.position.x,
-        endX: point.position.x + point.size.width,
-        y: point.position.y,
-        endY: point.position.y + point.size.height,
-      }))
+      const { actionBtns, ableDrafPoint, device } = oprateData
+      const draftingPoint = actionBtns.draftingPoints.find(point => {
+        let APosition = {}; let ASize = {}
+        if (device === 'mobile') {
+          APosition = point.position
+          ASize = point.size
+        } else if (device === 'pc') {
+          APosition = point.positionPc
+          ASize = point.sizePc
+        }
+        return checkIsBelongPosition(position, {
+          x: APosition.x,
+          endX: APosition.x + ASize.width,
+          y: APosition.y,
+          endY: APosition.y + ASize.height,
+        })
+      })
       if (draftingPoint && Object.keys(draftingPoint).length) {
         ableDrafPoint[draftingPoint.type] = true
       }
     },
     addAbleAddPointLine: function(position) {
-      const { ableAddPointLine, lines } = oprateData
+      const { ableAddPointLine, lines, device } = oprateData
       util.clearObj(ableAddPointLine)
       let findLine = null
       let findNum = 0
-      lines.forEach(line => {
-        const allPoints = [{ ...line.from.position }].concat(line.middlePoints).concat({ ...line.to.position })
-        const belongObj = checkIsBelongBrokenLine(position, allPoints, line.from.assembly.size, line.to.assembly.size)
-        if (belongObj.isBelong) {
-          findLine = line
-          findNum = belongObj.belongIndex
-          if (belongObj.isNear && findNum !== 0 && findNum !== line.middlePoints.length + 1) {
-            findNum--
-            line.middlePoints[findNum] = position
-          } else if (findNum === 1 && findNum === line.middlePoints.length + 1) {
-            findNum = 0
-            line.middlePoints.splice(findNum, 0, position)
-          } else {
-            line.middlePoints.splice(findNum, 0, position)
+      if (device === 'mobile') {
+        lines.forEach(line => {
+          const allPoints = [{ ...line.from.position }].concat(line.middlePoints).concat({ ...line.to.position })
+          const belongObj = checkIsBelongBrokenLine(position, allPoints, line.from.assembly.size, line.to.assembly.size)
+          if (belongObj.isBelong) {
+            findLine = line
+            findNum = belongObj.belongIndex
+            if (belongObj.isNear && findNum !== 0 && findNum !== line.middlePoints.length + 1) {
+              findNum--
+              line.middlePoints[findNum] = position
+            } else if (findNum === 1 && findNum === line.middlePoints.length + 1) {
+              findNum = 0
+              line.middlePoints.splice(findNum, 0, position)
+            } else {
+              line.middlePoints.splice(findNum, 0, position)
+            }
           }
-        }
-      })
+        })
+      }
+      if (device === 'pc') {
+        lines.forEach(line => {
+          const allPoints = [{ ...line.from.positionPc }].concat(line.middlePointsPc).concat({ ...line.to.positionPc })
+          const belongObj = checkIsBelongBrokenLine(position, allPoints, line.from.assembly.sizePc, line.to.assembly.sizePc)
+          if (belongObj.isBelong) {
+            findLine = line
+            findNum = belongObj.belongIndex
+            if (belongObj.isNear && findNum !== 0 && findNum !== line.middlePointsPc.length + 1) {
+              findNum--
+              line.middlePointsPc[findNum] = position
+            } else if (findNum === 1 && findNum === line.middlePointsPc.length + 1) {
+              findNum = 0
+              line.middlePointsPc.splice(findNum, 0, position)
+            } else {
+              line.middlePointsPc.splice(findNum, 0, position)
+            }
+          }
+        })
+      }
       if (findLine && Object.keys(findLine).length) {
         ableAddPointLine[findLine.id] = {
           positionAtLine: position,
@@ -481,21 +615,36 @@ export default function(oprateData) {
       }
     },
     updateAssemblyPosition: function(position) {
-      const { assemblies, ableMoveAssembly } = oprateData
+      const { assemblies, ableMoveAssembly, device } = oprateData
       const moveAssembly = assemblies.find(element => ableMoveAssembly[element.id])
       if (!moveAssembly || moveAssembly.wapper) { return }
-      moveAssembly.position = {
-        x: position.x - moveAssembly.size.width / 2,
-        y: position.y - moveAssembly.size.height / 2
+      if (device === 'mobile') {
+        moveAssembly.position = {
+          x: position.x - moveAssembly.size.width / 2,
+          y: position.y - moveAssembly.size.height / 2
+        }
+        moveAssembly.lines.from.forEach(line => {
+          line.line.from.position.x = position.x
+          line.line.from.position.y = position.y
+        })
+        moveAssembly.lines.to.forEach(line => {
+          line.line.to.position.x = position.x
+          line.line.to.position.y = position.y
+        })
+      } else if (device === 'pc') {
+        moveAssembly.positionPc = {
+          x: position.x - moveAssembly.sizePc.width / 2,
+          y: position.y - moveAssembly.sizePc.height / 2
+        }
+        moveAssembly.lines.from.forEach(line => {
+          line.line.from.positionPc.x = position.x
+          line.line.from.positionPc.y = position.y
+        })
+        moveAssembly.lines.to.forEach(line => {
+          line.line.to.positionPc.x = position.x
+          line.line.to.positionPc.y = position.y
+        })
       }
-      moveAssembly.lines.from.forEach(line => {
-        line.line.from.position.x = position.x
-        line.line.from.position.y = position.y
-      })
-      moveAssembly.lines.to.forEach(line => {
-        line.line.to.position.x = position.x
-        line.line.to.position.y = position.y
-      })
       this.updateAllPAssemblyPosition(moveAssembly)
 
       const wAssembly = assemblies.find(element => (checkIsBelongPosition(position, {
@@ -517,50 +666,94 @@ export default function(oprateData) {
     },
 
     updatePAssemblyPosition: function(position) {
-      const { parasiticAssemblies, ableMovePAssembly } = oprateData
+      const { parasiticAssemblies, ableMovePAssembly, device } = oprateData
       const movePAssembly = parasiticAssemblies.find(element => ableMovePAssembly[element.id])
       if (!movePAssembly) { return }
-      movePAssembly.position = {
-        x: position.x - movePAssembly.size.width / 2,
-        y: position.y - movePAssembly.size.height / 2
+      if (device === 'mobile') {
+        movePAssembly.position = {
+          x: position.x - movePAssembly.size.width / 2,
+          y: position.y - movePAssembly.size.height / 2
+        }
+      } else if (device === 'pc') {
+        movePAssembly.positionPc = {
+          x: position.x - movePAssembly.sizePc.width / 2,
+          y: position.y - movePAssembly.sizePc.height / 2
+        }
       }
     },
     updateDrafPointPosition: function(position) {
-      const { assemblies, choosenAssembly, actionBtns, ableDrafPoint } = oprateData
+      const { assemblies, choosenAssembly, actionBtns, ableDrafPoint, device } = oprateData
       const aTAssembly = assemblies.find(assembly => choosenAssembly[assembly.id])
       const draftingPoint = actionBtns.draftingPoints.find(point => ableDrafPoint[point.type])
       if (!draftingPoint) { return }
-      if (draftingPoint.type === 'topLeft') {
-        aTAssembly.size = {
-          width: aTAssembly.size.width - (position.x - aTAssembly.position.x),
-          height: aTAssembly.size.height - (position.y - aTAssembly.position.y),
+      if (device === 'mobile') {
+        if (draftingPoint.type === 'topLeft') {
+          aTAssembly.size = {
+            width: aTAssembly.size.width - (position.x - aTAssembly.position.x),
+            height: aTAssembly.size.height - (position.y - aTAssembly.position.y),
+          }
+          aTAssembly.position = position
         }
-        aTAssembly.position = position
+        if (draftingPoint.type === 'topRight') {
+          aTAssembly.size = {
+            width: position.x - aTAssembly.position.x,
+            height: aTAssembly.size.height - (position.y - aTAssembly.position.y),
+          }
+          aTAssembly.position = {
+            x: aTAssembly.position.x,
+            y: position.y
+          }
+        }
+        if (draftingPoint.type === 'bottomLeft') {
+          aTAssembly.size = {
+            width: aTAssembly.size.width - (position.x - aTAssembly.position.x),
+            height: position.y - aTAssembly.position.y,
+          }
+          aTAssembly.position = {
+            y: aTAssembly.position.y,
+            x: position.x
+          }
+        }
+        if (draftingPoint.type === 'bottomRight') {
+          aTAssembly.size = {
+            width: position.x - aTAssembly.position.x,
+            height: position.y - aTAssembly.position.y,
+          }
+        }
       }
-      if (draftingPoint.type === 'topRight') {
-        aTAssembly.size = {
-          width: position.x - aTAssembly.position.x,
-          height: aTAssembly.size.height - (position.y - aTAssembly.position.y),
+      if (device === 'pc') {
+        if (draftingPoint.type === 'topLeft') {
+          aTAssembly.sizePc = {
+            width: aTAssembly.sizePc.width - (position.x - aTAssembly.positionPc.x),
+            height: aTAssembly.sizePc.height - (position.y - aTAssembly.positionPc.y),
+          }
+          aTAssembly.positionPc = position
         }
-        aTAssembly.position = {
-          x: aTAssembly.position.x,
-          y: position.y
+        if (draftingPoint.type === 'topRight') {
+          aTAssembly.sizePc = {
+            width: position.x - aTAssembly.positionPc.x,
+            height: aTAssembly.sizePc.height - (position.y - aTAssembly.positionPc.y),
+          }
+          aTAssembly.positionPc = {
+            x: aTAssembly.positionPc.x,
+            y: position.y
+          }
         }
-      }
-      if (draftingPoint.type === 'bottomLeft') {
-        aTAssembly.size = {
-          width: aTAssembly.size.width - (position.x - aTAssembly.position.x),
-          height: position.y - aTAssembly.position.y,
+        if (draftingPoint.type === 'bottomLeft') {
+          aTAssembly.sizePc = {
+            width: aTAssembly.sizePc.width - (position.x - aTAssembly.positionPc.x),
+            height: position.y - aTAssembly.positionPc.y,
+          }
+          aTAssembly.positionPc = {
+            y: aTAssembly.positionPc.y,
+            x: position.x
+          }
         }
-        aTAssembly.position = {
-          y: aTAssembly.position.y,
-          x: position.x
-        }
-      }
-      if (draftingPoint.type === 'bottomRight') {
-        aTAssembly.size = {
-          width: position.x - aTAssembly.position.x,
-          height: position.y - aTAssembly.position.y,
+        if (draftingPoint.type === 'bottomRight') {
+          aTAssembly.sizePc = {
+            width: position.x - aTAssembly.positionPc.x,
+            height: position.y - aTAssembly.positionPc.y,
+          }
         }
       }
       this.updateAllPAssemblyPosition(aTAssembly)
@@ -575,16 +768,6 @@ export default function(oprateData) {
       if (line && Object.keys(line).length) {
         line.middlePoints[ableAddPointLine[line.id].belongIndex] = position
       }
-      // const allPoints = [{ ...line.from.position }].concat(line.middlePoints).concat({ ...line.to.position })
-      // const checkObj = checkIsBelongBrokenLine(position, allPoints, line.from.assembly.size, line.to.assembly.size)
-      // if (!checkObj.isBelong) {
-      //   const _num = checkIsNearAPosition(ableAddPointLine[line.id].positionAtLine, allPoints)
-      //   if (isNaN(_num)) {
-      //     line.middlePoints.splice(ableAddPointLine[line.id].belongIndex, 0, position)
-      //   } else {
-      //     line.middlePoints[_num - 1 ] = position
-      //   }
-      // }
     },
     setLinePositions: function(position) {
       const { lines, ableAddPointLine } = oprateData
@@ -599,57 +782,61 @@ export default function(oprateData) {
       } else {
         line.middlePoints[ableAddPointLine[line.id].belongIndex ] = position
       }
-      // const allPoints = [{ ...line.from.position }].concat(line.middlePoints).concat({ ...line.to.position })
-      // const checkObj = checkIsBelongBrokenLine(position, allPoints, line.from.assembly.size, line.to.assembly.size)
-      // if (!checkObj.isBelong) {
-      //   const _num = checkIsNearAPosition(ableAddPointLine[line.id].positionAtLine, allPoints)
-      //   if (isNaN(_num)) {
-      //     line.middlePoints.splice(ableAddPointLine[line.id].belongIndex, 0, position)
-      //   } else {
-      //     if (checkIsThreePointsLine(
-      //       _num === 1 ? line.from.position : line.middlePoints[_num - 2 ],
-      //       position,
-      //       _num === line.middlePoints.length ? line.to.position : line.middlePoints[_num]
-      //     )) {
-      //       line.middlePoints.splice(_num - 1, 1)
-      //     } else {
-      //       line.middlePoints[_num - 1 ] = position
-      //     }
-      //   }
-      // }
     },
     updateAllPAssemblyPosition: function(assembly) {
+      const { device } = oprateData
       let lessHeight = 0
       assembly.belongs.filter(belong => belong.isOccupyInternalSpace).forEach(belong => {
+        let pPosition = {}; let pSize = {}
+        if (device === 'mobile') {
+          pPosition = assembly.position
+          pSize = assembly.size
+        } else if (device === 'pc') {
+          pPosition = assembly.positionPc
+          pSize = assembly.sizePc
+        }
         const updateInfo = {
           position: {
-            x: assembly.position.x + assembly.insizeSpacePercent[3] * assembly.size.width,
-            y: assembly.position.y + assembly.size.height - assembly.insizeSpacePercent[2] * assembly.size.height - assembly.size.width * (1 - assembly.insizeSpacePercent[1] - assembly.insizeSpacePercent[3]) * belong.ratio - lessHeight,
+            x: pPosition.x + assembly.insizeSpacePercent[3] * pSize.width,
+            y: pPosition.y + pSize.height - assembly.insizeSpacePercent[2] * pSize.height - pSize.width * (1 - assembly.insizeSpacePercent[1] - assembly.insizeSpacePercent[3]) * belong.ratio - lessHeight,
           }, size: {
-            width: assembly.size.width * (1 - assembly.insizeSpacePercent[1] - assembly.insizeSpacePercent[3]),
-            height: assembly.size.width * (1 - assembly.insizeSpacePercent[1] - assembly.insizeSpacePercent[3]) * belong.ratio
+            width: pSize.width * (1 - assembly.insizeSpacePercent[1] - assembly.insizeSpacePercent[3]),
+            height: pSize.width * (1 - assembly.insizeSpacePercent[1] - assembly.insizeSpacePercent[3]) * belong.ratio
           }
         }
-        lessHeight = lessHeight + assembly.size.width * (1 - assembly.insizeSpacePercent[1] - assembly.insizeSpacePercent[3]) * belong.ratio
-        belong.position = updateInfo.position
-        belong.size = updateInfo.size
+        lessHeight = lessHeight + pSize.width * (1 - assembly.insizeSpacePercent[1] - assembly.insizeSpacePercent[3]) * belong.ratio
+        if (device === 'mobile') {
+          belong.positionPc = updateInfo.position
+          belong.sizePc = updateInfo.size
+        } else if (device === 'pc') {
+          belong.position = updateInfo.position
+          belong.size = updateInfo.size
+        }
       })
     },
     updateActionBtnPosition: function() {
-      const { assemblies, choosenAssembly, actionBtns } = oprateData
+      const { assemblies, choosenAssembly, actionBtns, device } = oprateData
       const aTAssembly = assemblies.find(assembly => choosenAssembly[assembly.id])
+      let position = {}; let size = {}
+      if (device === 'pc') {
+        position = aTAssembly.positionPc
+        size = aTAssembly.sizePc
+      } else if (device === 'mobile') {
+        position = aTAssembly.position
+        size = aTAssembly.size
+      }
       actionBtns.position = {
-        x: aTAssembly.position.x,
-        y: aTAssembly.position.y - 30
+        x: position.x,
+        y: position.y - 30
       }
       actionBtns.size = {
-        width: aTAssembly.size.width,
+        width: size.width,
         height: 30
       }
       actionBtns.btns.forEach((btn, index) => {
         btn.position = {
-          x: aTAssembly.position.x + index * 50,
-          y: aTAssembly.position.y - 50
+          x: position.x + index * 50,
+          y: position.y - 50
         }
         btn.size = {
           width: 30,
@@ -663,10 +850,17 @@ export default function(oprateData) {
           'bottomLeft': [0, 1],
           'bottomRight': [1, 1],
         }
-        
-        draftingPoint.position = {
-          x: aTAssembly.position.x - 10 + aTAssembly.size.width * map[draftingPoint.type][0],
-          y: aTAssembly.position.y - 10 + aTAssembly.size.height * map[draftingPoint.type][1]
+        if (device === 'pc') {
+          draftingPoint.positionPc = {
+            x: position.x - 10 + size.width * map[draftingPoint.type][0],
+            y: position.y - 10 + size.height * map[draftingPoint.type][1]
+          }
+        }
+        if (device === 'mobile') {
+          draftingPoint.position = {
+            x: position.x - 10 + size.width * map[draftingPoint.type][0],
+            y: position.y - 10 + size.height * map[draftingPoint.type][1]
+          }
         }
       })
     },
@@ -705,6 +899,10 @@ export default function(oprateData) {
           position: {
             x: fromAssembly.position.x + fromAssembly.size.width / 2,
             y: fromAssembly.position.y + fromAssembly.size.height / 2,
+          },
+          positionPc: {
+            x: fromAssembly.positionPc.x + fromAssembly.sizePc.width / 2,
+            y: fromAssembly.positionPc.y + fromAssembly.sizePc.height / 2,
           }
         }
         temLine.to = {
@@ -712,9 +910,14 @@ export default function(oprateData) {
           position: {
             x: fromAssembly.position.x + fromAssembly.size.width / 2,
             y: fromAssembly.position.y + fromAssembly.size.height / 2,
+          },
+          positionPc: {
+            x: fromAssembly.positionPc.x + fromAssembly.sizePc.width / 2,
+            y: fromAssembly.positionPc.y + fromAssembly.sizePc.height / 2,
           }
         }
         temLine.middlePoints = []
+        temLine.middlePointsPc = []
         temLine.draw = material.lines[Object.keys(activeLine)[0]].draw()
       }
     },
@@ -736,6 +939,10 @@ export default function(oprateData) {
       temLine.to.position = {
         x: assembly.position.x + assembly.size.width / 2,
         y: assembly.position.y + assembly.size.height / 2,
+      }
+      temLine.to.positionPc = {
+        x: assembly.positionPc.x + assembly.sizePc.width / 2,
+        y: assembly.positionPc.y + assembly.sizePc.height / 2,
       }
       temLine.to.assembly = assembly
       const cloneLine = Object.assign({}, temLine)

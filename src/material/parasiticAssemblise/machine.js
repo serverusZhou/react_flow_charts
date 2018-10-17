@@ -21,6 +21,7 @@ export default {
     assemblyType,
     assemblyName: '水泵',
     size: defaultSize,
+    isOccupyInternalSpace: true
   },
   airCompressor: {
     imageUrl: airCompressorOpend,

@@ -1,5 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { Button } from 'antd'
 import ReactFlowChart from '..'
 import assemblies from '../material/assemblies'
 import parasiticAssemblies from '../material/parasiticAssemblise'
@@ -46,7 +47,7 @@ ReactDOM.render(
       getData = {getData}
       title = {'污水处理流程'}
       disabled = {false}
-      btns = {<div><button>新建流程</button><button>新建流程</button><button>新建流程</button><button>新建流程</button></div>}
+      btns = {<div><Button type='primary' >新建流程</Button><Button>新建流程</Button><Button>新建流程</Button><Button>新建流程</Button></div>}
     />
   </div>,
   document.getElementById('app')

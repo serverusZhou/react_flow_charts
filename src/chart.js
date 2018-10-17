@@ -6,8 +6,6 @@ import actionMethod from './actionMehod'
 import { btns, draftingPoints } from './material/btns'
 import { others } from './material/other'
 
-console.log('othersothers', others)
-
 const mode = util.keysSwith({ 'assembly': true, 'line': false, 'inLineChoosen': false })
 let flag = false
 let setTime = null
@@ -16,6 +14,7 @@ const oprateData = {
   mode, // 用来判断当前处于哪个操作模式中（组件还是连线或者其它）
   ctx: null,
   dom: { canvas: {}},
+  destroy: false,
   assemblies: [],
   choosenAssembly: {},
   ableMoveAssembly: {},
@@ -62,7 +61,7 @@ class Chart extends Component {
       line: false,
       other: false
     }
-    this.state = { ...props, openMap }
+    this.state = { ...props, openMap, showPc: false }
   }
   dragAssembly (ev, assemblyType) {
     ev.dataTransfer.setData('assembly', ev.target.id)
@@ -277,6 +276,25 @@ class Chart extends Component {
     oprateData.dom.canvas.focus()
     drawWapper.init()
   }
+  changeDevice = (device) => {
+    this.setState({ device }, () => {
+      oprateData.device = device
+      if (device === 'pc' && this.refs['flow_canvas_pc']) {
+        oprateData.dom.canvas = this.refs['flow_canvas_pc']
+        oprateData.dom.canvas.focus()
+        oprateData.dom.canvas.width = 2500
+        oprateData.dom.canvas.height = 2500 * oprateData.dom.canvas.offsetHeight / oprateData.dom.canvas.offsetWidth
+        oprateData.ctx = oprateData.dom.canvas.getContext('2d')
+      }
+      if (device === 'mobile' && this.refs['flow_canvas']) {
+        oprateData.dom.canvas = this.refs['flow_canvas']
+        oprateData.dom.canvas.focus()
+        oprateData.dom.canvas.width = 1000
+        oprateData.dom.canvas.height = 1000 * oprateData.dom.canvas.offsetHeight / oprateData.dom.canvas.offsetWidth
+        oprateData.ctx = oprateData.dom.canvas.getContext('2d')
+      }
+    })
+  }
   render() {
     const { material, typeSummary, parasiticAssembliseTypeSummary, openMap } = this.state
     const { assemblies, lines, parasiticAssemblies, others } = material
@@ -305,25 +323,28 @@ class Chart extends Component {
                     {
                       Object.keys(assemblies).map((assembly, i) => {
                         return (
-                          assemblies[assembly].typeBelong === type ? <div key={i} className={styles['small_assembly']}>
-                            <img
-                              alt={assemblies[assembly].assemblyName}
-                              className={styles['assembly-img']}
-                              src={assemblies[assembly].imageUrl}
-                              id={assembly}
-                              draggable={true}
-                              onDragStart={(ev) => this.dragAssembly(ev)}
-                              onMouseEnter={() => { assemblies[assembly].showTip = true; this.setState({ assemblies }) }}
-                              onMouseLeave={() => { assemblies[assembly].showTip = false; this.setState({ assemblies }) }}
-                            />
-                            <div className={assemblies[assembly].showTip ? (`${styles['hover_div']} ${styles.show}`) : `${styles['hover_div']} ${styles.hide}`}>
-                              <p>{assemblies[assembly].assemblyName}</p>
-                              <img src={assemblies[assembly].imageUrl} />
-                            </div>
-                            <div className={styles['display_name']}>
-                              {assemblies[assembly].assemblyName}
-                            </div>
-                          </div> : ''
+                          assemblies[assembly].typeBelong === type
+                            ? <div key={i} className={styles['assembly_wapper']}>
+                              <div key={i} className={styles['small_assembly']}>
+                                <img
+                                  alt={assemblies[assembly].assemblyName}
+                                  className={styles['assembly-img']}
+                                  src={assemblies[assembly].imageUrl}
+                                  id={assembly}
+                                  draggable={true}
+                                  onDragStart={(ev) => this.dragAssembly(ev)}
+                                  onMouseEnter={() => { assemblies[assembly].showTip = true; this.setState({ assemblies }) }}
+                                  onMouseLeave={() => { assemblies[assembly].showTip = false; this.setState({ assemblies }) }}
+                                />
+                                <div className={styles['display_name']}>
+                                  {assemblies[assembly].assemblyName}
+                                </div>
+                              </div>
+                              <div className={assemblies[assembly].showTip ? (`${styles['hover_div']} ${styles.show}`) : `${styles['hover_div']} ${styles.hide}`}>
+                                <p>{assemblies[assembly].assemblyName}</p>
+                                <img src={assemblies[assembly].imageUrl} />
+                              </div>
+                            </div> : ''
                         )
                       })
                     }
@@ -349,23 +370,25 @@ class Chart extends Component {
                     {
                       Object.keys(parasiticAssemblies).map((assembly, i) => {
                         return (
-                          parasiticAssemblies[assembly].typeBelong === type ? <div key={i} className={styles['small_assembly']}>
-                            <img
-                              alt={parasiticAssemblies[assembly].assemblyName}
-                              className={styles['assembly-img']}
-                              src={parasiticAssemblies[assembly].imageUrl}
-                              id={assembly}
-                              draggable={true}
-                              onDragStart={(ev) => this.dragAssembly(ev, 'PA')}
-                              onMouseEnter={() => { parasiticAssemblies[assembly].showTip = true; this.setState({ parasiticAssemblies }) }}
-                              onMouseLeave={() => { parasiticAssemblies[assembly].showTip = false; this.setState({ parasiticAssemblies }) }}
-                              style={{ width: '70%', height: '70%' }}
-                            />
-                            <div className={parasiticAssemblies[assembly].showTip ? (`${styles['hover_div']} ${styles.show}`) : `${styles['hover_div']} ${styles.hide}`}>
-                              <p>{parasiticAssemblies[assembly].assemblyName}</p>
-                              <img src={parasiticAssemblies[assembly].imageUrl} />
-                            </div>
-                          </div> : ''
+                          parasiticAssemblies[assembly].typeBelong === type
+                            ? <div key={i} className={styles['assembly_wapper']}>
+                              <div className={`${styles['small_assembly']} ${styles['small_assembly_center_img']}`}>
+                                <img
+                                  alt={parasiticAssemblies[assembly].assemblyName}
+                                  className={styles['assembly-img']}
+                                  src={parasiticAssemblies[assembly].imageUrl}
+                                  id={assembly}
+                                  draggable={true}
+                                  onDragStart={(ev) => this.dragAssembly(ev, 'PA')}
+                                  onMouseEnter={() => { parasiticAssemblies[assembly].showTip = true; this.setState({ parasiticAssemblies }) }}
+                                  onMouseLeave={() => { parasiticAssemblies[assembly].showTip = false; this.setState({ parasiticAssemblies }) }}
+                                />
+                              </div>
+                              <div className={parasiticAssemblies[assembly].showTip ? (`${styles['hover_div']} ${styles.show}`) : `${styles['hover_div']} ${styles.hide}`}>
+                                <p>{parasiticAssemblies[assembly].assemblyName}</p>
+                                <img src={parasiticAssemblies[assembly].imageUrl} />
+                              </div>
+                            </div> : ''
                         )
                       })
                     }
@@ -390,16 +413,18 @@ class Chart extends Component {
               {
                 Object.keys(lines).map((line, i) => {
                   return (
-                    <div key={i} className={styles['small_assembly']}>
-                      <img
-                        className={!lines[line].isActive ? styles['line-img'] : styles['line-img-active']}
-                        src={lines[line].imgSrc}
-                        id={line} draggable={false}
-                        onClick={(ev) => this.setActiveLine(ev, line, lines)}
-                        onMouseEnter={() => { lines[line].showTip = true; this.setState({ lines }) }}
-                        onMouseLeave={() => { lines[line].showTip = false; this.setState({ lines }) }}
-                        style={{ width: '70%', height: '70%' }}
-                      />
+                    <div key={i} className={styles['assembly_wapper']}>
+                      <div className={styles['small_assembly']}>
+                        <img
+                          className={!lines[line].isActive ? styles['line-img'] : styles['line-img-active']}
+                          src={lines[line].imgSrc}
+                          id={line} draggable={false}
+                          onClick={(ev) => this.setActiveLine(ev, line, lines)}
+                          onMouseEnter={() => { lines[line].showTip = true; this.setState({ lines }) }}
+                          onMouseLeave={() => { lines[line].showTip = false; this.setState({ lines }) }}
+                          style={{ width: '70%', height: '70%' }}
+                        />
+                      </div>
                       <div className={lines[line].showTip ? (`${styles['hover_div']} ${styles.show}`) : `${styles['hover_div']} ${styles.hide}`}>
                         <p>{lines[line].lineName}</p>
                         <img src={lines[line].imgSrc} />
@@ -426,18 +451,20 @@ class Chart extends Component {
               {
                 Object.keys(others).map((item, i) => {
                   return (
-                    <div key={i} className={styles['small_assembly']}>
-                      <img
-                        className={styles['assembly-img']}
-                        src={others[item].imgSrc}
-                        id={item} draggable={true}
-                        onDragStart={(ev) => this.dragAssembly(ev)}
-                        onMouseEnter={() => { others[item].showTip = true; this.setState({ others }) }}
-                        onMouseLeave={() => { others[item].showTip = false; this.setState({ others }) }}
-                        style={{ width: '70%', height: '70%' }}
-                      />
+                    <div key={i} className={styles['assembly_wapper']}>
+                      <div key={i} className={styles['small_assembly']}>
+                        <img
+                          className={styles['assembly-img']}
+                          src={others[item].imgSrc}
+                          id={item} draggable={true}
+                          onDragStart={(ev) => this.dragAssembly(ev)}
+                          onMouseEnter={() => { others[item].showTip = true; this.setState({ others }) }}
+                          onMouseLeave={() => { others[item].showTip = false; this.setState({ others }) }}
+                          style={{ width: '70%', height: '70%' }}
+                        />
+                      </div>
                       <div className={others[item].showTip ? (`${styles['hover_div']} ${styles.show}`) : `${styles['hover_div']} ${styles.hide}`}>
-                        <p>{others[item].lineName}</p>
+                        <p>{others[item].assemblyName}</p>
                         <img src={others[item].imgSrc} />
                       </div>
                     </div>
@@ -452,6 +479,9 @@ class Chart extends Component {
           onDrop={(event) => this.materialDrop(event)}
           onDragOver={(ev) => ev.preventDefault()}
         >
+          <div className={styles.btns}>
+            <div className={styles.pc_button} onClick={() => this.changeDevice('pc')} />
+          </div>
           {
             this.props.btns && <div className={styles.extra_btn}>
               {this.props.btns}
@@ -459,7 +489,7 @@ class Chart extends Component {
           }
           <p className={styles.charts_title}>{this.props.title}</p>
           {
-            !this.props.disabled ? <div className={this.props.device === 'mobile' ? styles['canvas_mobile'] : styles['canvas_pc']}>
+            !this.props.disabled ? <div className={styles['canvas_mobile']}>
               <canvas
                 ref='flow_canvas'
                 onClick={(ev) => this.chooseAssembly(ev, this.props.chooseAssembly)}
@@ -470,20 +500,38 @@ class Chart extends Component {
                 style={{ width: '100%', height: '100%' }}
                 tabIndex='0'
               />
-            </div> : <div className={this.props.device === 'mobile' ? styles['canvas_mobile'] : styles['canvas_pc']}>
+            </div> : <div className={styles['canvas_mobile']}>
               <div style={{ width: '100%', height: '100%' }} className={styles.forbid} />
             </div>
           }
         </div>
+        {
+          this.state.device === 'pc' &&
+          <div className={styles.show_pc}>
+            <canvas
+              ref='flow_canvas_pc'
+              onClick={(ev) => this.chooseAssembly(ev, this.props.chooseAssembly)}
+              onMouseDown={(event) => this.moveStart(event)}
+              onMouseUp={event => this.moveEnd(event)}
+              onMouseOut={event => this.moveEnd(event)}
+              onMouseMove={(event) => this.move(event)}
+            />
+            <div className={styles.close} onClick={() => this.changeDevice('mobile')} />
+          </div>
+        }
       </div>
     )
   }
   componentDidMount() {
+    oprateData.destroy = false
     if (!this.refs['flow_canvas']) {
       return
     }
     this.flowInit()
     alreadyInit = true
+  }
+  componentWillUnmount() {
+    oprateData.destroy = true
   }
 }
 export default Chart
