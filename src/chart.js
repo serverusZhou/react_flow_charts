@@ -6,6 +6,9 @@ import actionMethod from './actionMehod'
 import { btns, draftingPoints } from './material/btns'
 import { others } from './material/other'
 
+import pcIcon from '../assets/icon/pc.png'
+import pcSave from '../assets/icon/save.png'
+
 const mode = util.keysSwith({ 'assembly': true, 'line': false, 'inLineChoosen': false })
 let flag = false
 let setTime = null
@@ -61,7 +64,7 @@ class Chart extends Component {
       line: false,
       other: false
     }
-    this.state = { ...props, openMap, showPc: false }
+    this.state = { ...props, openMap, showPc: false, mode: 'asm' }
   }
   dragAssembly (ev, assemblyType) {
     ev.dataTransfer.setData('assembly', ev.target.id)
@@ -75,10 +78,13 @@ class Chart extends Component {
     if (ev.dataTransfer.getData('assemblyType') !== 'PA') {
       actionMehodWapper.addAssmbly(ev.dataTransfer.getData('assembly'), position)
     } else {
-      actionMehodWapper.addPAssmbly(ev.dataTransfer.getData('assembly'), position)
+      const pAssembly = actionMehodWapper.addPAssmbly(ev.dataTransfer.getData('assembly'), position)
+      if (this.props.addPAssemblyCallBack && pAssembly) {
+        this.props.addPAssemblyCallBack(pAssembly)
+      }
     }
   }
-  chooseAssembly (ev, callBack) {
+  chooseAssembly (ev, chooseAsmCallBack, chooseLineCallBack, clearChoose) {
     if (flag) { flag = false; return false }
     const { mode, choosenLine, choosenAssembly, ableMovePAssembly, lines, ableAddPointLine } = oprateData
     const position = actionMehodWapper.transPixelToPos({
@@ -105,23 +111,43 @@ class Chart extends Component {
       const line = actionMehodWapper.chooseLine(position)
       if (line) {
         mode.setTo('inLineChoosen')
+        if (chooseLineCallBack) {
+          chooseLineCallBack(Object.assign({}, line), {})
+        }
         return
       }
       const assembly = actionMehodWapper.chooseAssmbly(position)
-      if (callBack && assembly) {
-        callBack(Object.assign({}, assembly), function(acturalData) {
-          actionMehodWapper.updateChoosenAssemblyActuralData(acturalData)
-        }, function(inOrOut, displayName, acturalData) {
-          if (inOrOut === 'in') {
-            actionMehodWapper.addPAssmbly('jumppingIntPoint', { x: assembly.position.x + 10, y: assembly.position.y + 10 }, displayName, acturalData)
-          }
-          if (inOrOut === 'out') {
-            actionMehodWapper.addPAssmbly('jumppingOutPoint', { x: assembly.position.x + 10, y: assembly.position.y + 10 }, displayName, acturalData)
-          }
-        }, function(deletePAssembly) {
-          actionMehodWapper.deletePAssembly(deletePAssembly)
-        })
+      if (assembly) {
+        if (chooseAsmCallBack) {
+          chooseAsmCallBack(Object.assign({}, assembly), {
+            updateActuralData: (acturalData) => {
+              actionMehodWapper.updateChoosenAssemblyActuralData(acturalData)
+            },
+            addJumppingPoint: (inOrOut, displayName, acturalData) => {
+              if (inOrOut === 'in') {
+                actionMehodWapper.addPAssmbly('jumppingIntPoint', { x: assembly.position.x + 10, y: assembly.position.y + 10 }, displayName, acturalData)
+              }
+              if (inOrOut === 'out') {
+                actionMehodWapper.addPAssmbly('jumppingOutPoint', { x: assembly.position.x + 10, y: assembly.position.y + 10 }, displayName, acturalData)
+              }
+            },
+            deletePAssembly: (deletePAssembly) => {
+              actionMehodWapper.deletePAssembly(deletePAssembly)
+            },
+            updatePAssemblyActuralData: (pAssembly, acturalData) => {
+              actionMehodWapper.updatePAssemblyActuralData(pAssembly, acturalData)
+            },
+            updateChoosenAssemblyPosition: (position) => {
+              actionMehodWapper.updateChoosenAssemblyPosition(position)
+            },
+            updateChoosenAssemblySize: (size) => {
+              actionMehodWapper.updateChoosenAssemblySize(size)
+            }
+          })
+        }
+        return
       }
+      clearChoose()
     }
   }
   moveStart (ev) {
@@ -253,14 +279,16 @@ class Chart extends Component {
   componentWillReceiveProps(nextProps) {
     oprateData.material = nextProps.material
     oprateData.material.others = others
-    // const resetMeterail = actionMehodWapper.resetAssembliesAndLines(
-    //   !nextProps.assemblies.length ? nextProps.assemblies : preProps.assemblies,
-    //   !nextProps.lines.length ? nextProps.lines : preProps.lines,
-    //   !nextProps.parasiticAssemblies.length ? nextProps.parasiticAssemblies : preProps.parasiticAssemblies)
-    // oprateData.assemblies = resetMeterail.assemblies
-    // oprateData.lines = resetMeterail.lines
-    // oprateData.parasiticAssemblies = resetMeterail.parasiticAssemblies
     oprateData.device = nextProps.device
+    if (nextProps.shouldUpdate) {
+      const resetMeterail = actionMehodWapper.resetAssembliesAndLines(
+        !nextProps.assemblies.length ? nextProps.assemblies : this.props.assemblies,
+        !nextProps.lines.length ? nextProps.lines : this.props.lines,
+        !nextProps.parasiticAssemblies.length ? nextProps.parasiticAssemblies : this.props.parasiticAssemblies)
+      oprateData.assemblies = resetMeterail.assemblies
+      oprateData.lines = resetMeterail.lines
+      oprateData.parasiticAssemblies = resetMeterail.parasiticAssemblies
+    }
   }
   componentDidUpdate() {
     if (!this.props.disabled && !alreadyInit && this.refs['flow_canvas']) {
@@ -277,6 +305,9 @@ class Chart extends Component {
     drawWapper.init()
   }
   changeDevice = (device) => {
+    if (this.props.deviceChange) {
+      this.props.deviceChange(device)
+    }
     this.setState({ device }, () => {
       oprateData.device = device
       if (device === 'pc' && this.refs['flow_canvas_pc']) {
@@ -399,44 +430,6 @@ class Chart extends Component {
           }
           <div>
             <p
-              className={openMap['line'] ? styles.up : styles.down}
-              onClick={() => {
-                this.setState({
-                  openMap: {
-                    ...openMap,
-                    line: !openMap['line']
-                  }
-                })
-              }}
-            >线条（点击选中进行连线）</p>
-            <div className={openMap['line'] ? '' : styles.hidden}>
-              {
-                Object.keys(lines).map((line, i) => {
-                  return (
-                    <div key={i} className={styles['assembly_wapper']}>
-                      <div className={styles['small_assembly']}>
-                        <img
-                          className={!lines[line].isActive ? styles['line-img'] : styles['line-img-active']}
-                          src={lines[line].imgSrc}
-                          id={line} draggable={false}
-                          onClick={(ev) => this.setActiveLine(ev, line, lines)}
-                          onMouseEnter={() => { lines[line].showTip = true; this.setState({ lines }) }}
-                          onMouseLeave={() => { lines[line].showTip = false; this.setState({ lines }) }}
-                          style={{ width: '70%', height: '70%' }}
-                        />
-                      </div>
-                      <div className={lines[line].showTip ? (`${styles['hover_div']} ${styles.show}`) : `${styles['hover_div']} ${styles.hide}`}>
-                        <p>{lines[line].lineName}</p>
-                        <img src={lines[line].imgSrc} />
-                      </div>
-                    </div>
-                  )
-                })
-              }
-            </div>
-          </div>
-          <div>
-            <p
               className={openMap['other'] ? styles.up : styles.down}
               onClick={() => {
                 this.setState({
@@ -479,9 +472,6 @@ class Chart extends Component {
           onDrop={(event) => this.materialDrop(event)}
           onDragOver={(ev) => ev.preventDefault()}
         >
-          <div className={styles.btns}>
-            <div className={styles.pc_button} onClick={() => this.changeDevice('pc')} />
-          </div>
           {
             this.props.btns && <div className={styles.extra_btn}>
               {this.props.btns}
@@ -490,14 +480,48 @@ class Chart extends Component {
           <p className={styles.charts_title}>{this.props.title}</p>
           {
             !this.props.disabled ? <div className={styles['canvas_mobile']}>
+              <div className={styles['top_btns']}>
+                <div className={styles.top_btn}>
+                  <img
+                    className={styles['line-img']}
+                    src={pcIcon}
+                    draggable={false}
+                    onClick={() => this.changeDevice('pc')}
+                  />
+                </div>
+                <div className={styles.top_btn}>
+                  <img
+                    className={styles['line-img']}
+                    src={pcSave}
+                    draggable={false}
+                    onClick={() => this.getData()}
+                  />
+                </div>
+                {
+                  Object.keys(lines).map((line, i) => {
+                    return (
+                      <div key={i} className={styles['top_btn']}>
+                        <img
+                          className={!lines[line].isActive ? styles['line-img'] : styles['line-img-active']}
+                          src={lines[line].imgSrc}
+                          id={line} draggable={false}
+                          onClick={(ev) => this.setActiveLine(ev, line, lines)}
+                          onMouseEnter={() => { lines[line].showTip = true; this.setState({ lines }) }}
+                          onMouseLeave={() => { lines[line].showTip = false; this.setState({ lines }) }}
+                        />
+                      </div>
+                    )
+                  })
+                }
+              </div>
               <canvas
                 ref='flow_canvas'
-                onClick={(ev) => this.chooseAssembly(ev, this.props.chooseAssembly)}
+                onClick={(ev) => this.chooseAssembly(ev, this.props.chooseAssembly, this.props.chooseLine, this.props.clearChoose)}
                 onMouseDown={(event) => this.moveStart(event)}
                 onMouseUp={event => this.moveEnd(event)}
                 onMouseOut={event => this.moveEnd(event)}
                 onMouseMove={(event) => this.move(event)}
-                style={{ width: '100%', height: '100%' }}
+                style={{ width: '100%', height: 'calc(100% - 44px)' }}
                 tabIndex='0'
               />
             </div> : <div className={styles['canvas_mobile']}>
@@ -510,7 +534,7 @@ class Chart extends Component {
           <div className={styles.show_pc}>
             <canvas
               ref='flow_canvas_pc'
-              onClick={(ev) => this.chooseAssembly(ev, this.props.chooseAssembly)}
+              onClick={(ev) => this.chooseAssembly(ev, this.props.chooseAssembly, this.props.chooseLine, this.props.clearChoose)}
               onMouseDown={(event) => this.moveStart(event)}
               onMouseUp={event => this.moveEnd(event)}
               onMouseOut={event => this.moveEnd(event)}

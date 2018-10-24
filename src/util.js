@@ -21,8 +21,15 @@ function clearObj (obj) {
     delete obj[key]
   })
 }
+
+function getImage(url) {
+  const image = new Image()
+  image.src = url
+  return image
+}
   
 export default {
   keysSwith,
   clearObj,
+  getImage
 }

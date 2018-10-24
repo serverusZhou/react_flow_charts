@@ -2,7 +2,7 @@
 function drawATip(ctx, position = { x: 0, y: 0 }, words = '暂无名称') {
   ctx.beginPath()
   ctx.fillStyle = 'rgba(0,0,0,1)'
-  ctx.font = "bold 36px '宋体'"
+  ctx.font = "bold 32px '宋体'"
   ctx.textAlign = 'center'
   ctx.textBaseline = 'top'
   ctx.fillText(words, position.x, position.y)
@@ -98,7 +98,7 @@ export default function(oprateData) {
           size = element.size
         }
 
-        element.draw(ctx, position, size, element.imageUrl, element.displayName)
+        element.draw(ctx, position, size, element.image, element.displayName)
         if (!element.highLevelAssembly) {
           drawATip(ctx, {
             x: position.x + size.width / 2,

@@ -43,6 +43,15 @@ export default {
     assemblyType,
     assemblyName: '加药泵',
     size: defaultSize,
+    isPAndA: true,
+    offsetPosition: { x: 120, y: -135.5 },
+    draw: () => (ctx, position, size, image) => {
+      ctx.beginPath()
+      ctx.strokeStyle = 'rgba(0,0,0,1)'
+      ctx.drawImage(image, position.x, position.y, size.width, size.height)
+      ctx.stroke()
+      ctx.restore()
+    }
   },
   dosingMixer: {
     imageUrl: dosingMixerOpen,

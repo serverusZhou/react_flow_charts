@@ -8,19 +8,26 @@ import lines from '../material/lines'
 import { typeSummary, parasiticAssembliseTypeSummary } from './dict'
 import CircularJSON from 'circular-json'
 
-function chooseAssemblyCallBakTest(assembly, updateActuralData, handleJumpPoint) {
+function chooseAssemblyCallBakTest(assembly, funcsWapper) {
   console.log(assembly)
-  updateActuralData({
+  console.log(typeof funcsWapper.updateActuralData)
+  funcsWapper.updateActuralData({
     tip: 'shibai'
   })
   setTimeout(() => {
-    updateActuralData({
+    funcsWapper.updateActuralData({
       tip: '成功啦'
     })
     // handleJumpPoint('in')
   }, 3000)
 }
+function chooseLineCallBack(line) {
+  console.log('linelineline', line)
+}
 
+function clearChoose() {
+  console.log('已经clear了')
+}
 function getData (data) {
   localStorage.setItem('cartData', CircularJSON.stringify(Object.assign({}, data)))
 }
@@ -43,6 +50,8 @@ ReactDOM.render(
       lines= {(cartData && cartData.lines) || []}
       parasiticAssemblies = {(cartData && cartData.parasiticAssemblies) || []}
       chooseAssembly = {chooseAssemblyCallBakTest}
+      chooseLine={chooseLineCallBack}
+      clearChoose={clearChoose}
       device = {'mobile'}
       getData = {getData}
       title = {'污水处理流程'}
