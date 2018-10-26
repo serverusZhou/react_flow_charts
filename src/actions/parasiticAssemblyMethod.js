@@ -20,14 +20,13 @@ export default class ParasiticAssemblyMethod {
       ratio: imageRatio(getImage(_pAssembly.imageUrl)),
       isOccupyInternalSpace: _pAssembly.isOccupyInternalSpace,
       initData: _pAssembly.initData,
+      typeBelong: _pAssembly.typeBelong,
     }
     parasiticAssemblies.push(addParasiticAssembly)
     return addParasiticAssembly
   }
   updateActuralData = (_pAssembly, _data) => {
     const { parasiticAssemblies } = this.DATA
-    console.log('_pAssembly_pAssembly_pAssembly', _pAssembly)
-    console.log('parasiticAssembliesparasiticAssemblies', parasiticAssemblies)
     const choosenPAsm = parasiticAssemblies.find(pasm => (pasm.id === _pAssembly.id))
     choosenPAsm.acturalData = {
       ..._pAssembly.acturalData,

@@ -86,7 +86,7 @@ class Chart extends Component {
   }
   chooseAssembly (ev, chooseAsmCallBack, chooseLineCallBack, clearChoose) {
     if (flag) { flag = false; return false }
-    const { mode, choosenLine, choosenAssembly, ableMovePAssembly, lines, ableAddPointLine } = oprateData
+    const { mode, choosenLine, choosenAssembly, ableMovePAssembly, lines, ableAddPointLine, device } = oprateData
     const position = actionMehodWapper.transPixelToPos({
       x: ev.clientX,
       y: ev.clientY
@@ -103,7 +103,12 @@ class Chart extends Component {
       if (ableAddPointLine && Object.keys(ableAddPointLine).length) {
         const line = lines.find(element => !!ableAddPointLine[element.id])
         if (line) {
-          line.middlePoints.splice(ableAddPointLine[line.id].belongIndex, 1)
+          if (device === 'mobile') {
+            line.middlePoints.splice(ableAddPointLine[line.id].belongIndex, 1)
+          }
+          if (device === 'pc') {
+            line.middlePointsPc.splice(ableAddPointLine[line.id].belongIndex, 1)
+          }
           util.clearObj(ableAddPointLine)
         }
       }
@@ -200,11 +205,12 @@ class Chart extends Component {
     }
   }
   move (ev) {
-    const { mode, ableMoveAssembly, ableMovePAssembly, temLine, ableDrafPoint, ableAddPointLine } = oprateData
+    const { mode, ableMoveAssembly, ableMovePAssembly, temLine, ableDrafPoint, ableAddPointLine, dom } = oprateData
     const position = actionMehodWapper.transPixelToPos({
       x: ev.clientX,
       y: ev.clientY
     })
+    dom.canvas.style.cursor = 'default'
     if (flag) {
       if (mode.is('assembly')) {
         if (Object.keys(ableMoveAssembly).length) {
@@ -303,6 +309,21 @@ class Chart extends Component {
     }, true)
     oprateData.dom.canvas.focus()
     drawWapper.init()
+    if (this.props.getInitCallBackFuncs) {
+      this.props.getInitCallBackFuncs({
+        updateAsmActuralData: (assembly, acturalData) => {
+          actionMehodWapper.updateAsmActuralData(assembly, acturalData)
+        },
+        updatePAssemblyActuralData: (pAssembly, acturalData) => {
+          actionMehodWapper.updatePAssemblyActuralData(pAssembly, acturalData)
+        },
+        deleteAssembly: (assembly) => {
+          const { choosenAssembly, assemblies } = oprateData
+          actionMehodWapper.deleteRightAssembly(assembly)
+          return assemblies.find(asm => choosenAssembly[asm.id])
+        }
+      })
+    }
   }
   changeDevice = (device) => {
     if (this.props.deviceChange) {
@@ -525,7 +546,9 @@ class Chart extends Component {
                 tabIndex='0'
               />
             </div> : <div className={styles['canvas_mobile']}>
-              <div style={{ width: '100%', height: '100%' }} className={styles.forbid} />
+              <div style={{ width: '100%', height: '100%' }} className={styles.forbid}>
+                <p>{this.props.forbidWord}</p>
+              </div>
             </div>
           }
         </div>

@@ -171,10 +171,12 @@ export default function(oprateData) {
         size: { width: belong.size.width, height: belong.size.height },
         sizePc: { width: belong.size.width, height: belong.size.height },
         displayName,
+        typeBelong: belong.typeBelong,
         turnSetting: {
           offsetPosition: belong.offsetPosition
         },
         draw: belong.draw(),
+        initData: belong.initData,
         acturalData: acturalData || {}
       })
       assemblyAction.turnToBelowAssembly(belongToAssembly, turnedAssembly)
@@ -251,9 +253,18 @@ export default function(oprateData) {
       const { assemblies, choosenAssembly } = oprateData
       assemblies.forEach(element => {
         if (choosenAssembly[element.id]) {
-          element.acturalData = acturalData
+          element.acturalData = {
+            ...element.acturalData,
+            ...acturalData,
+          }
         }
       })
+    },
+    updateAsmActuralData: function(asm, acturalData) {
+      asm.acturalData = {
+        ...asm.acturalData,
+        ...acturalData,
+      }
     },
     updatePAssemblyActuralData: function(pAssembly, acturalData) {
       pAssemblyAction.updateActuralData(pAssembly, acturalData)
@@ -553,24 +564,43 @@ export default function(oprateData) {
       }
     },
     updateLinePositions: function(position) {
-      const { lines, ableAddPointLine } = oprateData
+      const { lines, ableAddPointLine, device } = oprateData
       const line = lines.find(line => !!ableAddPointLine[line.id])
       if (line && Object.keys(line).length) {
-        line.middlePoints[ableAddPointLine[line.id].belongIndex] = position
+        if (device === 'mobile') {
+          line.middlePoints[ableAddPointLine[line.id].belongIndex] = position
+        }
+        if (device === 'pc') {
+          line.middlePointsPc[ableAddPointLine[line.id].belongIndex] = position
+        }
       }
     },
     setLinePositions: function(position) {
-      const { lines, ableAddPointLine } = oprateData
+      const { lines, ableAddPointLine, device } = oprateData
       const line = lines.find(line => !!ableAddPointLine[line.id])
-      const allPoints = [line.from.position].concat(line.middlePoints).concat([line.to.position])
-      if (checkIsThreePointsLine(
-        allPoints[ableAddPointLine[line.id].belongIndex],
-        allPoints[ableAddPointLine[line.id].belongIndex + 1],
-        allPoints[ableAddPointLine[line.id].belongIndex + 2]
-      )) {
-        line.middlePoints.splice(ableAddPointLine[line.id].belongIndex, 1)
-      } else {
-        line.middlePoints[ableAddPointLine[line.id].belongIndex ] = position
+      if (device === 'mobile') {
+        const allPoints = [line.from.position].concat(line.middlePoints).concat([line.to.position])
+        if (checkIsThreePointsLine(
+          allPoints[ableAddPointLine[line.id].belongIndex],
+          allPoints[ableAddPointLine[line.id].belongIndex + 1],
+          allPoints[ableAddPointLine[line.id].belongIndex + 2]
+        )) {
+          line.middlePoints.splice(ableAddPointLine[line.id].belongIndex, 1)
+        } else {
+          line.middlePoints[ableAddPointLine[line.id].belongIndex ] = position
+        }
+      }
+      if (device === 'pc') {
+        const allPoints = [line.from.positionPc].concat(line.middlePointsPc).concat([line.to.positionPc])
+        if (checkIsThreePointsLine(
+          allPoints[ableAddPointLine[line.id].belongIndex],
+          allPoints[ableAddPointLine[line.id].belongIndex + 1],
+          allPoints[ableAddPointLine[line.id].belongIndex + 2]
+        )) {
+          line.middlePointsPc.splice(ableAddPointLine[line.id].belongIndex, 1)
+        } else {
+          line.middlePointsPc[ableAddPointLine[line.id].belongIndex ] = position
+        }
       }
     },
     updateActionBtnPosition: function() {
@@ -625,7 +655,7 @@ export default function(oprateData) {
     },
     showHoverAssembly: function() {
       const that = this
-      const { hoverAssembly } = oprateData
+      const { hoverAssembly, dom } = oprateData
       return (position) => {
         const assembly = that.findAssmblyByPosition(position)
         if (!assembly) {
@@ -634,6 +664,7 @@ export default function(oprateData) {
         }
         util.clearObj(hoverAssembly)
         hoverAssembly[assembly.id] = true
+        dom.canvas.style.cursor = 'pointer'
       }
     },
     setActiveLine: function(lineType) {
@@ -719,10 +750,14 @@ export default function(oprateData) {
       }
     },
     deleteAssembly: function() {
-      const { choosenAssembly, assemblies, parasiticAssemblies, lines, actionBtns } = oprateData
-      if (choosenAssembly && Object.keys(choosenAssembly).length) {
+      const { choosenAssembly, assemblies } = oprateData
+      this.deleteRightAssembly(assemblies.find(asm => choosenAssembly[asm.id]))
+    },
+    deleteRightAssembly: function(_assembly) {
+      const { assemblies, parasiticAssemblies, lines, actionBtns } = oprateData
+      if (_assembly && Object.keys(_assembly).length) {
         assemblies.forEach((element, index) => {
-          if (choosenAssembly[element.id]) {
+          if (_assembly.id === element.id) {
             oprateData.lines = lines.filter(line => {
               return !element.lines.from.some(fromLine => line.id === fromLine.id) && !element.lines.to.some(fromLine => line.id === fromLine.id)
             })

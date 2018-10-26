@@ -30,6 +30,7 @@ export default class AssemblyMethod {
       sizePc: { width: size.width, height: size.height },
       insizeSpacePercent: _assembly.insizeSpacePercent,
       initData: _assembly.initData,
+      typeBelong: _assembly.typeBelong,
       draw: _assembly.draw
         ? _assembly.draw()
         : function(ctx, _position, size, image) {
@@ -38,6 +39,19 @@ export default class AssemblyMethod {
     }
     assemblies.push(addAssembly)
     return addAssembly
+  }
+  delete = (_assembly) => {
+    let getNum = 99999
+    const { assemblies } = this.DATA
+    assemblies.forEach((asm, index) => {
+      if (asm.id === _assembly.id) {
+        getNum = index
+      }
+    })
+    if (getNum !== 99999) {
+      assemblies.splice(getNum, 1)
+    }
+    return _assembly
   }
   addWithoutKey = (settings) => {
     const { assemblies } = this.DATA

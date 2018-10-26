@@ -266,9 +266,21 @@
 }
 
 .forbid {
-    background: url(../assets/icon/forbid.png) #ccc no-repeat;
-    background-position: center 30%;
-    background-size: 15%;
+    // background: url(../assets/icon/forbid.png) #ccc no-repeat;
+    // background-position: center 30%;
+    // background-size: 15%;
+    background-color: #f0f0f0;
+    &>p{
+        padding-top:150px;
+        display: flex;
+        justify-content: center;
+        color: #000;
+        font-size: 18px;
+        line-height: 30px;
+        margin: 0 auto;
+        width: 200px;
+        text-align: center;
+    }
 }
 
 .btns {
@@ -299,7 +311,7 @@
     left: 0;
     top:0;
     width: 100%;
-    height: calc(100% - 45px);
+    height: 100%;
     background-color: #fff;
     animation:show_pc_move .7s;
     -webkit-animation:show_pc_move .7s;
