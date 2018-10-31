@@ -105,7 +105,6 @@ export default function(oprateData) {
             y: position.y + size.height + 10
           }, element.name)
         }
-
         if (choosenAssembly[element.id]) {
           drawADottedLineWapper(ctx, [
             { x: position.x - 5, y: position.y - 5 },

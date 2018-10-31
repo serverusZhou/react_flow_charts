@@ -20,6 +20,7 @@ export default class ParasiticAssemblyMethod {
       ratio: imageRatio(getImage(_pAssembly.imageUrl)),
       isOccupyInternalSpace: _pAssembly.isOccupyInternalSpace,
       initData: _pAssembly.initData,
+      assemblyType: _pAssembly.assemblyType,
       typeBelong: _pAssembly.typeBelong,
     }
     parasiticAssemblies.push(addParasiticAssembly)

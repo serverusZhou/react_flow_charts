@@ -156,6 +156,7 @@ class Chart extends Component {
     }
   }
   moveStart (ev) {
+    if (this.props.isOnlyShow) return
     setTime = setTimeout(() => { flag = true }, 150)
     const { mode, choosenAssembly } = oprateData
     const position = actionMehodWapper.transPixelToPos({
@@ -294,6 +295,8 @@ class Chart extends Component {
       oprateData.assemblies = resetMeterail.assemblies
       oprateData.lines = resetMeterail.lines
       oprateData.parasiticAssemblies = resetMeterail.parasiticAssemblies
+      oprateData.choosenAssembly = {}
+      oprateData.actionBtns.enable = false
     }
   }
   componentDidUpdate() {
@@ -321,6 +324,9 @@ class Chart extends Component {
           const { choosenAssembly, assemblies } = oprateData
           actionMehodWapper.deleteRightAssembly(assembly)
           return assemblies.find(asm => choosenAssembly[asm.id])
+        },
+        getAllOprateData: () => {
+          return oprateData
         }
       })
     }
@@ -359,7 +365,7 @@ class Chart extends Component {
             }
           </div>
           {
-            Object.keys(typeSummary).map(type => {
+            !this.props.isOnlyShow && Object.keys(typeSummary).map(type => {
               return (
                 <div key = {type}>
                   <p
@@ -406,7 +412,7 @@ class Chart extends Component {
             })
           }
           {
-            Object.keys(parasiticAssembliseTypeSummary).map(type => {
+            !this.props.isOnlyShow && Object.keys(parasiticAssembliseTypeSummary).map(type => {
               return (
                 <div key = {type}>
                   <p
@@ -449,44 +455,46 @@ class Chart extends Component {
               )
             })
           }
-          <div>
-            <p
-              className={openMap['other'] ? styles.up : styles.down}
-              onClick={() => {
-                this.setState({
-                  openMap: {
-                    ...openMap,
-                    other: !openMap['other']
-                  }
-                })
-              }}
-            >其它</p>
-            <div className={openMap['other'] ? '' : styles.hidden}>
-              {
-                Object.keys(others).map((item, i) => {
-                  return (
-                    <div key={i} className={styles['assembly_wapper']}>
-                      <div key={i} className={styles['small_assembly']}>
-                        <img
-                          className={styles['assembly-img']}
-                          src={others[item].imgSrc}
-                          id={item} draggable={true}
-                          onDragStart={(ev) => this.dragAssembly(ev)}
-                          onMouseEnter={() => { others[item].showTip = true; this.setState({ others }) }}
-                          onMouseLeave={() => { others[item].showTip = false; this.setState({ others }) }}
-                          style={{ width: '70%', height: '70%' }}
-                        />
+          {
+            !this.props.isOnlyShow && <div>
+              <p
+                className={openMap['other'] ? styles.up : styles.down}
+                onClick={() => {
+                  this.setState({
+                    openMap: {
+                      ...openMap,
+                      other: !openMap['other']
+                    }
+                  })
+                }}
+              >其它</p>
+              <div className={openMap['other'] ? '' : styles.hidden}>
+                {
+                  Object.keys(others).map((item, i) => {
+                    return (
+                      <div key={i} className={styles['assembly_wapper']}>
+                        <div key={i} className={styles['small_assembly']}>
+                          <img
+                            className={styles['assembly-img']}
+                            src={others[item].imgSrc}
+                            id={item} draggable={true}
+                            onDragStart={(ev) => this.dragAssembly(ev)}
+                            onMouseEnter={() => { others[item].showTip = true; this.setState({ others }) }}
+                            onMouseLeave={() => { others[item].showTip = false; this.setState({ others }) }}
+                            style={{ width: '70%', height: '70%' }}
+                          />
+                        </div>
+                        <div className={others[item].showTip ? (`${styles['hover_div']} ${styles.show}`) : `${styles['hover_div']} ${styles.hide}`}>
+                          <p>{others[item].assemblyName}</p>
+                          <img src={others[item].imgSrc} />
+                        </div>
                       </div>
-                      <div className={others[item].showTip ? (`${styles['hover_div']} ${styles.show}`) : `${styles['hover_div']} ${styles.hide}`}>
-                        <p>{others[item].assemblyName}</p>
-                        <img src={others[item].imgSrc} />
-                      </div>
-                    </div>
-                  )
-                })
-              }
+                    )
+                  })
+                }
+              </div>
             </div>
-          </div>
+          }
         </div>
         <div
           className={styles['content']}
@@ -510,14 +518,14 @@ class Chart extends Component {
                     onClick={() => this.changeDevice('pc')}
                   />
                 </div>
-                <div className={styles.top_btn}>
+                {/* <div className={styles.top_btn}>
                   <img
                     className={styles['line-img']}
                     src={pcSave}
                     draggable={false}
                     onClick={() => this.getData()}
                   />
-                </div>
+                </div> */}
                 {
                   Object.keys(lines).map((line, i) => {
                     return (

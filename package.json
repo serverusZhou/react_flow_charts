@@ -1,6 +1,6 @@
 {
   "name": "react_flow_charts",
-  "version": "1.5.4",
+  "version": "1.5.5",
   "description": "A react flow chart component",
   "main": "dist/index.js",
   "files": [
@@ -31,7 +31,9 @@
   },
   "homepage": "https://github.com/serverusZhou/react_flow_charts#readme",
   "dependencies": {
+    "antd": "^3.10.3",
     "circular-json": "^0.5.5",
+    "fundebug-javascript": "^1.2.3",
     "prop-types": "^15.6.2",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
