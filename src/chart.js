@@ -7,7 +7,6 @@ import { btns, draftingPoints } from './material/btns'
 import { others } from './material/other'
 
 import pcIcon from '../assets/icon/pc.png'
-import pcSave from '../assets/icon/save.png'
 
 const mode = util.keysSwith({ 'assembly': true, 'line': false, 'inLineChoosen': false })
 let flag = false
@@ -289,9 +288,9 @@ class Chart extends Component {
     oprateData.device = nextProps.device
     if (nextProps.shouldUpdate) {
       const resetMeterail = actionMehodWapper.resetAssembliesAndLines(
-        !nextProps.assemblies.length ? nextProps.assemblies : this.props.assemblies,
-        !nextProps.lines.length ? nextProps.lines : this.props.lines,
-        !nextProps.parasiticAssemblies.length ? nextProps.parasiticAssemblies : this.props.parasiticAssemblies)
+        nextProps.assemblies.length ? nextProps.assemblies : this.props.assemblies,
+        nextProps.lines.length ? nextProps.lines : this.props.lines,
+        nextProps.parasiticAssemblies.length ? nextProps.parasiticAssemblies : this.props.parasiticAssemblies)
       oprateData.assemblies = resetMeterail.assemblies
       oprateData.lines = resetMeterail.lines
       oprateData.parasiticAssemblies = resetMeterail.parasiticAssemblies
