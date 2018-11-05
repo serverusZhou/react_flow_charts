@@ -9,7 +9,7 @@ function drawATip(ctx, position = { x: 0, y: 0 }, words = '暂无名称') {
   ctx.closePath()
   ctx.restore()
 }
-
+  
 function drawADottedLine() {
   let isIncrease = 1
   let distence = 5
@@ -38,7 +38,7 @@ function drawADottedLine() {
     ctx.restore()
   }
 }
-
+  
 function drawAImage(ctx, image, position, size) {
   ctx.beginPath()
   ctx.drawImage(image, 0, 0, image.width, image.height, position.x, position.y, size.width, size.width * image.height / image.width)
@@ -59,9 +59,9 @@ function drawGrid(ctx, dom) {
   ctx.stroke()
   ctx.closePath()
 }
-
+  
 const drawADottedLineWapper = drawADottedLine()
-
+  
 export default function(oprateData) {
   return {
     init: function(initWidth = 1000, initHeight = 1000) {
@@ -86,7 +86,7 @@ export default function(oprateData) {
       mainLoop()
     },
     draw: function() {
-      const { assemblies, choosenAssembly, hoverAssembly, parasiticAssemblies, choosenLine, ctx, lines, temLine, actionBtns, dom, device } = oprateData
+      const { assemblies, choosenAssembly, hoverAssembly, parasiticAssemblies, choosenLine, ctx, lines, temLine, dom, device } = oprateData
       drawGrid(ctx, dom) // ok
       assemblies.forEach(element => {
         let position = {}; let size = {}
@@ -97,7 +97,7 @@ export default function(oprateData) {
           position = element.position
           size = element.size
         }
-
+  
         element.draw(ctx, position, size, element.image, element.displayName)
         if (!element.highLevelAssembly) {
           drawATip(ctx, {
@@ -157,7 +157,7 @@ export default function(oprateData) {
           toSize = element.to.assembly.size
           middlePoints = element.middlePoints
         }
-
+  
         if (element.draw) {
           element.draw(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints)
         }
@@ -175,19 +175,6 @@ export default function(oprateData) {
       })
       if (Object.keys(temLine).length) {
         temLine.draw(ctx, temLine.from.position, temLine.to.position)
-      }
-      if (actionBtns.enable) {
-        actionBtns.btns.forEach((btn, index) => {
-          drawAImage(ctx, btn.image, btn.position, btn.size)
-        })
-        actionBtns.draftingPoints.forEach((draftingPoint, index) => {
-          if (device === 'pc') {
-            drawAImage(ctx, draftingPoint.image, draftingPoint.positionPc, draftingPoint.sizePc)
-          }
-          if (device === 'mobile') {
-            drawAImage(ctx, draftingPoint.image, draftingPoint.position, draftingPoint.size)
-          }
-        })
       }
     }
   }

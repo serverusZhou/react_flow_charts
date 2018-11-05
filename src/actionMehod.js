@@ -281,8 +281,10 @@ export default function(oprateData) {
           { x: choosenA.position.x, y: choosenA.position.y },
           { x: choosenA.position.x + choosenA.size.width, y: choosenA.position.y + choosenA.size.height }
         ])) {
-          oprateData.parasiticAssemblies = parasiticAssemblies.filter(pAssembly => pAssembly.id !== movePAssembly.id)
-          choosenA.belongs = choosenA.belongs.filter(belong => belong.id !== movePAssembly.id)
+          // oprateData.parasiticAssemblies = parasiticAssemblies.filter(pAssembly => pAssembly.id !== movePAssembly.id)
+          // choosenA.belongs = choosenA.belongs.filter(belong => belong.id !== movePAssembly.id)
+          const bAsm = pAssemblyAction.deleteWithId(movePAssembly.id)
+          assemblyAction.deletePAssembly(bAsm, movePAssembly)
         }
         assemblyAction.reLayoutPAssemblies(choosenA)
       }
@@ -791,17 +793,8 @@ export default function(oprateData) {
       }
     },
     deletePAssembly: function(pAssembly) {
-      const { parasiticAssemblies } = oprateData
-      parasiticAssemblies.forEach((pa, index) => {
-        if (pa.id === pAssembly.id) {
-          pAssembly.belongsTo.belongs.forEach((belong, _index) => {
-            if (belong.id === pAssembly.id) {
-              pAssembly.belongsTo.belongs.splice(_index, 1)
-            }
-          })
-          parasiticAssemblies.splice(index, 1)
-        }
-      })
+      const belognToAsm = pAssemblyAction.deleteWithId(pAssembly.id)
+      assemblyAction.deletePAssembly(belognToAsm, pAssembly)
     },
     deleteLine: function() {
       const { choosenLine, lines, mode } = oprateData
@@ -829,9 +822,11 @@ export default function(oprateData) {
       const { material } = oprateData
       assemblies.forEach(assembly => {
         if (assembly.highLevelAssembly) {
-          assembly.draw = material.parasiticAssemblies[assembly.assemblyName].draw ? material.parasiticAssemblies[assembly.assemblyName].draw() : function(ctx, position, size, image) {
-            drawAImage(ctx, image, position, size)
-          }
+          assembly.draw = material.parasiticAssemblies[assembly.assemblyName].draw
+            ? material.parasiticAssemblies[assembly.assemblyName].draw()
+            : function(ctx, position, size, image) {
+              drawAImage(ctx, image, position, size)
+            }
         } else {
           assembly.draw = material.assemblies[assembly.assemblyName].draw ? material.assemblies[assembly.assemblyName].draw() : function(ctx, position, size, image) {
             drawAImage(ctx, image, position, size)

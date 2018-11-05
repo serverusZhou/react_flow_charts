@@ -120,6 +120,15 @@ export default class AssemblyMethod {
     pAsb.sizePc = remainPosition.sizePc
     asb.belongs.push(pAsb)
   }
+  deletePAssembly = (asb, pAsb) => {
+    const belongs = asb.belongs.reduce((ev, belong) => {
+      if (belong.id !== pAsb.id) {
+        ev.push(belong)
+      }
+      return ev
+    }, [])
+    asb.belongs = belongs
+  }
   turnToBelowAssembly = (asb, turnAsb) => {
     turnAsb.highLevelAssembly = asb
     const offsetP = turnAsb.turnSetting.offsetPosition

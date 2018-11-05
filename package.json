@@ -1,6 +1,6 @@
 {
   "name": "react_flow_charts",
-  "version": "1.5.6",
+  "version": "1.5.7",
   "description": "A react flow chart component",
   "main": "dist/index.js",
   "files": [
@@ -9,6 +9,8 @@
   "scripts": {
     "build": "node build/build",
     "start": "webpack-dev-server --inline --progress --config build/test.conf.js",
+    "startMobile": "webpack-dev-server --inline --progress --config build/test.mobile.conf.js",
+    "startPc": "webpack-dev-server --inline --progress --config build/test.pc.conf.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "npm run lint:es && npm run lint:style",
     "lint:es": "eslint ./src --ext '.js,.jsx'",

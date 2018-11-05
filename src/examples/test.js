@@ -56,7 +56,7 @@ ReactDOM.render(
       getData = {getData}
       title = {'污水处理流程'}
       disabled = {false}
-      isOnlyShow = {true}
+      isOnlyShow = {false}
       forbidWord = '请至企业下选择已有流程或者新建流程'
       btns = {<div><Button type='primary' >新建流程</Button><Button>新建流程</Button><Button>新建流程</Button><Button>新建流程</Button></div>}
     />

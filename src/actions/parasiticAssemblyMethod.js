@@ -26,6 +26,23 @@ export default class ParasiticAssemblyMethod {
     parasiticAssemblies.push(addParasiticAssembly)
     return addParasiticAssembly
   }
+  deleteWithId = (id) => {
+    const { parasiticAssemblies: pAsms } = this.DATA
+    const result = pAsms.reduce((ev, pAsm) => {
+      if (pAsm.id === id) {
+        ev.asm = pAsm.belongsTo
+      } else {
+        ev.pAsms.push(pAsm)
+      }
+      return ev
+    }, {
+      pAsms: [],
+      asm: {}
+    })
+    console.log('==========----', result)
+    this.DATA.parasiticAssemblies = result.pAsm
+    return result.asm
+  }
   updateActuralData = (_pAssembly, _data) => {
     const { parasiticAssemblies } = this.DATA
     const choosenPAsm = parasiticAssemblies.find(pasm => (pasm.id === _pAssembly.id))
