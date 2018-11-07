@@ -147,6 +147,7 @@ export default function(oprateData) {
         aTWAssembly.children.push(addedAss)
         wAssemblyAction.reLayout(aTWAssembly)
       }
+      return addedAss
     },
     addPAssmbly: function(parasiticAssembly, position, displayName, acturalData) {
       const { material } = oprateData
@@ -267,7 +268,10 @@ export default function(oprateData) {
       }
     },
     updatePAssemblyActuralData: function(pAssembly, acturalData) {
+      const { assemblies, choosenAssembly } = oprateData
       pAssemblyAction.updateActuralData(pAssembly, acturalData)
+      const choosenA = assemblies.find(assembly => choosenAssembly[assembly.id])
+      return { choosenAssembly: choosenA }
     },
     dealWithPAssemblyAction: function(position) {
       const { parasiticAssemblies, ableMovePAssembly, assemblies, choosenAssembly } = oprateData

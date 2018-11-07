@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import draw from './draw/mobileDraw'
+import draw from './draw/pcDraw'
 import util from './util'
 import actionMethod from './actionMehod'
 import { btns, draftingPoints } from './material/btns'

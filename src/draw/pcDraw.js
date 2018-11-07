@@ -9,7 +9,7 @@ function drawATip(ctx, position = { x: 0, y: 0 }, words = '暂无名称') {
   ctx.closePath()
   ctx.restore()
 }
-  
+    
 function drawADottedLine() {
   let isIncrease = 1
   let distence = 5
@@ -38,15 +38,15 @@ function drawADottedLine() {
     ctx.restore()
   }
 }
-  
+    
 function drawAImage(ctx, image, position, size) {
   ctx.beginPath()
   ctx.drawImage(image, 0, 0, image.width, image.height, position.x, position.y, size.width, size.width * image.height / image.width)
   ctx.closePath()
 }
-  
+    
 const drawADottedLineWapper = drawADottedLine()
-  
+    
 export default function(oprateData) {
   return {
     init: function(initWidth = 1000, initHeight = 1000) {
@@ -81,7 +81,7 @@ export default function(oprateData) {
           position = element.position
           size = element.size
         }
-  
+    
         element.draw(ctx, position, size, element.image, element.displayName)
         if (!element.highLevelAssembly) {
           drawATip(ctx, {
@@ -141,7 +141,7 @@ export default function(oprateData) {
           toSize = element.to.assembly.size
           middlePoints = element.middlePoints
         }
-  
+    
         if (element.draw) {
           element.draw(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints)
         }

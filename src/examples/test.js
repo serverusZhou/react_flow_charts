@@ -1,6 +1,5 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { Button } from 'antd'
 import ReactFlowChart from '..'
 import assemblies from '../material/assemblies'
 import parasiticAssemblies from '../material/parasiticAssemblise'
@@ -58,7 +57,7 @@ ReactDOM.render(
       disabled = {false}
       isOnlyShow = {false}
       forbidWord = '请至企业下选择已有流程或者新建流程'
-      btns = {<div><Button type='primary' >新建流程</Button><Button>新建流程</Button><Button>新建流程</Button><Button>新建流程</Button></div>}
+      btns = {<div><button type='primary' >新建流程</button><button>新建流程</button><button>新建流程</button><button>新建流程</button></div>}
     />
   </div>,
   document.getElementById('app')

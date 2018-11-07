@@ -75,11 +75,15 @@ class Chart extends Component {
       y: ev.clientY
     })
     if (ev.dataTransfer.getData('assemblyType') !== 'PA') {
-      actionMehodWapper.addAssmbly(ev.dataTransfer.getData('assembly'), position)
+      const assembly = actionMehodWapper.addAssmbly(ev.dataTransfer.getData('assembly'), position)
+      if (this.props.addAssemblyCallBack && assembly) {
+        this.props.addAssemblyCallBack(assembly)
+      }
     } else {
       const pAssembly = actionMehodWapper.addPAssmbly(ev.dataTransfer.getData('assembly'), position)
       if (this.props.addPAssemblyCallBack && pAssembly) {
-        this.props.addPAssemblyCallBack(pAssembly)
+        const { assemblies, choosenAssembly } = oprateData
+        this.props.addPAssemblyCallBack(pAssembly, assemblies.find(asm => choosenAssembly[asm.id]))
       }
     }
   }
@@ -139,7 +143,7 @@ class Chart extends Component {
               actionMehodWapper.deletePAssembly(deletePAssembly)
             },
             updatePAssemblyActuralData: (pAssembly, acturalData) => {
-              actionMehodWapper.updatePAssemblyActuralData(pAssembly, acturalData)
+              return actionMehodWapper.updatePAssemblyActuralData(pAssembly, acturalData)
             },
             updateChoosenAssemblyPosition: (position) => {
               actionMehodWapper.updateChoosenAssemblyPosition(position)
