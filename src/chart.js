@@ -83,6 +83,10 @@ class Chart extends Component {
       const pAssembly = actionMehodWapper.addPAssmbly(ev.dataTransfer.getData('assembly'), position)
       if (this.props.addPAssemblyCallBack && pAssembly) {
         const { assemblies, choosenAssembly } = oprateData
+        if (pAssembly.highLevelAssembly) {
+          this.props.addAssemblyCallBack(pAssembly)
+          return
+        }
         this.props.addPAssemblyCallBack(pAssembly, assemblies.find(asm => choosenAssembly[asm.id]))
       }
     }
@@ -327,6 +331,14 @@ class Chart extends Component {
           const { choosenAssembly, assemblies } = oprateData
           actionMehodWapper.deleteRightAssembly(assembly)
           return assemblies.find(asm => choosenAssembly[asm.id])
+        },
+        changeAssemblyDisplayName: (assembly, name) => {
+          const { assemblies } = oprateData
+          const atAsm = assemblies.find(asm => asm.id === assembly.id)
+          if (atAsm) {
+            atAsm.displayName = name
+            return atAsm
+          }
         },
         getAllOprateData: () => {
           return oprateData

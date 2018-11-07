@@ -154,8 +154,8 @@ export default function(oprateData) {
       const belongToAssembly = this.getAssemblyAtPos(position)
       if (belongToAssembly) {
         if (material.parasiticAssemblies[parasiticAssembly].isPAndA) {
-          this.toTurnAddAssembly(belongToAssembly, material.parasiticAssemblies[parasiticAssembly], parasiticAssembly, displayName, acturalData)
-          return
+          const turnedAssembly = this.toTurnAddAssembly(belongToAssembly, material.parasiticAssemblies[parasiticAssembly], parasiticAssembly, displayName, acturalData)
+          return turnedAssembly
         }
         const addedPassembly = pAssemblyAction.add(parasiticAssembly, belongToAssembly)
         assemblyAction.addPAssembly(belongToAssembly, addedPassembly)
@@ -184,6 +184,7 @@ export default function(oprateData) {
       const addedLine = lineAction.add(belong.isTo ? belongToAssembly : turnedAssembly, belong.isTo ? turnedAssembly : belongToAssembly)
       assemblyAction.addFromLine(belong.isTo ? belongToAssembly : turnedAssembly, addedLine)
       assemblyAction.addToLine(belong.isTo ? turnedAssembly : belongToAssembly, addedLine)
+      return turnedAssembly
     },
     chooseAssmbly: function(position) {
       const { assemblies, choosenAssembly, actionBtns, ableMoveAssembly, device } = oprateData
