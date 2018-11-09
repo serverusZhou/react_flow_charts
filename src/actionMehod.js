@@ -799,6 +799,7 @@ export default function(oprateData) {
     },
     deletePAssembly: function(pAssembly) {
       const belognToAsm = pAssemblyAction.deleteWithId(pAssembly.id)
+
       assemblyAction.deletePAssembly(belognToAsm, pAssembly)
     },
     deleteLine: function() {

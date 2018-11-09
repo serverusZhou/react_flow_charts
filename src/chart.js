@@ -296,9 +296,9 @@ class Chart extends Component {
     oprateData.device = nextProps.device
     if (nextProps.shouldUpdate) {
       const resetMeterail = actionMehodWapper.resetAssembliesAndLines(
-        nextProps.assemblies.length ? nextProps.assemblies : this.props.assemblies,
-        nextProps.lines.length ? nextProps.lines : this.props.lines,
-        nextProps.parasiticAssemblies.length ? nextProps.parasiticAssemblies : this.props.parasiticAssemblies)
+        nextProps.assemblies ? nextProps.assemblies : this.props.assemblies,
+        nextProps.lines ? nextProps.lines : this.props.lines,
+        nextProps.parasiticAssemblies ? nextProps.parasiticAssemblies : this.props.parasiticAssemblies)
       oprateData.assemblies = resetMeterail.assemblies
       oprateData.lines = resetMeterail.lines
       oprateData.parasiticAssemblies = resetMeterail.parasiticAssemblies

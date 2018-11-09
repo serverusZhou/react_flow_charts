@@ -1,6 +1,6 @@
 {
   "name": "react_flow_charts",
-  "version": "1.6.6",
+  "version": "1.6.9",
   "description": "A react flow chart component",
   "main": "dist/index.js",
   "files": [

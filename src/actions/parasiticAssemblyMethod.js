@@ -39,8 +39,7 @@ export default class ParasiticAssemblyMethod {
       pAsms: [],
       asm: {}
     })
-    console.log('==========----', result)
-    this.DATA.parasiticAssemblies = result.pAsm
+    this.DATA.parasiticAssemblies = result.pAsms
     return result.asm
   }
   updateActuralData = (_pAssembly, _data) => {
