@@ -44,6 +44,17 @@ export default class LineMethod {
     lines.push(addLine)
     return addLine
   }
+  changeType = (line, type) => {
+    const { lines, material } = this.DATA
+    if (Object.keys(material.lines).includes(type)) {
+      const aTLine = lines.find(l => l.id === line.id)
+      if (aTLine) {
+        aTLine.type = type
+        aTLine.draw = material.lines[type].draw()
+        return aTLine
+      }
+    }
+  }
   resetLinesPosition = (lines) => {
     const { device } = this.DATA
     if (device === 'mobile') {

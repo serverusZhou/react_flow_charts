@@ -23,6 +23,7 @@ export default {
         ctx.beginPath()
         ctx.strokeStyle = 'rgba(0,0,0,1)'
         ctx.font = '28px Georgia'
+        ctx.fillStyle = '#000'
         ctx.fillText(displayName, position.x + size.width / 2, position.y + size.height / 2 - 20)
         ctx.stroke()
         ctx.restore()
@@ -42,9 +43,10 @@ export default {
     },
     isPAndA: true,
     draw: () => {
-      return function(ctx, position, size, imageUrl, displayName) {
+      return function(ctx, position, size, imageUrl, displayName = '暂无名称') {
         ctx.beginPath()
         ctx.strokeStyle = 'rgba(0,0,0,1)'
+        ctx.fillStyle = '#000'
         ctx.lineWidth = 1
         ctx.moveTo(position.x, position.y)
         ctx.lineTo(position.x + size.width, position.y)

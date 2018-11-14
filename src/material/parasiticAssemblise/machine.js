@@ -36,6 +36,9 @@ export default {
     assemblyType,
     assemblyName: '鼓风机',
     size: defaultSize,
+    draw: () => (ctx, image, ratio, position, size) => {
+      ctx.drawImage(image, position.x - size.width - 10, position.y + (size.height * 2 / 3), size.width, size.width / 2)
+    }
   },
   dosingPpump: {
     imageUrl: dosingPumpOpen,

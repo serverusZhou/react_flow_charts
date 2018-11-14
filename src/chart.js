@@ -340,6 +340,16 @@ class Chart extends Component {
             return atAsm
           }
         },
+        updateAssemblyStatus: (assembly, status) => {
+          actionMehodWapper.updateAsmStatus(assembly, status)
+        },
+        updatePAssemblyStatus: (pAsm, status) => {
+          actionMehodWapper.updatePAsmStatus(pAsm, status)
+        },
+        changeLineType: (line, type) => {
+          const mmm = actionMehodWapper.updateLineType(line, type)
+          return mmm
+        },
         getAllOprateData: () => {
           return oprateData
         }
@@ -397,7 +407,7 @@ class Chart extends Component {
                       Object.keys(assemblies).map((assembly, i) => {
                         return (
                           assemblies[assembly].typeBelong === type
-                            ? <div key={i} className={styles['assembly_wapper']}>
+                            ? <div key={i} className={assemblies[assembly].className || styles['assembly_wapper']}>
                               <div key={i} className={styles['small_assembly']}>
                                 <img
                                   alt={assemblies[assembly].assemblyName}
@@ -557,6 +567,13 @@ class Chart extends Component {
                     )
                   })
                 }
+                {/* <div className={styles['top_btn']}>
+                  <img
+                    className={styles['line-img']}
+                    src={pcIcon} draggable={false}
+                    onClick={(ev) => this.changeLineTypeTest()}
+                  />
+                </div> */}
               </div>
               <canvas
                 ref='flow_canvas'

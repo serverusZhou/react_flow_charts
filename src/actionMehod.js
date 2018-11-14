@@ -159,8 +159,15 @@ export default function(oprateData) {
         }
         const addedPassembly = pAssemblyAction.add(parasiticAssembly, belongToAssembly)
         assemblyAction.addPAssembly(belongToAssembly, addedPassembly)
+        assemblyAction.reLayoutPAssemblies(belongToAssembly)
         return addedPassembly
       }
+    },
+    updateAsmStatus: function(asm, status) {
+      assemblyAction.updateStatus(asm, status)
+    },
+    updatePAsmStatus: function(pAsm, status) {
+      pAssemblyAction.updateStatus(pAsm, status)
     },
     toTurnAddAssembly: function(belongToAssembly, belong, belongName, displayName, acturalData) {
       const turnedAssembly = assemblyAction.addWithoutKey({
@@ -173,6 +180,7 @@ export default function(oprateData) {
         sizePc: { width: belong.size.width, height: belong.size.height },
         displayName,
         typeBelong: belong.typeBelong,
+        status: 'normal',
         turnSetting: {
           offsetPosition: belong.offsetPosition
         },
@@ -250,6 +258,9 @@ export default function(oprateData) {
         }
       })
       return chooseLine
+    },
+    updateLineType: function(line, type) {
+      return lineAction.changeType(line, type)
     },
     updateChoosenAssemblyActuralData: function(acturalData) {
       const { assemblies, choosenAssembly } = oprateData
@@ -761,13 +772,15 @@ export default function(oprateData) {
       this.deleteRightAssembly(assemblies.find(asm => choosenAssembly[asm.id]))
     },
     deleteRightAssembly: function(_assembly) {
-      const { assemblies, parasiticAssemblies, lines, actionBtns } = oprateData
+      const { assemblies, parasiticAssemblies, actionBtns } = oprateData
       if (_assembly && Object.keys(_assembly).length) {
         assemblies.forEach((element, index) => {
           if (_assembly.id === element.id) {
-            oprateData.lines = lines.filter(line => {
-              return !element.lines.from.some(fromLine => line.id === fromLine.id) && !element.lines.to.some(fromLine => line.id === fromLine.id)
-            })
+            // oprateData.lines = lines.filter(line => {
+            //   return !element.lines.from.some(fromLine => line.id === fromLine.id) && !element.lines.to.some(fromLine => line.id === fromLine.id)
+            // })
+            element.lines.from.forEach(fromL => this.deleteRightLine(fromL))
+            element.lines.to.forEach(fromT => this.deleteRightLine(fromT))
             oprateData.parasiticAssemblies = parasiticAssemblies.filter(parasiticAssembly => {
               return !element.belongs.some(belong => belong.id === parasiticAssembly.id)
             })
@@ -805,24 +818,44 @@ export default function(oprateData) {
     deleteLine: function() {
       const { choosenLine, lines, mode } = oprateData
       if (choosenLine && Object.keys(choosenLine).length) {
-        lines.forEach((line, index) => {
-          if (choosenLine[line.id]) {
-            line.from.assembly.lines.from.forEach((fromLine, fromLineIndex) => {
-              if (line.id === fromLine.id) {
-                line.from.assembly.lines.from.splice(fromLineIndex, 1)
-              }
-            })
-            line.to.assembly.lines.to.forEach((toLine, toLineIndex) => {
-              if (line.id === toLine.id) {
-                line.to.assembly.lines.to.splice(toLineIndex, 1)
-              }
-            })
-            lines.splice(index, 1)
-          }
-        })
+        const needDelLine = lines.find(l => choosenLine[l.id])
+        // lines.forEach((line, index) => {
+        //   if (choosenLine[line.id]) {
+        //     line.from.assembly.lines.from.forEach((fromLine, fromLineIndex) => {
+        //       if (line.id === fromLine.id) {
+        //         line.from.assembly.lines.from.splice(fromLineIndex, 1)
+        //       }
+        //     })
+        //     line.to.assembly.lines.to.forEach((toLine, toLineIndex) => {
+        //       if (line.id === toLine.id) {
+        //         line.to.assembly.lines.to.splice(toLineIndex, 1)
+        //       }
+        //     })
+        //     lines.splice(index, 1)
+        //   }
+        // })
+        this.deleteRightLine(needDelLine)
       }
       util.clearObj(choosenLine)
       mode.setTo('assembly')
+    },
+    deleteRightLine: function(needDeleteLine) {
+      const { lines } = oprateData
+      lines.forEach((line, index) => {
+        if (needDeleteLine.id === line.id) {
+          line.from.assembly.lines.from.forEach((fromLine, fromLineIndex) => {
+            if (line.id === fromLine.id) {
+              line.from.assembly.lines.from.splice(fromLineIndex, 1)
+            }
+          })
+          line.to.assembly.lines.to.forEach((toLine, toLineIndex) => {
+            if (line.id === toLine.id) {
+              line.to.assembly.lines.to.splice(toLineIndex, 1)
+            }
+          })
+          lines.splice(index, 1)
+        }
+      })
     },
     resetAssembliesAndLines: function(assemblies, lines, parasiticAssemblies) {
       const { material } = oprateData

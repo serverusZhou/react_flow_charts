@@ -22,6 +22,10 @@ export default class ParasiticAssemblyMethod {
       initData: _pAssembly.initData,
       assemblyType: _pAssembly.assemblyType,
       typeBelong: _pAssembly.typeBelong,
+      status: 'normal',
+      draw: _pAssembly.draw
+        ? _pAssembly.draw()
+        : null,
     }
     parasiticAssemblies.push(addParasiticAssembly)
     return addParasiticAssembly
@@ -49,5 +53,8 @@ export default class ParasiticAssemblyMethod {
       ..._pAssembly.acturalData,
       ..._data,
     }
+  }
+  updateStatus = (pAsm, status) => {
+    pAsm.status = status
   }
 }

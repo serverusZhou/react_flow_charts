@@ -31,6 +31,7 @@ export default class AssemblyMethod {
       insizeSpacePercent: _assembly.insizeSpacePercent,
       initData: _assembly.initData,
       typeBelong: _assembly.typeBelong,
+      status: 'normal',
       draw: _assembly.draw
         ? _assembly.draw()
         : function(ctx, _position, size, image) {
@@ -180,5 +181,8 @@ export default class AssemblyMethod {
   }
   addToLine = (toAsb, line) => {
     toAsb.lines.to.push({ id: line.id, line })
+  }
+  updateStatus = (asm, status) => {
+    asm.status = status
   }
 }

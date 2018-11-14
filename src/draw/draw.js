@@ -98,7 +98,7 @@ export default function(oprateData) {
           size = element.size
         }
 
-        element.draw(ctx, position, size, element.image, element.displayName)
+        element.draw(ctx, position, size, element.image, element.displayName, element.status)
         if (!element.highLevelAssembly) {
           drawATip(ctx, {
             x: position.x + size.width / 2,
@@ -136,10 +136,10 @@ export default function(oprateData) {
       })
       parasiticAssemblies.filter(pA => pA.isOccupyInternalSpace).forEach((pAssembly, index) => {
         if (device === 'mobile') {
-          drawAImage(ctx, pAssembly.image, pAssembly.position, pAssembly.size)
+          drawAImage(ctx, pAssembly.image, pAssembly.position, pAssembly.size, pAssembly)
         }
         if (device === 'pc') {
-          drawAImage(ctx, pAssembly.image, pAssembly.positionPc, pAssembly.sizePc)
+          drawAImage(ctx, pAssembly.image, pAssembly.positionPc, pAssembly.sizePc, pAssembly)
         }
       })
       lines.forEach(element => {
