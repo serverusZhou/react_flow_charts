@@ -164,6 +164,54 @@ function drawAArrow(ctx, fromPoint, endPoint, arrowWidth, lineWidth, arrowLength
   ctx.closePath()
   ctx.restore()
 }
+
+function drawADottedArrow(ctx, fromPoint, endPoint, arrowWidth, lineWidth, arrowLength, fillStyle) {
+  const lineExtend = lineExtendFunc(fromPoint, endPoint)
+  const elements = lineExtend.getElement()
+  const p0AND1D40 = lineExtend.getLineExtendPosition(lineWidth / 2, 0)
+  const p4D5AND1D40 = lineExtend.getLineExtendPosition(lineWidth / 2, elements.length - arrowLength)
+  const p4D5AND1D20 = lineExtend.getLineExtendPosition(arrowWidth / 2, elements.length - arrowLength)
+  ctx.beginPath()
+  ctx.fillStyle = fillStyle
+  ctx.lineWidth = 1
+  drawADottedLine(ctx, fromPoint, {
+    x: (p4D5AND1D40[0].x + p4D5AND1D40[1].x) / 2,
+    y: (p4D5AND1D40[0].y + p4D5AND1D40[1].y) / 2,
+  }, lineWidth, fillStyle)
+  // ctx.moveTo(p0AND1D40[0].x, p0AND1D40[0].y)
+  ctx.moveTo(p4D5AND1D40[0].x, p4D5AND1D40[0].y)
+  ctx.lineTo(p4D5AND1D20[0].x, p4D5AND1D20[0].y)
+  ctx.lineTo(endPoint.x, endPoint.y)
+  ctx.lineTo(p4D5AND1D20[1].x, p4D5AND1D20[1].y)
+  ctx.lineTo(p4D5AND1D40[1].x, p4D5AND1D40[1].y)
+  // ctx.lineTo(p0AND1D40[1].x, p0AND1D40[1].y)
+  // ctx.lineTo(p0AND1D40[0].x, p0AND1D40[0].y)
+  ctx.fill()
+  ctx.closePath()
+  ctx.restore()
+}
+
+function drawAArrowWapper(ctx, fromPoint, endPoint, arrowWidth, lineWidth, arrowLength, fillStyle) {
+  const lineExtend = lineExtendFunc(fromPoint, endPoint)
+  const elements = lineExtend.getElement()
+  const p0AND1D40 = lineExtend.getLineExtendPosition(lineWidth / 2, 0)
+  const p4D5AND1D40 = lineExtend.getLineExtendPosition(lineWidth / 2, elements.length - arrowLength)
+  const p4D5AND1D20 = lineExtend.getLineExtendPosition(arrowWidth / 2, elements.length - arrowLength)
+  ctx.beginPath()
+  ctx.strokeStyle = fillStyle
+  ctx.lineWidth = 2
+  ctx.moveTo(p0AND1D40[0].x, p0AND1D40[0].y)
+  ctx.lineTo(p4D5AND1D40[0].x, p4D5AND1D40[0].y)
+  ctx.lineTo(p4D5AND1D20[0].x, p4D5AND1D20[0].y)
+  ctx.lineTo(endPoint.x, endPoint.y)
+  ctx.lineTo(p4D5AND1D20[1].x, p4D5AND1D20[1].y)
+  ctx.lineTo(p4D5AND1D40[1].x, p4D5AND1D40[1].y)
+  ctx.lineTo(p0AND1D40[1].x, p0AND1D40[1].y)
+  ctx.lineTo(p0AND1D40[0].x, p0AND1D40[0].y)
+  ctx.stroke()
+  ctx.closePath()
+  ctx.restore()
+}
 function drawALineWithWidth(ctx, fromPoint, endPoint, lineWidth, fillStyle) {
   const lineExtend = lineExtendFunc(fromPoint, endPoint)
   const elements = lineExtend.getElement()
@@ -178,6 +226,36 @@ function drawALineWithWidth(ctx, fromPoint, endPoint, lineWidth, fillStyle) {
   ctx.lineTo(p5AND0[1].x, p5AND0[1].y)
   ctx.lineTo(p5AND0[0].x, p5AND0[0].y)
   ctx.fill()
+  ctx.closePath()
+  ctx.restore()
+}
+
+function drawADottedLine(ctx, fromPoint, endPoint, lineWidth, strokeStyle) {
+  ctx.beginPath()
+  ctx.setLineDash([30, 2])
+  ctx.strokeStyle = strokeStyle
+  ctx.lineWidth = lineWidth
+  ctx.moveTo(fromPoint.x, fromPoint.y)
+  ctx.lineTo(endPoint.x, endPoint.y)
+  ctx.stroke()
+  ctx.closePath()
+  ctx.restore()
+}
+
+function drawALineWithWidthWapper(ctx, fromPoint, endPoint, lineWidth, fillStyle) {
+  const lineExtend = lineExtendFunc(fromPoint, endPoint)
+  const elements = lineExtend.getElement()
+  const p5AND0 = lineExtend.getLineExtendPosition(lineWidth / 2, 0)
+  const p5AND1 = lineExtend.getLineExtendPosition(lineWidth / 2, elements.length)
+  ctx.beginPath()
+  ctx.strokeStyle = fillStyle
+  ctx.lineWidth = 2
+  ctx.moveTo(p5AND0[0].x, p5AND0[0].y)
+  ctx.lineTo(p5AND1[0].x, p5AND1[0].y)
+  ctx.lineTo(p5AND1[1].x, p5AND1[1].y)
+  ctx.lineTo(p5AND0[1].x, p5AND0[1].y)
+  ctx.lineTo(p5AND0[0].x, p5AND0[0].y)
+  ctx.stroke()
   ctx.closePath()
   ctx.restore()
 }
@@ -213,11 +291,24 @@ function lineExtendFunc(from, to) {
     }
   }
 }
+
+function drawACircle(ctx, center, radius, color = '#39B54A') {
+  ctx.beginPath()
+  ctx.fillStyle = color
+  ctx.arc(...center, radius, 0, 2 * Math.PI)
+  ctx.fill()
+  ctx.closePath()
+}
 export {
   drawAImage,
   getLinePositionWithoutAssembly,
   drawASvgImage,
   lineExtendFunc,
   drawAArrow,
-  drawALineWithWidth
+  drawADottedArrow,
+  drawAArrowWapper,
+  drawALineWithWidth,
+  drawADottedLine,
+  drawACircle,
+  drawALineWithWidthWapper
 }

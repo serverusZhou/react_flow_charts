@@ -144,7 +144,7 @@ class Chart extends Component {
               }
             },
             deletePAssembly: (deletePAssembly) => {
-              actionMehodWapper.deletePAssembly(deletePAssembly)
+              return actionMehodWapper.deletePAssembly(deletePAssembly)
             },
             updatePAssemblyActuralData: (pAssembly, acturalData) => {
               return actionMehodWapper.updatePAssemblyActuralData(pAssembly, acturalData)
@@ -308,10 +308,16 @@ class Chart extends Component {
   }
   componentDidUpdate() {
     if (!this.props.disabled && !alreadyInit && this.refs['flow_canvas']) {
-      this.flowInit()
+      oprateData.destroy = true
+      setTimeout(() => {
+        oprateData.destroy = false
+        this.flowInit()
+      }, 100)
+      // this.flowInit()
     }
   }
   flowInit = () => {
+    alreadyInit = true
     oprateData.dom.content = this.refs['flow_content']
     oprateData.dom.canvas = this.refs['flow_canvas']
     oprateData.dom.canvas.addEventListener('keydown', (ev) => {
@@ -319,8 +325,20 @@ class Chart extends Component {
     }, true)
     oprateData.dom.canvas.focus()
     drawWapper.init()
+    this.setInitFuncs()
+  }
+  setInitFuncs = () => {
     if (this.props.getInitCallBackFuncs) {
       this.props.getInitCallBackFuncs({
+        addAssembly: (assemblyType, position = { x: 0, y: 0 }) => {
+          return actionMehodWapper.addAssmbly(assemblyType, position)
+        },
+        addPAssmblyWithBelongTo: (assemblyType, belongToAssembly, displayName, acturalData) => {
+          return actionMehodWapper.addPAssmblyWithBelongTo(assemblyType, belongToAssembly, displayName, acturalData)
+        },
+        updateRightAsmPosition: (assembly, position) => {
+          return actionMehodWapper.updateRightAsmPosition(assembly, position)
+        },
         updateAsmActuralData: (assembly, acturalData) => {
           actionMehodWapper.updateAsmActuralData(assembly, acturalData)
         },
@@ -347,8 +365,21 @@ class Chart extends Component {
           actionMehodWapper.updatePAsmStatus(pAsm, status)
         },
         changeLineType: (line, type) => {
-          const mmm = actionMehodWapper.updateLineType(line, type)
-          return mmm
+          return actionMehodWapper.updateLineType(line, type)
+        },
+        updateLineState: (line, type) => {
+          return actionMehodWapper.updateLineState(line, type)
+        },
+        addMiddlePoint: (line, point) => {
+          return actionMehodWapper.addMiddlePoint(line, point)
+        },
+        addJumppingPoint: (asm, inOrOut, displayName, acturalData) => {
+          if (inOrOut === 'in') {
+            return actionMehodWapper.addPAssmblyWithBelongTo('jumppingIntPoint', asm, displayName, acturalData)
+          }
+          if (inOrOut === 'out') {
+            return actionMehodWapper.addPAssmblyWithBelongTo('jumppingOutPoint', asm, displayName, acturalData)
+          }
         },
         getAllOprateData: () => {
           return oprateData
@@ -379,7 +410,8 @@ class Chart extends Component {
     })
   }
   render() {
-    const { material, typeSummary, parasiticAssembliseTypeSummary, openMap } = this.state
+    const { openMap } = this.state
+    const { typeSummary, parasiticAssembliseTypeSummary, material } = this.props
     const { assemblies, lines, parasiticAssemblies, others } = material
     return (
       <div className={styles['flow-content']} ref='flow_content'>
@@ -595,14 +627,18 @@ class Chart extends Component {
         {
           this.state.device === 'pc' &&
           <div className={styles.show_pc}>
-            <canvas
-              ref='flow_canvas_pc'
-              onClick={(ev) => this.chooseAssembly(ev, this.props.chooseAssembly, this.props.chooseLine, this.props.clearChoose)}
-              onMouseDown={(event) => this.moveStart(event)}
-              onMouseUp={event => this.moveEnd(event)}
-              onMouseOut={event => this.moveEnd(event)}
-              onMouseMove={(event) => this.move(event)}
-            />
+            <div>
+              <div>
+                <canvas
+                  ref='flow_canvas_pc'
+                  onClick={(ev) => this.chooseAssembly(ev, this.props.chooseAssembly, this.props.chooseLine, this.props.clearChoose)}
+                  onMouseDown={(event) => this.moveStart(event)}
+                  onMouseUp={event => this.moveEnd(event)}
+                  onMouseOut={event => this.moveEnd(event)}
+                  onMouseMove={(event) => this.move(event)}
+                />
+              </div>
+            </div>
             <div className={styles.close} onClick={() => this.changeDevice('mobile')} />
           </div>
         }
@@ -615,10 +651,10 @@ class Chart extends Component {
       return
     }
     this.flowInit()
-    alreadyInit = true
   }
   componentWillUnmount() {
     oprateData.destroy = true
+    alreadyInit = false
   }
 }
 export default Chart

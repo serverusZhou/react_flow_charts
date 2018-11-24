@@ -24,7 +24,7 @@ export default {
         ctx.strokeStyle = 'rgba(0,0,0,1)'
         ctx.font = '28px Georgia'
         ctx.fillStyle = '#000'
-        ctx.fillText(displayName, position.x + size.width / 2, position.y + size.height / 2 - 20)
+        ctx.fillText(displayName, position.x + size.width / 2, position.y + size.height / 2 - 15)
         ctx.stroke()
         ctx.restore()
       }
@@ -54,7 +54,7 @@ export default {
         ctx.lineTo(position.x, position.y + size.height)
         ctx.lineTo(position.x, position.y)
         ctx.font = "bold 28px '宋体'"
-        ctx.fillText(displayName, position.x + size.width / 2, position.y + size.height / 2 - 20, size.width)
+        ctx.fillText(displayName, position.x + size.width / 2, position.y + size.height / 2 - 15, size.width)
         ctx.stroke()
         ctx.restore()
       }

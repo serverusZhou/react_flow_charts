@@ -39,7 +39,9 @@ export default class LineMethod {
           y: _toAsb.positionPc.y + _toAsb.sizePc.height / 2,
         }
       },
-      draw: material.lines[lineType].draw()
+      state: 'normal',
+      draw: material.lines[lineType].draw(),
+      drawChoosen: material.lines[lineType].drawChoosen ? material.lines[lineType].drawChoosen() : null
     }
     lines.push(addLine)
     return addLine
@@ -76,6 +78,24 @@ export default class LineMethod {
         _tPosition.x = _tAssembly.positionPc.x + 1 / 2 * _tAssembly.sizePc.width
         _tPosition.y = _tAssembly.positionPc.y + 1 / 2 * _tAssembly.sizePc.height
       })
+    }
+  }
+  updateLineState = (line, state) => {
+    const { lines } = this.DATA
+    const rightLine = lines.find(l => l.id === line.id)
+    if (rightLine) {
+      rightLine.state = state
+      return rightLine
+    }
+  }
+  addMiddlePoint = (line, point) => {
+    const { lines, device } = this.DATA
+    const rightLine = lines.find(l => l.id === line.id)
+    if (device === 'mobile') {
+      rightLine.middlePoints.push(point)
+    }
+    if (device === 'pc') {
+      rightLine.middlePointsPc.push(point)
     }
   }
 }

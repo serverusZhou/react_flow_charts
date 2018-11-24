@@ -141,9 +141,12 @@ export default function(oprateData) {
     addAssmbly: function(assembly, position) {
       if (assembly === 'wapperAssembly') { return wAssemblyAction.add(assembly, position) }
       const addedAss = assemblyAction.add(assembly, position)
+      if (addedAss.typeBelong === 'jumppingPoint') {
+        return addedAss
+      }
       const aTWAssembly = this.getWAssemblyAtPos(position)
       if (aTWAssembly) {
-        addedAss.wapper = wapperAssembly
+        addedAss.wapper = aTWAssembly
         aTWAssembly.children.push(addedAss)
         wAssemblyAction.reLayout(aTWAssembly)
       }
@@ -162,6 +165,17 @@ export default function(oprateData) {
         assemblyAction.reLayoutPAssemblies(belongToAssembly)
         return addedPassembly
       }
+    },
+    addPAssmblyWithBelongTo: function(parasiticAssembly, belongToAssembly, displayName, acturalData) {
+      const { material } = oprateData
+      if (material.parasiticAssemblies[parasiticAssembly].isPAndA) {
+        const turnedAssembly = this.toTurnAddAssembly(belongToAssembly, material.parasiticAssemblies[parasiticAssembly], parasiticAssembly, displayName, acturalData)
+        return turnedAssembly
+      }
+      const addedPassembly = pAssemblyAction.add(parasiticAssembly, belongToAssembly)
+      assemblyAction.addPAssembly(belongToAssembly, addedPassembly)
+      assemblyAction.reLayoutPAssemblies(belongToAssembly)
+      return addedPassembly
     },
     updateAsmStatus: function(asm, status) {
       assemblyAction.updateStatus(asm, status)
@@ -198,6 +212,7 @@ export default function(oprateData) {
       const { assemblies, choosenAssembly, actionBtns, ableMoveAssembly, device } = oprateData
       util.clearObj(choosenAssembly)
       actionBtns.enable = false
+      let cAsm = {}
       let assembly = assemblies.find(element => {
         let APosition = {}; let ASize = {}
         if (device === 'mobile') {
@@ -234,17 +249,20 @@ export default function(oprateData) {
           })
           if (childAss) {
             choosenAssembly[childAss.id] = true
+            cAsm = childAss
           } else {
             choosenAssembly[assembly.id] = true
+            cAsm = assembly
           }
         } else {
           choosenAssembly[assembly.id] = true
+          cAsm = assembly
         }
         actionBtns.enable = true
         util.clearObj(ableMoveAssembly)
         this.updateActionBtnPosition()
       }
-      return assembly
+      return cAsm
     },
     chooseLine: function(position) {
       const { lines, choosenLine } = oprateData
@@ -261,6 +279,9 @@ export default function(oprateData) {
     },
     updateLineType: function(line, type) {
       return lineAction.changeType(line, type)
+    },
+    updateLineState: function(line, state) {
+      return lineAction.updateLineState(line, state)
     },
     updateChoosenAssemblyActuralData: function(acturalData) {
       const { assemblies, choosenAssembly } = oprateData
@@ -442,6 +463,26 @@ export default function(oprateData) {
     updateAssemblyPosition: function(position) {
       const { assemblies, ableMoveAssembly } = oprateData
       const moveAssembly = assemblies.find(element => ableMoveAssembly[element.id])
+      if (!moveAssembly || moveAssembly.wapper) { return }
+      assemblyAction.updatePosition(moveAssembly, position)
+      lineAction.resetLinesPosition([...moveAssembly.lines.from, ...moveAssembly.lines.to])
+      assemblyAction.reLayoutPAssemblies(moveAssembly)
+
+      const wAssembly = this.getWAssemblyAtPos(position)
+      if (wAssembly && Object.keys(wAssembly) && moveAssembly.assemblyName !== 'wapperAssembly' && moveAssembly.typeBelong === 'jumppingPoint') {
+        moveAssembly.wapper = wAssembly
+        if (!wAssembly.children.find(child => child.id === moveAssembly.id)) {
+          wAssembly.children.push(moveAssembly)
+        }
+        wAssemblyAction.reLayout(wAssembly)
+      }
+      if (moveAssembly.assemblyName === 'wapperAssembly') {
+        wAssemblyAction.reLayout(moveAssembly)
+      }
+    },
+    updateRightAsmPosition: function(asm, position) {
+      const { assemblies } = oprateData
+      const moveAssembly = assemblies.find(element => element.id === asm.id)
       if (!moveAssembly || moveAssembly.wapper) { return }
       assemblyAction.updatePosition(moveAssembly, position)
       lineAction.resetLinesPosition([...moveAssembly.lines.from, ...moveAssembly.lines.to])
@@ -741,6 +782,9 @@ export default function(oprateData) {
       assemblyAction.addFromLine(fromAssembly, addedLine)
       assemblyAction.addToLine(assembly, addedLine)
     },
+    addMiddlePoint: function(line, middlePoint) {
+      lineAction.addMiddlePoint(line, middlePoint)
+    },
     moveTemLine: function(position) {
       const { temLine } = oprateData
       temLine.to.position = {
@@ -813,7 +857,7 @@ export default function(oprateData) {
     deletePAssembly: function(pAssembly) {
       const belognToAsm = pAssemblyAction.deleteWithId(pAssembly.id)
 
-      assemblyAction.deletePAssembly(belognToAsm, pAssembly)
+      return assemblyAction.deletePAssembly(belognToAsm, pAssembly)
     },
     deleteLine: function() {
       const { choosenLine, lines, mode } = oprateData
@@ -860,15 +904,21 @@ export default function(oprateData) {
     resetAssembliesAndLines: function(assemblies, lines, parasiticAssemblies) {
       const { material } = oprateData
       assemblies.forEach(assembly => {
-        if (assembly.highLevelAssembly) {
-          assembly.draw = material.parasiticAssemblies[assembly.assemblyName].draw
-            ? material.parasiticAssemblies[assembly.assemblyName].draw()
-            : function(ctx, position, size, image) {
+        if (assembly.assemblyName === 'wapperAssembly') {
+          assembly.draw = material.others[assembly.assemblyName].draw ? material.others[assembly.assemblyName].draw() : function(ctx, position, size, imgUrl) {
+            drawAImage(ctx, imgUrl, position, size)
+          }
+        } else {
+          if (assembly.highLevelAssembly) {
+            assembly.draw = material.parasiticAssemblies[assembly.assemblyName].draw
+              ? material.parasiticAssemblies[assembly.assemblyName].draw()
+              : function(ctx, position, size, image) {
+                drawAImage(ctx, image, position, size)
+              }
+          } else {
+            assembly.draw = material.assemblies[assembly.assemblyName].draw ? material.assemblies[assembly.assemblyName].draw() : function(ctx, position, size, image) {
               drawAImage(ctx, image, position, size)
             }
-        } else {
-          assembly.draw = material.assemblies[assembly.assemblyName].draw ? material.assemblies[assembly.assemblyName].draw() : function(ctx, position, size, image) {
-            drawAImage(ctx, image, position, size)
           }
         }
         assembly.image = util.getImage(assembly.imageUrl)
@@ -879,6 +929,7 @@ export default function(oprateData) {
       })
       lines.forEach(line => {
         line.draw = material.lines[line.type].draw()
+        line.drawChoosen = material.lines[line.type].drawChoosen ? material.lines[line.type].drawChoosen() : null
       })
       return {
         assemblies,

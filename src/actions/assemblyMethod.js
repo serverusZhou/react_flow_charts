@@ -34,7 +34,7 @@ export default class AssemblyMethod {
       status: 'normal',
       draw: _assembly.draw
         ? _assembly.draw()
-        : function(ctx, _position, size, image) {
+        : function(ctx, _position, size, image, status) {
           drawAImage(ctx, image, _position, size)
         },
     }
@@ -129,6 +129,7 @@ export default class AssemblyMethod {
       return ev
     }, [])
     asb.belongs = belongs
+    return asb
   }
   turnToBelowAssembly = (asb, turnAsb) => {
     turnAsb.highLevelAssembly = asb

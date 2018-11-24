@@ -149,6 +149,58 @@ class Chart extends Component {
   flowInit = () => {
     oprateData.dom.canvas = this.refs['flow_canvas']
     drawWapper.init(2500, 2500)
+    if (this.props.getInitCallBackFuncs) {
+      this.props.getInitCallBackFuncs({
+        updateAsmActuralData: (assembly, acturalData) => {
+          actionMehodWapper.updateAsmActuralData(assembly, acturalData)
+        },
+        updatePAssemblyActuralData: (pAssembly, acturalData) => {
+          actionMehodWapper.updatePAssemblyActuralData(pAssembly, acturalData)
+        },
+        updateRightAsmPosition: (assembly, position) => {
+          return actionMehodWapper.updateRightAsmPosition(assembly, position)
+        },
+        deleteAssembly: (assembly) => {
+          const { choosenAssembly, assemblies } = oprateData
+          actionMehodWapper.deleteRightAssembly(assembly)
+          return assemblies.find(asm => choosenAssembly[asm.id])
+        },
+        changeAssemblyDisplayName: (assembly, name) => {
+          const { assemblies } = oprateData
+          const atAsm = assemblies.find(asm => asm.id === assembly.id)
+          if (atAsm) {
+            atAsm.displayName = name
+            return atAsm
+          }
+        },
+        updateAssemblyStatus: (assembly, status) => {
+          actionMehodWapper.updateAsmStatus(assembly, status)
+        },
+        updatePAssemblyStatus: (pAsm, status) => {
+          actionMehodWapper.updatePAsmStatus(pAsm, status)
+        },
+        changeLineType: (line, type) => {
+          return actionMehodWapper.updateLineType(line, type)
+        },
+        updateLineState: (line, type) => {
+          return actionMehodWapper.updateLineState(line, type)
+        },
+        addMiddlePoint: (line, point) => {
+          return actionMehodWapper.addMiddlePoint(line, point)
+        },
+        addJumppingPoint: (asm, inOrOut, displayName, acturalData) => {
+          if (inOrOut === 'in') {
+            return actionMehodWapper.addPAssmblyWithBelongTo('jumppingIntPoint', asm, displayName, acturalData)
+          }
+          if (inOrOut === 'out') {
+            return actionMehodWapper.addPAssmblyWithBelongTo('jumppingOutPoint', asm, displayName, acturalData)
+          }
+        },
+        getAllOprateData: () => {
+          return oprateData
+        }
+      })
+    }
   }
   render() {
     return (
