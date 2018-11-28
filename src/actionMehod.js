@@ -6,6 +6,8 @@ import WAssemblyMethod from './actions/wepperAssemblyMethod'
 import PAssemblyMethod from './actions/parasiticAssemblyMethod'
 import LineMethod from './actions/lineMethod'
 
+import deleteBtn from '../assets/icon/delete.png'
+
 function checkIsBelongPosition (point, belongPoints) {
   return point.x > belongPoints.x && point.x < belongPoints.endX && point.y > belongPoints.y && point.y < belongPoints.endY
 }
@@ -937,6 +939,22 @@ export default function(oprateData) {
         parasiticAssemblies
       }
     },
+    chooseInput: function(position) {
+      const { inputs, choosenLine, mode } = oprateData
+      const chooseInput = inputs.find(element => {
+        return checkIsBelongPosition(position, {
+          x: element.position.x,
+          endX: element.position.x + element.size.width,
+          y: element.position.y,
+          endY: element.position.y + element.size.height,
+        })
+      })
+      if (chooseInput) {
+        util.clearObj(choosenLine)
+        mode.setTo('input')
+      }
+      return chooseInput
+    },
     takeAction: function(position) {
       const { actionBtns, choosenAssembly } = oprateData
       let btn = actionBtns.btns.find(btn => checkIsBelongPosition(position, {
@@ -951,6 +969,52 @@ export default function(oprateData) {
         return true
       }
       return false
+    },
+    addInputDiv: function(position) {
+      const canvasPosition = getPosition(oprateData.dom.content)
+      const scrollTop = getScrollTop()
+      let input = document.createElement('input')
+      input.style.position = 'absolute'
+      input.style.left = (position.x - canvasPosition.left) + 'px'
+      input.style.top = (position.y - canvasPosition.top + scrollTop) + 'px'
+      input.style.width = '120px'
+      input.style.height = '30px'
+      let delImg = document.createElement('img')
+      delImg.style.position = 'absolute'
+      delImg.style.cursor = 'pointer'
+      delImg.src = deleteBtn
+      delImg.style.height = '16px'
+      delImg.style.left = (position.x - canvasPosition.left) + 'px'
+      delImg.style.top = (position.y - canvasPosition.top + scrollTop - 17) + 'px'
+      oprateData.dom.content.appendChild(input)
+      oprateData.dom.content.appendChild(delImg)
+      delImg.onclick = () => {
+        input.parentNode.removeChild(input)
+        delImg.parentNode.removeChild(delImg)
+      }
+      input.onkeyup = (key) => {
+        console.log('keykeykeykey', key)
+        if (key.keyCode === 13) {
+          console.log('需要添加文字了。。。。。', key.target.value)
+          input.parentNode.removeChild(input)
+          delImg.parentNode.removeChild(delImg)
+          this.addInput(position, key.target.value)
+        }
+      }
+    },
+    addInput: function(position, value) {
+      const self = this
+      oprateData.inputs.push({
+        id: UUID(),
+        position: self.transPixelToPos(position),
+        clientPosition: position,
+        size: {
+          width: 100,
+          height: 30
+        },
+        words: value,
+        maxLength: 140
+      })
     }
   }
 }

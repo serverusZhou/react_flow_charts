@@ -7,8 +7,9 @@ import { btns, draftingPoints } from './material/btns'
 import { others } from './material/other'
 
 import pcIcon from '../assets/icon/pc.png'
+import inputIcon from '../assets/icon/input.png'
 
-const mode = util.keysSwith({ 'assembly': true, 'line': false, 'inLineChoosen': false })
+const mode = util.keysSwith({ 'assembly': true, 'line': false, 'inLineChoosen': false, 'input': false })
 let flag = false
 let setTime = null
 let alreadyInit = false
@@ -28,6 +29,7 @@ const oprateData = {
   activeLine: {},
   ableAddPointLine: {},
   temLine: {},
+  inputs: [],
   actionBtns: {
     enable: false,
     btns,
@@ -98,6 +100,13 @@ class Chart extends Component {
       x: ev.clientX,
       y: ev.clientY
     })
+    if (mode.is('input')) {
+      actionMehodWapper.addInputDiv({
+        x: ev.clientX,
+        y: ev.clientY
+      })
+      return
+    }
     if (!mode.is('line')) {
       mode.setTo('assembly')
       util.clearObj(choosenLine)
@@ -120,7 +129,11 @@ class Chart extends Component {
         }
       }
       util.clearObj(choosenAssembly)
-      const line = actionMehodWapper.chooseLine(position)
+      const input = actionMehodWapper.chooseInput(position)
+      if (input) {
+        return actionMehodWapper.addInputDiv(clientPosition)
+      }
+      const line = actionMehodWapper.chooseLine(input.position)
       if (line) {
         mode.setTo('inLineChoosen')
         if (chooseLineCallBack) {
@@ -409,6 +422,16 @@ class Chart extends Component {
       }
     })
   }
+  setInput = () => {
+    const { mode } = oprateData
+    console.log(mode.getCurrentMode())
+    if (mode.is('input')) {
+      mode.setTo('assembly')
+    } else {
+      mode.setTo('input')
+    }
+    this.setState({})
+  }
   render() {
     const { openMap } = this.state
     const { typeSummary, parasiticAssembliseTypeSummary, material } = this.props
@@ -583,6 +606,14 @@ class Chart extends Component {
                     onClick={() => this.getData()}
                   />
                 </div> */}
+                <div className={styles.top_btn}>
+                  <img
+                    className={mode.is('input') ? styles['line-img-active'] : styles['line-img']}
+                    src={inputIcon}
+                    draggable={false}
+                    onClick={() => this.setInput()}
+                  />
+                </div>
                 {
                   Object.keys(lines).map((line, i) => {
                     return (

@@ -16,6 +16,23 @@ function drawATip(ctx, position = { x: 0, y: 0 }, words = '暂无名称', maxWid
   ctx.restore()
 }
 
+function drawWords(ctx, position = { x: 0, y: 0 }, words = '暂无名称', maxWidth = 100) {
+  ctx.beginPath()
+  ctx.fillStyle = 'rgba(0,0,0,1)'
+  ctx.font = "bold 24px '宋体'"
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'top'
+  for (let i = 0; i < (words.length / 6 + 1); i++) {
+    if (i !== words.length / 6) {
+      ctx.fillText(words.substring(6 * i, 6 * (i + 1)), position.x, position.y + (40 * i), maxWidth)
+    } else {
+      ctx.fillText(words.substring(6 * i, 6 * (i + 1)), position.x, position.y + (40 * i))
+    }
+  }
+  ctx.closePath()
+  ctx.restore()
+}
+
 function drawADottedLine() {
   let isIncrease = 1
   let distence = 5
@@ -92,7 +109,7 @@ export default function(oprateData) {
       mainLoop()
     },
     draw: function() {
-      const { assemblies, choosenAssembly, hoverAssembly, parasiticAssemblies, choosenLine, ctx, lines, temLine, actionBtns, dom, device } = oprateData
+      const { assemblies, choosenAssembly, hoverAssembly, parasiticAssemblies, choosenLine, ctx, lines, temLine, inputs, actionBtns, dom, device } = oprateData
       drawGrid(ctx, dom) // ok
       assemblies.forEach(element => {
         let position = {}; let size = {}
@@ -218,6 +235,9 @@ export default function(oprateData) {
       if (Object.keys(temLine).length) {
         temLine.draw(ctx, temLine.from.position, temLine.to.position)
       }
+      inputs.forEach(input => {
+        drawWords(ctx, input.position, input.words, input.maxLength)
+      })
       if (actionBtns.enable) {
         actionBtns.btns.forEach((btn, index) => {
           drawAImage(ctx, btn.image, btn.position, btn.size)
