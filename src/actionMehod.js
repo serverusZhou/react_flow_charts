@@ -940,7 +940,7 @@ export default function(oprateData) {
       }
     },
     chooseInput: function(position) {
-      const { inputs, choosenLine, mode } = oprateData
+      const { inputs, choosenLine } = oprateData
       const chooseInput = inputs.find(element => {
         return checkIsBelongPosition(position, {
           x: element.position.x,
@@ -951,7 +951,6 @@ export default function(oprateData) {
       })
       if (chooseInput) {
         util.clearObj(choosenLine)
-        mode.setTo('input')
       }
       return chooseInput
     },
@@ -970,7 +969,7 @@ export default function(oprateData) {
       }
       return false
     },
-    addInputDiv: function(position) {
+    addInputDiv: function(position, words = '') {
       const canvasPosition = getPosition(oprateData.dom.content)
       const scrollTop = getScrollTop()
       let input = document.createElement('input')
@@ -988,6 +987,8 @@ export default function(oprateData) {
       delImg.style.top = (position.y - canvasPosition.top + scrollTop - 17) + 'px'
       oprateData.dom.content.appendChild(input)
       oprateData.dom.content.appendChild(delImg)
+      input.focus()
+      input.value = words
       delImg.onclick = () => {
         input.parentNode.removeChild(input)
         delImg.parentNode.removeChild(delImg)

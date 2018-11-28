@@ -236,7 +236,10 @@ export default function(oprateData) {
         temLine.draw(ctx, temLine.from.position, temLine.to.position)
       }
       inputs.forEach(input => {
-        drawWords(ctx, input.position, input.words, input.maxLength)
+        drawWords(ctx, {
+          x: input.position.x + input.size.width / 2,
+          y: input.position.y + input.size.height / 2
+        }, input.words, input.maxLength)
       })
       if (actionBtns.enable) {
         actionBtns.btns.forEach((btn, index) => {

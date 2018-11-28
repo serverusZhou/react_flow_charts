@@ -131,9 +131,10 @@ class Chart extends Component {
       util.clearObj(choosenAssembly)
       const input = actionMehodWapper.chooseInput(position)
       if (input) {
-        return actionMehodWapper.addInputDiv(clientPosition)
+        this.setState({})
+        return actionMehodWapper.addInputDiv(input.clientPosition, input.words)
       }
-      const line = actionMehodWapper.chooseLine(input.position)
+      const line = actionMehodWapper.chooseLine(position)
       if (line) {
         mode.setTo('inLineChoosen')
         if (chooseLineCallBack) {
