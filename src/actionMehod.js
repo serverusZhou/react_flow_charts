@@ -131,13 +131,23 @@ export default function(oprateData) {
       }) && element.assemblyName !== 'wapperAssembly')
     },
     getWAssemblyAtPos: function(position) {
-      const { assemblies } = oprateData
-      return assemblies.find(element => checkIsBelongPosition(position, {
-        x: element.position.x,
-        endX: element.position.x + element.size.width,
-        y: element.position.y,
-        endY: element.position.y + element.size.height,
-      }) && element.assemblyName === 'wapperAssembly')
+      const { assemblies, device } = oprateData
+      if (device === 'mobile') {
+        return assemblies.find(element => checkIsBelongPosition(position, {
+          x: element.position.x,
+          endX: element.position.x + element.size.width,
+          y: element.position.y,
+          endY: element.position.y + element.size.height,
+        }) && element.assemblyName === 'wapperAssembly')
+      }
+      if (device === 'pc') {
+        return assemblies.find(element => checkIsBelongPosition(position, {
+          x: element.positionPc.x,
+          endX: element.positionPc.x + element.sizePc.width,
+          y: element.positionPc.y,
+          endY: element.positionPc.y + element.sizePc.height,
+        }) && element.assemblyName === 'wapperAssembly')
+      }
     },
     
     addAssmbly: function(assembly, position) {
@@ -283,6 +293,7 @@ export default function(oprateData) {
       return lineAction.changeType(line, type)
     },
     updateLineState: function(line, state) {
+      console.log('changing state......', state)
       return lineAction.updateLineState(line, state)
     },
     updateChoosenAssemblyActuralData: function(acturalData) {
@@ -471,15 +482,23 @@ export default function(oprateData) {
       assemblyAction.reLayoutPAssemblies(moveAssembly)
 
       const wAssembly = this.getWAssemblyAtPos(position)
-      if (wAssembly && Object.keys(wAssembly) && moveAssembly.assemblyName !== 'wapperAssembly' && moveAssembly.typeBelong === 'jumppingPoint') {
+      if (wAssembly && Object.keys(wAssembly) && moveAssembly.assemblyName !== 'wapperAssembly' && !moveAssembly.highLevelAssembly) {
         moveAssembly.wapper = wAssembly
         if (!wAssembly.children.find(child => child.id === moveAssembly.id)) {
           wAssembly.children.push(moveAssembly)
         }
         wAssemblyAction.reLayout(wAssembly)
+        wAssembly.children.forEach(child => {
+          lineAction.resetLinesPosition([...child.lines.from, ...child.lines.to])
+          assemblyAction.reLayoutPAssemblies(child)
+        })
       }
       if (moveAssembly.assemblyName === 'wapperAssembly') {
         wAssemblyAction.reLayout(moveAssembly)
+        moveAssembly.children.forEach(child => {
+          lineAction.resetLinesPosition([...child.lines.from, ...child.lines.to])
+          assemblyAction.reLayoutPAssemblies(child)
+        })
       }
     },
     updateRightAsmPosition: function(asm, position) {
@@ -989,10 +1008,12 @@ export default function(oprateData) {
       oprateData.dom.content.appendChild(delImg)
       input.focus()
       input.value = words
+      input.draggable = true
       delImg.onclick = () => {
         input.parentNode.removeChild(input)
         delImg.parentNode.removeChild(delImg)
       }
+      delImg.draggable = false
       input.onkeyup = (key) => {
         console.log('keykeykeykey', key)
         if (key.keyCode === 13) {

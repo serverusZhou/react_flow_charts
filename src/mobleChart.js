@@ -185,6 +185,9 @@ class Chart extends Component {
         updatePAssemblyStatus: (pAsm, status) => {
           actionMehodWapper.updatePAsmStatus(pAsm, status)
         },
+        deleteLine: (line) => {
+          actionMehodWapper.deleteRightLine(line)
+        },
         changeLineType: (line, type) => {
           return actionMehodWapper.updateLineType(line, type)
         },

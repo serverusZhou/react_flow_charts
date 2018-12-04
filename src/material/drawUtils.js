@@ -143,6 +143,104 @@ function getLinePositionWithoutAssembly(fromPosition, toPosition, fromSize, toSi
     to: returnTo
   }
 }
+
+function getLinePositionWithoutAssemblyBySide(fromPosition, toPosition, fromSize, toSize) {
+  let from = {
+    x: fromPosition.x + fromSize.width / 2,
+    y: fromPosition.y + fromSize.height / 2,
+  }
+  let to = {
+    x: toPosition.x + toSize.width / 2,
+    y: toPosition.y + toSize.height / 2,
+  }
+  if (fromSize.width * fromSize.height < 25 && toSize.width * toSize.height > 25) {
+    to = getRelativePosition({
+      x: toPosition.x - toSize.width / 2,
+      y: toPosition.y - toSize.height / 2
+    }, toSize, {
+      x: fromPosition.x - fromSize.width / 2,
+      y: fromPosition.y - fromSize.height / 2
+    })
+  }
+  if (fromSize.width * fromSize.height > 25 && toSize.width * toSize.height < 25) {
+    from = getRelativePosition({
+      x: fromPosition.x - fromSize.width / 2,
+      y: fromPosition.y - fromSize.height / 2
+    }, fromSize, {
+      x: toPosition.x + toSize.width / 2,
+      y: toPosition.y + toSize.height / 2
+    })
+  }
+  if (fromSize.width * fromSize.height > 25 && toSize.width * toSize.height > 25) {
+    return getLinePositionWithoutAssembly(fromPosition, toPosition, fromSize, toSize)
+  }
+  // console.log('fromPosition', fromPosition, 'toPosition', toPosition, 'fromSize', fromSize, 'toSize', toSize)
+  // console.log('return', {
+  //   from,
+  //   to
+  // })
+  return {
+    from,
+    to
+  }
+}
+
+function getRelativePosition(objectPosition, objectSize, pointPosition) {
+  // console.log('objectPosition', objectPosition, 'objectSize', objectSize, 'pointPosition', pointPosition)
+  let returnPosition = {
+    x: 0,
+    y: 0
+  }
+  // 正上或者正下
+  if (pointPosition.x >= objectPosition.x && pointPosition.x <= (objectPosition.x + objectSize.width)) {
+    // console.log('正上或者正下')
+    returnPosition.x = pointPosition.x
+    // 中心点往上
+    if (pointPosition.y <= (objectPosition.y + objectSize.height / 2)) {
+      returnPosition.y = objectPosition.y
+    }
+    // 中心点往下
+    if (pointPosition.y >= (objectPosition.y + objectSize.height / 2)) {
+      returnPosition.y = objectPosition.y + objectSize.height
+    }
+  }
+  // 正左或者正右
+  if (pointPosition.y >= objectPosition.y && pointPosition.y <= (objectPosition.y + objectSize.height)) {
+    // console.log('正左或者正右')
+    returnPosition.y = pointPosition.y
+    // 中心点往左
+    if (pointPosition.x <= (objectPosition.x + objectSize.width / 2)) {
+      returnPosition.x = objectPosition.x
+    }
+    // 中心点往右
+    // console.log('中心点往右')
+    if (pointPosition.x >= (objectPosition.x + objectSize.width / 2)) {
+      returnPosition.x = objectPosition.x + objectSize.width
+    }
+  }
+  // 左上
+  if (pointPosition.x < objectPosition.x && pointPosition.y < objectPosition.y) {
+    returnPosition = objectPosition
+  }
+  // 右上
+  if (pointPosition.x > (objectPosition.x + objectSize.width) && pointPosition.y < objectPosition.y) {
+    // console.log()
+    returnPosition.x = objectPosition.x + objectSize.width
+    returnPosition.y = objectPosition.y
+  }
+  // 左下
+  if ((pointPosition.x < objectPosition.x) && pointPosition.y > (objectPosition.y + objectSize.height)) {
+    returnPosition.x = objectPosition.x
+    returnPosition.y = objectPosition.y + objectSize.height
+  }
+  // 右下
+  if (pointPosition.x > (objectPosition.x + objectSize.width) && pointPosition.y > (objectPosition.y + objectSize.height)) {
+    returnPosition.x = objectPosition.x + objectSize.width
+    returnPosition.y = objectPosition.y + objectSize.height
+  }
+  return returnPosition
+}
+
 function drawAArrow(ctx, fromPoint, endPoint, arrowWidth, lineWidth, arrowLength, fillStyle) {
   const lineExtend = lineExtendFunc(fromPoint, endPoint)
   const elements = lineExtend.getElement()
@@ -168,7 +266,7 @@ function drawAArrow(ctx, fromPoint, endPoint, arrowWidth, lineWidth, arrowLength
 function drawADottedArrow(ctx, fromPoint, endPoint, arrowWidth, lineWidth, arrowLength, fillStyle) {
   const lineExtend = lineExtendFunc(fromPoint, endPoint)
   const elements = lineExtend.getElement()
-  const p0AND1D40 = lineExtend.getLineExtendPosition(lineWidth / 2, 0)
+  // const p0AND1D40 = lineExtend.getLineExtendPosition(lineWidth / 2, 0)
   const p4D5AND1D40 = lineExtend.getLineExtendPosition(lineWidth / 2, elements.length - arrowLength)
   const p4D5AND1D20 = lineExtend.getLineExtendPosition(arrowWidth / 2, elements.length - arrowLength)
   ctx.beginPath()
@@ -302,6 +400,7 @@ function drawACircle(ctx, center, radius, color = '#39B54A') {
 export {
   drawAImage,
   getLinePositionWithoutAssembly,
+  getLinePositionWithoutAssemblyBySide,
   drawASvgImage,
   lineExtendFunc,
   drawAArrow,

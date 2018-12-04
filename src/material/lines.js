@@ -6,7 +6,7 @@ import {
   drawALineWithWidth,
   drawAArrowWapper,
   drawALineWithWidthWapper,
-  drawACircle
+  getLinePositionWithoutAssemblyBySide
 } from './drawUtils'
 import sewagePipe from '../../assets/png/sewage-pipe.png'
 import sludgeTube from '../../assets/png/sludge-tube.png'
@@ -19,7 +19,7 @@ export default {
     draw: () => {
       const center = []
       const step = 2
-      return function(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, state) {
+      return function(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, state, connectionMethod) {
         let from = {}
         let to = {}
         const allPoints = [fromPosition].concat(middlePoints).concat([toPosition])
@@ -27,10 +27,20 @@ export default {
           for (let index = 0; index < allPoints.length - 1; index++) {
             let linePosition = {}
             if (index === (allPoints.length - 2)) {
-              linePosition = getLinePositionWithoutAssembly(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+              if (connectionMethod === 'center' || !connectionMethod) {
+                linePosition = getLinePositionWithoutAssembly(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+              }
+              if (connectionMethod === 'side') {
+                linePosition = getLinePositionWithoutAssemblyBySide(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+              }
               drawAArrow(ctx, linePosition.from, linePosition.to, 20, 7, 20, '#2643ef')
             } else {
-              linePosition = getLinePositionWithoutAssembly(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
+              if (connectionMethod === 'center' || !connectionMethod) {
+                linePosition = getLinePositionWithoutAssembly(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
+              }
+              if (connectionMethod === 'side') {
+                linePosition = getLinePositionWithoutAssemblyBySide(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
+              }
               drawALineWithWidth(ctx, linePosition.from, linePosition.to, 7, '#2643ef')
             }
             if (state === 'animation') {

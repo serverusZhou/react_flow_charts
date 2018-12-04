@@ -95,7 +95,7 @@ class Chart extends Component {
   }
   chooseAssembly (ev, chooseAsmCallBack, chooseLineCallBack, clearChoose) {
     if (flag) { flag = false; return false }
-    const { mode, choosenLine, choosenAssembly, ableMovePAssembly, lines, ableAddPointLine, device } = oprateData
+    const { mode, choosenLine, choosenAssembly, ableMovePAssembly, lines, ableAddPointLine, device, inputs } = oprateData
     const position = actionMehodWapper.transPixelToPos({
       x: ev.clientX,
       y: ev.clientY
@@ -131,6 +131,8 @@ class Chart extends Component {
       util.clearObj(choosenAssembly)
       const input = actionMehodWapper.chooseInput(position)
       if (input) {
+        const filterInputs = inputs.filter(inp => inp.id !== input.id)
+        oprateData.inputs = filterInputs
         this.setState({})
         return actionMehodWapper.addInputDiv(input.clientPosition, input.words)
       }
@@ -232,7 +234,9 @@ class Chart extends Component {
       x: ev.clientX,
       y: ev.clientY
     })
-    dom.canvas.style.cursor = 'default'
+    if (dom.canvas.style) {
+      dom.canvas.style.cursor = 'default'
+    }
     if (flag) {
       if (mode.is('assembly')) {
         if (Object.keys(ableMoveAssembly).length) {
@@ -395,6 +399,9 @@ class Chart extends Component {
             return actionMehodWapper.addPAssmblyWithBelongTo('jumppingOutPoint', asm, displayName, acturalData)
           }
         },
+        deleteLine: (line) => {
+          actionMehodWapper.deleteRightLine(line)
+        },
         getAllOprateData: () => {
           return oprateData
         }
@@ -425,7 +432,6 @@ class Chart extends Component {
   }
   setInput = () => {
     const { mode } = oprateData
-    console.log(mode.getCurrentMode())
     if (mode.is('input')) {
       mode.setTo('assembly')
     } else {

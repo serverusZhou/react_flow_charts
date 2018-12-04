@@ -196,6 +196,9 @@ class Chart extends Component {
             return actionMehodWapper.addPAssmblyWithBelongTo('jumppingOutPoint', asm, displayName, acturalData)
           }
         },
+        deleteLine: (line) => {
+          actionMehodWapper.deleteRightLine(line)
+        },
         getAllOprateData: () => {
           return oprateData
         }

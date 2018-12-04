@@ -19,7 +19,7 @@ function drawATip(ctx, position = { x: 0, y: 0 }, words = '暂无名称', maxWid
 function drawWords(ctx, position = { x: 0, y: 0 }, words = '暂无名称', maxWidth = 100) {
   ctx.beginPath()
   ctx.fillStyle = 'rgba(0,0,0,1)'
-  ctx.font = "bold 24px '宋体'"
+  ctx.font = "bold 28px '宋体'"
   ctx.textAlign = 'center'
   ctx.textBaseline = 'top'
   for (let i = 0; i < (words.length / 6 + 1); i++) {
@@ -165,7 +165,7 @@ export default function(oprateData) {
 
         if (element.draw && (!(element.from.assembly.wapper || element.to.assembly.wapper)) ||
         (element.from.assembly.highLevelAssembly || element.to.assembly.highLevelAssembly)) {
-          element.draw(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, element.state)
+          element.draw(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, element.state, element.connectionMethod)
         }
         if (choosenLine[element.id]) {
           element.drawChoosen ? element.drawChoosen(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints) : (function() {
@@ -201,37 +201,7 @@ export default function(oprateData) {
           }
         }
       })
-      // lines.forEach(element => {
-      //   let fromPosition = {}; let fromSize = {}; let toPosition = {}; let toSize = {}; let middlePoints = []
-      //   if (device === 'pc') {
-      //     fromPosition = element.from.positionPc
-      //     toPosition = element.to.positionPc
-      //     fromSize = element.from.assembly.sizePc
-      //     toSize = element.to.assembly.sizePc
-      //     middlePoints = element.middlePointsPc
-      //   } else if (device === 'mobile') {
-      //     fromPosition = element.from.position
-      //     toPosition = element.to.position
-      //     fromSize = element.from.assembly.size
-      //     toSize = element.to.assembly.size
-      //     middlePoints = element.middlePoints
-      //   }
-
-      //   if (element.draw && !(element.from.assembly.wapper || element.to.assembly.wapper)) {
-      //     element.draw(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, element.state)
-      //   }
-      //   if (choosenLine[element.id]) {
-      //     element.drawChoosen ? element.drawChoosen(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints) : (function() {
-      //       ctx.beginPath()
-      //       ctx.lineWidth = 2
-      //       ctx.strokeStyle = '#666'
-      //       ctx.moveTo(fromPosition.x, fromPosition.y)
-      //       ctx.lineTo(toPosition.x, toPosition.y)
-      //       ctx.stroke()
-      //       ctx.closePath()
-      //     })()
-      //   }
-      // })
+      
       if (Object.keys(temLine).length) {
         temLine.draw(ctx, temLine.from.position, temLine.to.position)
       }

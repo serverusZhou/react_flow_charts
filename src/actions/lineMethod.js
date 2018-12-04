@@ -1,6 +1,7 @@
 import UUID from 'uuid'
 import setting from './defaltSettings'
 
+const connectionMethod = 'side'
 export default class LineMethod {
   constructor(data) {
     this.DATA = data
@@ -17,6 +18,7 @@ export default class LineMethod {
       ...setting.lineSetting,
       id: UUID(),
       type: lineType,
+      connectionMethod,
       from: {
         assembly: _fromAsb,
         position: {
@@ -55,6 +57,13 @@ export default class LineMethod {
         aTLine.draw = material.lines[type].draw()
         return aTLine
       }
+    }
+  }
+  changeConnectionMethod = (line, connectionMethod) => {
+    const aTLine = lines.find(l => l.id === line.id)
+    if (aTLine) {
+      aTLine.connectionMethod = connectionMethod
+      return aTLine
     }
   }
   resetLinesPosition = (lines) => {
