@@ -23,9 +23,12 @@ function checkIsBelongLine (point, from, to, fromSize, toSize) {
     y: pLength * Math.sin(angle - pointAngle)
   }
   const rule = length / 20 > 10 ? length / 20 : 10
+  // return Math.abs(transPoint.y) < rule &&
+  // (transPoint.x < (transTo.x - Math.sqrt(Math.pow(toSize.width, 2) + Math.pow(toSize.height, 2)) / 2) &&
+  // transPoint.x > Math.sqrt(Math.pow(fromSize.width, 2) + Math.pow(fromSize.height, 2)) / 2)
   return Math.abs(transPoint.y) < rule &&
-  (transPoint.x < (transTo.x - Math.sqrt(Math.pow(toSize.width, 2) + Math.pow(toSize.height, 2)) / 2) &&
-  transPoint.x > Math.sqrt(Math.pow(fromSize.width, 2) + Math.pow(fromSize.height, 2)) / 2)
+  (transPoint.x < transTo.x) &&
+  transPoint.x > 0
 }
 
 function checkIsBelongBrokenLine (point, allPoints, fromSize, toSize, isNearDistence = 6) {
@@ -293,7 +296,6 @@ export default function(oprateData) {
       return lineAction.changeType(line, type)
     },
     updateLineState: function(line, state) {
-      console.log('changing state......', state)
       return lineAction.updateLineState(line, state)
     },
     updateChoosenAssemblyActuralData: function(acturalData) {
@@ -1015,9 +1017,7 @@ export default function(oprateData) {
       }
       delImg.draggable = false
       input.onkeyup = (key) => {
-        console.log('keykeykeykey', key)
         if (key.keyCode === 13) {
-          console.log('需要添加文字了。。。。。', key.target.value)
           input.parentNode.removeChild(input)
           delImg.parentNode.removeChild(delImg)
           this.addInput(position, key.target.value)

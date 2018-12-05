@@ -7,7 +7,7 @@ export default class AssemblyMethod {
     this.DATA = data
   }
   add = (_assemblyKey, _position) => {
-    const { assemblies, material, device } = this.DATA
+    const { assemblies, material, device, dom } = this.DATA
     const _assembly = material.assemblies[_assemblyKey]
     const size = (function() {
       let width = (_assembly.size && _assembly.size.width) || 100
@@ -17,6 +17,20 @@ export default class AssemblyMethod {
         height: (device === 'mobile') ? height * 2 : height
       }
     })()
+    let positionX = 0
+    let positionY = 0
+    if ((_position.x - size.width / 2) > 0 && (_position.x - size.width / 2) < dom.canvas.width) {
+      positionX = (_position.x - size.width / 2)
+    }
+    if ((_position.x - size.width / 2) > dom.canvas.width) {
+      positionX = dom.canvas.width
+    }
+    if ((_position.y - size.height / 2) > 0 && (_position.y - size.height / 2) < dom.canvas.height) {
+      positionY = (_position.y - size.height / 2)
+    }
+    if ((_position.y - size.height / 2) > dom.canvas.height) {
+      positionY = dom.canvas.height
+    }
     const addAssembly = {
       ...setting.assembly,
       id: UUID(),
@@ -24,9 +38,9 @@ export default class AssemblyMethod {
       assemblyName: _assemblyKey,
       imageUrl: _assembly.imageUrl,
       image: getImage(_assembly.imageUrl),
-      position: { x: _position.x - size.width / 2, y: _position.y - size.height / 2 },
+      position: { x: positionX, y: positionY },
       size: { width: size.width, height: size.height },
-      positionPc: { x: _position.x - size.width / 2, y: _position.y - size.height / 2 },
+      positionPc: { x: positionX, y: positionY },
       sizePc: { width: size.width, height: size.height },
       insizeSpacePercent: _assembly.insizeSpacePercent,
       initData: _assembly.initData,
@@ -132,23 +146,54 @@ export default class AssemblyMethod {
     return asb
   }
   turnToBelowAssembly = (asb, turnAsb) => {
+    const { dom } = this.DATA
     turnAsb.highLevelAssembly = asb
     const offsetP = turnAsb.turnSetting.offsetPosition
+
+    let positionX = 0
+    let positionY = 0
+    // if ((asb.position.x - offsetP.x) > 0 && (asb.position.x - offsetP.x) < dom.canvas.width) {
+    //   positionX = (asb.position.x - offsetP.x)
+    // }
+    // if ((asb.position.x - offsetP.x) > dom.canvas.width) {
+    //   positionX = dom.canvas.width
+    // }
+    // if ((_position.y - size.height / 2) > 0 && (_position.y - size.height / 2) < dom.canvas.height) {
+    //   positionY = (_position.y - size.height / 2)
+    // }
+    // if ((_position.y - size.height / 2) > dom.canvas.height) {
+    //   positionY = dom.canvas.height
+    // }
+    let shouldPositionX = 0
+    let shouldPositionY = 0
+    if (offsetP.x > 0) {
+      shouldPositionX = asb.position.x - offsetP.x - Math.floor(Math.random() * 60)
+      shouldPositionY = asb.position.y - offsetP.y - Math.floor(Math.random() * 60)
+    }
+    if (offsetP.x <= 0) {
+      shouldPositionX = asb.position.x + asb.size.width - offsetP.x - Math.floor(Math.random() * 60)
+      shouldPositionY = asb.position.y + asb.size.height - offsetP.y - Math.floor(Math.random() * 60)
+    }
+    if (shouldPositionX > 0 && shouldPositionX < dom.canvas.width) {
+      positionX = shouldPositionX
+    }
+    if (shouldPositionX > dom.canvas.width) {
+      positionX = dom.canvas.width - turnAsb.size.width / 2
+    }
+    if (shouldPositionY > 0 && shouldPositionY < dom.canvas.height) {
+      positionY = shouldPositionY
+    }
+    if (shouldPositionY > dom.canvas.height) {
+      positionY = dom.canvas.height - turnAsb.size.height / 2
+    }
+
     turnAsb.position = {
-      x: offsetP.x > 0
-        ? (asb.position.x - offsetP.x - Math.floor(Math.random() * 60))
-        : asb.position.x + asb.size.width - offsetP.x - Math.floor(Math.random() * 60),
-      y: offsetP.x > 0
-        ? asb.position.y - offsetP.y - Math.floor(Math.random() * 60)
-        : asb.position.y + asb.size.height - offsetP.y - Math.floor(Math.random() * 60),
+      x: positionX,
+      y: positionY,
     }
     turnAsb.positionPc = {
-      x: offsetP.x > 0
-        ? (asb.positionPc.x - offsetP.x - Math.floor(Math.random() * 60))
-        : asb.positionPc.x + asb.sizePc.width - offsetP.x - Math.floor(Math.random() * 60),
-      y: offsetP.x > 0
-        ? asb.positionPc.y - offsetP.y - Math.floor(Math.random() * 60)
-        : asb.positionPc.y + asb.sizePc.height - offsetP.y - Math.floor(Math.random() * 60),
+      x: positionX,
+      y: positionY,
     }
     asb.belowLevelAssembly.push(turnAsb)
   }

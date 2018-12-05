@@ -132,7 +132,6 @@ export default function(oprateData) {
 
         if (element.draw && (!(element.from.assembly.wapper || element.to.assembly.wapper)) ||
         (element.from.assembly.highLevelAssembly || element.to.assembly.highLevelAssembly)) {
-          console.log('element.stateelement.stateelement.state', element.state)
           element.draw(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, element.state, element.connectionMethod)
         }
         if (choosenLine[element.id]) {
