@@ -135,7 +135,7 @@ export default function(oprateData) {
           element.draw(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, element.state, element.connectionMethod)
         }
         if (choosenLine[element.id]) {
-          element.drawChoosen ? element.drawChoosen(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints) : (function() {
+          element.drawChoosen ? element.drawChoosen(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, element.state, element.connectionMethod) : (function() {
             ctx.beginPath()
             ctx.lineWidth = 2
             ctx.strokeStyle = '#666'

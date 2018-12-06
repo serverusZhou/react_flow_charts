@@ -106,3 +106,177 @@ export function drawATip(ctx, position = { x: 0, y: 0 }, words = '哈哈哈') {
   ctx.fillText(words, 0, 0)
   ctx.closePath()
 }
+
+export function getLinePositionWithoutAssembly(fromPosition, toPosition, fromSize, toSize) {
+  const from = {
+    x: fromPosition.x - fromSize.width / 2,
+    y: fromPosition.y - fromSize.height / 2,
+  }
+  const to = {
+    x: toPosition.x - toSize.width / 2,
+    y: toPosition.y - toSize.height / 2,
+  }
+  const fCCenter = {
+    x: from.x + fromSize.width / 2,
+    y: from.y + fromSize.height / 2
+  }
+  const tCCenter = {
+    x: to.x + toSize.width / 2,
+    y: to.y + toSize.height / 2
+  }
+  const returnFrom = { x: 0, y: 0 }
+  // 垂直方向
+  if (fCCenter.x === tCCenter.x) {
+    returnFrom.x = from.x + fromSize.width / 2
+    returnFrom.y = from.y + fromSize.height * (tCCenter.y < fCCenter.y ? 0 : 1)
+  }
+  // 右上方
+  if (tCCenter.x > fCCenter.x && tCCenter.y < fCCenter.y) {
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) > fromSize.height / fromSize.width) {
+      returnFrom.x = from.x + fromSize.width / 2 + fromSize.height / 2 * Math.abs((tCCenter.x - fCCenter.x) / (tCCenter.y - fCCenter.y))
+      returnFrom.y = from.y
+    }
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) <= fromSize.height / fromSize.width) {
+      returnFrom.x = from.x + fromSize.width
+      returnFrom.y = from.y + fromSize.height / 2 - fromSize.width / 2 * Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x))
+    }
+  }
+  // 右下方
+  if (tCCenter.x > fCCenter.x && tCCenter.y > fCCenter.y) {
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) > fromSize.height / fromSize.width) {
+      returnFrom.x = from.x + fromSize.width / 2 + fromSize.height / 2 * Math.abs((tCCenter.x - fCCenter.x) / (tCCenter.y - fCCenter.y))
+      returnFrom.y = from.y + fromSize.height
+    }
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) <= fromSize.height / fromSize.width) {
+      returnFrom.x = from.x + fromSize.width
+      returnFrom.y = from.y + fromSize.height / 2 + fromSize.width / 2 * Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x))
+    }
+  }
+  // 水平方向
+  if (fCCenter.y === tCCenter.y) {
+    returnFrom.x = from.x + fromSize.width * (tCCenter.x > fCCenter.x ? 1 : 0)
+    returnFrom.y = from.y + fromSize.height / 2
+  }
+  // 左上方
+  if (tCCenter.x < fCCenter.x && tCCenter.y < fCCenter.y) {
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) > fromSize.height / fromSize.width) {
+      returnFrom.x = from.x + fromSize.width / 2 - fromSize.height / 2 * Math.abs((tCCenter.x - fCCenter.x) / (tCCenter.y - fCCenter.y))
+      returnFrom.y = from.y
+    }
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) <= fromSize.height / fromSize.width) {
+      returnFrom.x = from.x
+      returnFrom.y = from.y + fromSize.height / 2 - fromSize.width / 2 * Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x))
+    }
+  }
+  // 左下方
+  if (tCCenter.x < fCCenter.x && tCCenter.y > fCCenter.y) {
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) > fromSize.height / fromSize.width) {
+      returnFrom.x = from.x + fromSize.width / 2 - fromSize.height / 2 * Math.abs((tCCenter.x - fCCenter.x) / (tCCenter.y - fCCenter.y))
+      returnFrom.y = from.y + fromSize.height
+    }
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) <= fromSize.height / fromSize.width) {
+      returnFrom.x = from.x
+      returnFrom.y = from.y + fromSize.height / 2 + fromSize.width / 2 * Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x))
+    }
+  }
+  const returnTo = { x: 0, y: 0 }
+  // 垂直方向
+  if (tCCenter.x === fCCenter.x) {
+    returnTo.x = to.x + toSize.width / 2
+    returnTo.y = to.y + toSize.height * (fCCenter.y > tCCenter.y ? 1 : 0)
+  }
+  // 右上方
+  if (fCCenter.x > tCCenter.x && fCCenter.y < tCCenter.y) {
+    if (Math.abs((fCCenter.y - tCCenter.y) / (fCCenter.x - tCCenter.x)) > toSize.height / toSize.width) {
+      returnTo.x = to.x + toSize.width / 2 + toSize.height / 2 * Math.abs((fCCenter.x - tCCenter.x) / (fCCenter.y - tCCenter.y))
+      returnTo.y = to.y
+    }
+    if (Math.abs((fCCenter.y - tCCenter.y) / (fCCenter.x - tCCenter.x)) <= toSize.height / toSize.width) {
+      returnTo.x = to.x + toSize.width
+      returnTo.y = to.y + toSize.height / 2 - toSize.width / 2 * Math.abs((fCCenter.y - tCCenter.y) / (fCCenter.x - tCCenter.x))
+    }
+  }
+  // 右下方
+  if (fCCenter.x > tCCenter.x && fCCenter.y > tCCenter.y) {
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) > toSize.height / toSize.width) {
+      returnTo.x = to.x + toSize.width / 2 + toSize.height / 2 * Math.abs((tCCenter.x - fCCenter.x) / (tCCenter.y - fCCenter.y))
+      returnTo.y = to.y + toSize.height
+    }
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) <= toSize.height / toSize.width) {
+      returnTo.x = to.x + toSize.width
+      returnTo.y = to.y + toSize.height / 2 + toSize.width / 2 * Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x))
+    }
+  }
+  // 水平方向
+  if (fCCenter.y === tCCenter.y) {
+    returnTo.x = to.x + toSize.width * (fCCenter.x > tCCenter.x ? 1 : 0)
+    returnTo.y = to.y + toSize.height / 2
+  }
+  // 左上方
+  if (fCCenter.x < tCCenter.x && fCCenter.y < tCCenter.y) {
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) > toSize.height / toSize.width) {
+      returnTo.x = to.x + toSize.width / 2 - toSize.height / 2 * Math.abs((tCCenter.x - fCCenter.x) / (tCCenter.y - fCCenter.y))
+      returnTo.y = to.y
+    }
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) <= toSize.height / toSize.width) {
+      returnTo.x = to.x
+      returnTo.y = to.y + toSize.height / 2 - toSize.width / 2 * Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x))
+    }
+  }
+  // 左下方
+  if (fCCenter.x < tCCenter.x && fCCenter.y > tCCenter.y) {
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) > toSize.height / toSize.width) {
+      returnTo.x = to.x + toSize.width / 2 - toSize.height / 2 * Math.abs((tCCenter.x - fCCenter.x) / (tCCenter.y - fCCenter.y))
+      returnTo.y = to.y + toSize.height
+    }
+    if (Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x)) <= toSize.height / toSize.width) {
+      returnTo.x = to.x
+      returnTo.y = to.y + toSize.height / 2 + toSize.width / 2 * Math.abs((tCCenter.y - fCCenter.y) / (tCCenter.x - fCCenter.x))
+    }
+  }
+  return {
+    from: returnFrom,
+    to: returnTo
+  }
+}
+
+export function getLinePositionWithoutAssemblyBySide(fromPosition, toPosition, fromSize, toSize) {
+  let from = {
+    x: fromPosition.x + fromSize.width / 2,
+    y: fromPosition.y + fromSize.height / 2,
+  }
+  let to = {
+    x: toPosition.x + toSize.width / 2,
+    y: toPosition.y + toSize.height / 2,
+  }
+  if (fromSize.width * fromSize.height < 25 && toSize.width * toSize.height > 25) {
+    to = getRelativePosition({
+      x: toPosition.x - toSize.width / 2,
+      y: toPosition.y - toSize.height / 2
+    }, toSize, {
+      x: fromPosition.x - fromSize.width / 2,
+      y: fromPosition.y - fromSize.height / 2
+    })
+  }
+  if (fromSize.width * fromSize.height > 25 && toSize.width * toSize.height < 25) {
+    from = getRelativePosition({
+      x: fromPosition.x - fromSize.width / 2,
+      y: fromPosition.y - fromSize.height / 2
+    }, fromSize, {
+      x: toPosition.x + toSize.width / 2,
+      y: toPosition.y + toSize.height / 2
+    })
+  }
+  if (fromSize.width * fromSize.height > 25 && toSize.width * toSize.height > 25) {
+    return getLinePositionWithoutAssembly(fromPosition, toPosition, fromSize, toSize)
+  }
+  // console.log('fromPosition', fromPosition, 'toPosition', toPosition, 'fromSize', fromSize, 'toSize', toSize)
+  // console.log('return', {
+  //   from,
+  //   to
+  // })
+  return {
+    from,
+    to
+  }
+}

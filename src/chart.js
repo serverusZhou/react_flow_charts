@@ -137,6 +137,7 @@ class Chart extends Component {
         return actionMehodWapper.addInputDiv(input.clientPosition, input.words)
       }
       const line = actionMehodWapper.chooseLine(position)
+      console.log('linelinelinelineline', line)
       if (line) {
         mode.setTo('inLineChoosen')
         if (chooseLineCallBack) {
@@ -322,6 +323,18 @@ class Chart extends Component {
       oprateData.parasiticAssemblies = resetMeterail.parasiticAssemblies
       oprateData.choosenAssembly = {}
       oprateData.actionBtns.enable = false
+    }
+    if (nextProps.disabled !== this.props.disabled) {
+      if (!nextProps.disabled) {
+        oprateData.destroy = true
+        setTimeout(() => {
+          oprateData.destroy = false
+          this.flowInit()
+        }, 100)
+      }
+      if (nextProps.disabled) {
+        oprateData.destroy = true
+      }
     }
   }
   componentDidUpdate() {

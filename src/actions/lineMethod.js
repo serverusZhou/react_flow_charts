@@ -55,6 +55,7 @@ export default class LineMethod {
       if (aTLine) {
         aTLine.type = type
         aTLine.draw = material.lines[type].draw()
+        aTLine.drawChoosen = material.lines[type].drawChoosen()
         return aTLine
       }
     }

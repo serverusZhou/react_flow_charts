@@ -80,15 +80,28 @@ export default {
         }
       }
     },
-    drawChoosen: () => (ctx, fromPosition, toPosition, fromSize, toSize, middlePoints) => {
+    drawChoosen: () => (ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, state, connectionMethod) => {
       const allPoints = [fromPosition].concat(middlePoints).concat([toPosition])
       if (fromSize && toSize) {
         for (let index = 0; index < allPoints.length - 1; index++) {
+          let linePosition = {}
           if (index === (allPoints.length - 2)) {
-            const linePosition = getLinePositionWithoutAssembly(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+            if (connectionMethod === 'center' || !connectionMethod) {
+              linePosition = getLinePositionWithoutAssembly(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+            }
+            if (connectionMethod === 'side') {
+              linePosition = getLinePositionWithoutAssemblyBySide(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+            }
+            // const linePosition = getLinePositionWithoutAssembly(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
             drawAArrowWapper(ctx, linePosition.from, linePosition.to, 30, 17, 25, 'rgba(38, 67, 239, .5)')
           } else {
-            const linePosition = getLinePositionWithoutAssembly(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
+            if (connectionMethod === 'center' || !connectionMethod) {
+              linePosition = getLinePositionWithoutAssembly(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
+            }
+            if (connectionMethod === 'side') {
+              linePosition = getLinePositionWithoutAssemblyBySide(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
+            }
+            // const linePosition = getLinePositionWithoutAssembly(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
             drawALineWithWidthWapper(ctx, linePosition.from, linePosition.to, 17, 'rgba(38, 67, 239, .5)')
           }
         }
@@ -99,18 +112,56 @@ export default {
     imgSrc: sludgeTube,
     lineName: '污泥管',
     draw: () => {
-      return function(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints) {
+      const center = []
+      const step = 2
+      return function(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, state, connectionMethod) {
         let from = {}
         let to = {}
         const allPoints = [fromPosition].concat(middlePoints).concat([toPosition])
         if (fromSize && toSize) {
           for (let index = 0; index < allPoints.length - 1; index++) {
+            let linePosition = {}
             if (index === (allPoints.length - 2)) {
-              const linePosition = getLinePositionWithoutAssembly(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+              // const linePosition = getLinePositionWithoutAssembly(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+              if (connectionMethod === 'center' || !connectionMethod) {
+                linePosition = getLinePositionWithoutAssembly(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+              }
+              if (connectionMethod === 'side') {
+                linePosition = getLinePositionWithoutAssemblyBySide(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+              }
               drawAArrow(ctx, linePosition.from, linePosition.to, 20, 7, 20, '#36125B')
             } else {
-              const linePosition = getLinePositionWithoutAssembly(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
+              // const linePosition = getLinePositionWithoutAssembly(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
+              if (connectionMethod === 'center' || !connectionMethod) {
+                linePosition = getLinePositionWithoutAssembly(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
+              }
+              if (connectionMethod === 'side') {
+                linePosition = getLinePositionWithoutAssemblyBySide(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
+              }
               drawALineWithWidth(ctx, linePosition.from, linePosition.to, 7, '#36125B')
+            }
+            if (state === 'animation') {
+              (function drawWater() {
+                const length = Math.sqrt((linePosition.from.x - linePosition.to.x) ** 2 + (linePosition.from.y - linePosition.to.y) ** 2)
+                if (!center[index]) {
+                  center[index] = linePosition.from
+                }
+                const rightLength = Math.sqrt((linePosition.from.x - center[index].x) ** 2 + (linePosition.from.y - center[index].y) ** 2)
+                if (rightLength < length - 20) {
+                  const position = {
+                    x: center[index].x + step * ((linePosition.to.x - linePosition.from.x) / length),
+                    y: center[index].y + step * ((linePosition.to.y - linePosition.from.y) / length),
+                  }
+                  center[index] = position
+                } else {
+                  center[index] = linePosition.from
+                }
+                // drawACircle(ctx, [center[index].x, center[index].y], 10, '#2643ef')
+                drawAArrow(ctx, center[index], {
+                  x: center[index].x + 20 * ((linePosition.to.x - linePosition.from.x) / length),
+                  y: center[index].y + 20 * ((linePosition.to.y - linePosition.from.y) / length),
+                }, 20, 7, 20, '#36125B')
+              })()
             }
           }
         } else {
@@ -126,15 +177,28 @@ export default {
         }
       }
     },
-    drawChoosen: () => (ctx, fromPosition, toPosition, fromSize, toSize, middlePoints) => {
+    drawChoosen: () => (ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, state, connectionMethod) => {
       const allPoints = [fromPosition].concat(middlePoints).concat([toPosition])
       if (fromSize && toSize) {
         for (let index = 0; index < allPoints.length - 1; index++) {
+          let linePosition = {}
           if (index === (allPoints.length - 2)) {
-            const linePosition = getLinePositionWithoutAssembly(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+            // const linePosition = getLinePositionWithoutAssembly(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+            if (connectionMethod === 'center' || !connectionMethod) {
+              linePosition = getLinePositionWithoutAssembly(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+            }
+            if (connectionMethod === 'side') {
+              linePosition = getLinePositionWithoutAssemblyBySide(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+            }
             drawAArrowWapper(ctx, linePosition.from, linePosition.to, 30, 17, 20, 'rgba(54, 18, 91, .5)')
           } else {
-            const linePosition = getLinePositionWithoutAssembly(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
+            // const linePosition = getLinePositionWithoutAssembly(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
+            if (connectionMethod === 'center' || !connectionMethod) {
+              linePosition = getLinePositionWithoutAssembly(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
+            }
+            if (connectionMethod === 'side') {
+              linePosition = getLinePositionWithoutAssemblyBySide(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
+            }
             drawALineWithWidthWapper(ctx, linePosition.from, linePosition.to, 17, 'rgba(54, 18, 91, .5)')
           }
         }
@@ -145,19 +209,57 @@ export default {
     imgSrc: medisionLine,
     lineName: '加药管',
     draw: () => {
-      return function(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints) {
+      const center = []
+      const step = 2
+      return function(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, state, connectionMethod) {
         let from = {}
         let to = {}
         const allPoints = [fromPosition].concat(middlePoints).concat([toPosition])
         if (fromSize && toSize) {
           for (let index = 0; index < allPoints.length - 1; index++) {
+            let linePosition = {}
             if (index === (allPoints.length - 2)) {
-              const linePosition = getLinePositionWithoutAssembly(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+              // const linePosition = getLinePositionWithoutAssembly(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+              if (connectionMethod === 'center' || !connectionMethod) {
+                linePosition = getLinePositionWithoutAssembly(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+              }
+              if (connectionMethod === 'side') {
+                linePosition = getLinePositionWithoutAssemblyBySide(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+              }
               drawADottedArrow(ctx, linePosition.from, linePosition.to, 20, 7, 20, '#4FE7FF')
             } else {
-              const linePosition = getLinePositionWithoutAssembly(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
+              // const linePosition = getLinePositionWithoutAssembly(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
               // drawALineWithWidth(ctx, linePosition.from, linePosition.to, 10, '#4FE7FF')
+              if (connectionMethod === 'center' || !connectionMethod) {
+                linePosition = getLinePositionWithoutAssembly(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
+              }
+              if (connectionMethod === 'side') {
+                linePosition = getLinePositionWithoutAssemblyBySide(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
+              }
               drawADottedLine(ctx, linePosition.from, linePosition.to, 7, '#4FE7FF')
+            }
+            if (state === 'animation') {
+              (function drawWater() {
+                const length = Math.sqrt((linePosition.from.x - linePosition.to.x) ** 2 + (linePosition.from.y - linePosition.to.y) ** 2)
+                if (!center[index]) {
+                  center[index] = linePosition.from
+                }
+                const rightLength = Math.sqrt((linePosition.from.x - center[index].x) ** 2 + (linePosition.from.y - center[index].y) ** 2)
+                if (rightLength < length - 20) {
+                  const position = {
+                    x: center[index].x + step * ((linePosition.to.x - linePosition.from.x) / length),
+                    y: center[index].y + step * ((linePosition.to.y - linePosition.from.y) / length),
+                  }
+                  center[index] = position
+                } else {
+                  center[index] = linePosition.from
+                }
+                // drawACircle(ctx, [center[index].x, center[index].y], 10, '#2643ef')
+                drawAArrow(ctx, center[index], {
+                  x: center[index].x + 20 * ((linePosition.to.x - linePosition.from.x) / length),
+                  y: center[index].y + 20 * ((linePosition.to.y - linePosition.from.y) / length),
+                }, 20, 7, 20, '#4FE7FF')
+              })()
             }
           }
         } else {
@@ -170,6 +272,33 @@ export default {
           ctx.lineTo(to.x, to.y)
           ctx.stroke()
           ctx.closePath()
+        }
+      }
+    },
+    drawChoosen: () => (ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, state, connectionMethod) => {
+      const allPoints = [fromPosition].concat(middlePoints).concat([toPosition])
+      if (fromSize && toSize) {
+        for (let index = 0; index < allPoints.length - 1; index++) {
+          let linePosition = {}
+          if (index === (allPoints.length - 2)) {
+            // const linePosition = getLinePositionWithoutAssembly(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+            if (connectionMethod === 'center' || !connectionMethod) {
+              linePosition = getLinePositionWithoutAssembly(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+            }
+            if (connectionMethod === 'side') {
+              linePosition = getLinePositionWithoutAssemblyBySide(allPoints[index], toPosition, (index === 0) ? fromSize : { width: 2, height: 2 }, toSize)
+            }
+            drawAArrowWapper(ctx, linePosition.from, linePosition.to, 30, 17, 20, 'rgba(54, 18, 91, 1)')
+          } else {
+            // const linePosition = getLinePositionWithoutAssembly(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
+            if (connectionMethod === 'center' || !connectionMethod) {
+              linePosition = getLinePositionWithoutAssembly(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
+            }
+            if (connectionMethod === 'side') {
+              linePosition = getLinePositionWithoutAssemblyBySide(allPoints[index], allPoints[index + 1], (index === 0) ? fromSize : { width: 2, height: 2 }, { width: 2, height: 2 })
+            }
+            drawALineWithWidthWapper(ctx, linePosition.from, linePosition.to, 17, 'rgba(54, 18, 91, 1)')
+          }
         }
       }
     }

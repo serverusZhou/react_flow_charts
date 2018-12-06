@@ -11,7 +11,11 @@ import deleteBtn from '../assets/icon/delete.png'
 function checkIsBelongPosition (point, belongPoints) {
   return point.x > belongPoints.x && point.x < belongPoints.endX && point.y > belongPoints.y && point.y < belongPoints.endY
 }
-function checkIsBelongLine (point, from, to, fromSize, toSize) {
+function checkIsAPoint (size) {
+  console.log('size.width * size.height', size.width * size.height)
+  return size.width * size.height < 16
+}
+function checkIsBelongLine (point, from, to) {
   const length = Math.sqrt(Math.pow(to.x - from.x, 2) + Math.pow(to.y - from.y, 2))
   const pLength = Math.sqrt(Math.pow(point.x - from.x, 2) + Math.pow(point.y - from.y, 2))
   const angle = Math.asin((to.y - from.y) / length)
@@ -31,25 +35,45 @@ function checkIsBelongLine (point, from, to, fromSize, toSize) {
   transPoint.x > 0
 }
 
-function checkIsBelongBrokenLine (point, allPoints, fromSize, toSize, isNearDistence = 6) {
+function checkIsBelongBrokenLine (point, allPoints, fromSize, toSize, isNearDistence = 20, alignType = 'center') {
+  console.log('alignTypealignTypealignType', alignType)
   let isBelong = false
   let isNear = false
   let belongIndex = 0
   for (let i = 0; i < allPoints.length - 1; i++) {
-    let beginSize = { width: 0, height: 0 }
-    let endSize = { width: 0, height: 0 }
+    let beginSize = { width: 2, height: 2 }
+    let endSize = { width: 2, height: 2 }
     if (i === 0) {
       beginSize = fromSize
     }
     if (i === allPoints.length - 2) {
       endSize = toSize
     }
-    if (checkIsBelongLine(point, allPoints[i], allPoints[i + 1], beginSize, endSize)) {
+    let isBelongLine = false
+    let linePosition = {
+      from: allPoints[i],
+      to: allPoints[i + 1]
+    }
+    if (checkIsAPoint(beginSize) && checkIsAPoint(endSize)) {
+      isBelongLine = checkIsBelongLine(point, linePosition.from, linePosition.to)
+    } else if (!checkIsAPoint(beginSize) && !checkIsAPoint(endSize)) {
+      linePosition = util.getLinePositionWithoutAssembly(allPoints[i], allPoints[i + 1], beginSize, endSize)
+      isBelongLine = checkIsBelongLine(point, linePosition.from, linePosition.to)
+    } else if ((!checkIsAPoint(beginSize) || !checkIsAPoint(endSize))) {
+      if (alignType === 'center') {
+        linePosition = util.getLinePositionWithoutAssembly(allPoints[i], allPoints[i + 1], beginSize, endSize)
+      }
+      if (alignType === 'side') {
+        linePosition = util.getLinePositionWithoutAssemblyBySide(allPoints[i], allPoints[i + 1], beginSize, endSize)
+      }
+      isBelongLine = checkIsBelongLine(point, linePosition.from, linePosition.to)
+    }
+    if (isBelongLine) {
       isBelong = true
-      if (Math.abs(allPoints[i].x - point.x) < isNearDistence && Math.abs(allPoints[i].y - point.y) < isNearDistence) {
+      if (Math.abs(linePosition.from.x - point.x) < isNearDistence && Math.abs(linePosition.from.y - point.y) < isNearDistence) {
         isNear = true
         belongIndex = i
-      } else if (Math.abs(allPoints[i + 1].x - point.x) < isNearDistence && Math.abs(allPoints[i + 1].x - point.x) < isNearDistence) {
+      } else if (Math.abs(linePosition.to.x - point.x) < isNearDistence && Math.abs(linePosition.to.y - point.y) < isNearDistence) {
         isNear = true
         belongIndex = i + 1
       } else {
@@ -285,7 +309,8 @@ export default function(oprateData) {
       let chooseLine = null
       lines.forEach(line => {
         const allPoints = [{ ...line.from.position }].concat(line.middlePoints).concat({ ...line.to.position })
-        if (checkIsBelongBrokenLine(position, allPoints, line.from.assembly.size, line.to.assembly.size).isBelong) {
+        console.log('line.connectionMethodline.connectionMethod', line.connectionMethod)
+        if (checkIsBelongBrokenLine(position, allPoints, line.from.assembly.size, line.to.assembly.size, 20, line.connectionMethod).isBelong) {
           choosenLine[line.id] = true
           chooseLine = line
         }
@@ -432,7 +457,7 @@ export default function(oprateData) {
       if (device === 'mobile') {
         lines.forEach(line => {
           const allPoints = [{ ...line.from.position }].concat(line.middlePoints).concat({ ...line.to.position })
-          const belongObj = checkIsBelongBrokenLine(position, allPoints, line.from.assembly.size, line.to.assembly.size)
+          const belongObj = checkIsBelongBrokenLine(position, allPoints, line.from.assembly.size, line.to.assembly.size, 20, line.connectionMethod)
           if (belongObj.isBelong) {
             findLine = line
             findNum = belongObj.belongIndex
@@ -451,7 +476,7 @@ export default function(oprateData) {
       if (device === 'pc') {
         lines.forEach(line => {
           const allPoints = [{ ...line.from.positionPc }].concat(line.middlePointsPc).concat({ ...line.to.positionPc })
-          const belongObj = checkIsBelongBrokenLine(position, allPoints, line.from.assembly.sizePc, line.to.assembly.sizePc)
+          const belongObj = checkIsBelongBrokenLine(position, allPoints, line.from.assembly.sizePc, line.to.assembly.sizePc, 20, line.connectionMethod)
           if (belongObj.isBelong) {
             findLine = line
             findNum = belongObj.belongIndex
