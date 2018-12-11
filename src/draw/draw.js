@@ -62,6 +62,25 @@ function drawADottedLine() {
   }
 }
 
+function drawALine() {
+  return function(ctx, positions, color, lineWidth = 2) {
+    ctx.save()
+    ctx.beginPath()
+    ctx.lineWidth = lineWidth
+    ctx.strokeStyle = color
+    positions.forEach((position, index) => {
+      if (index === 0) {
+        ctx.moveTo(position.x, position.y)
+      } else {
+        ctx.lineTo(position.x, position.y)
+      }
+    })
+    ctx.stroke()
+    ctx.closePath()
+    ctx.restore()
+  }
+}
+
 function drawAImage(ctx, image, position, size) {
   ctx.beginPath()
   ctx.drawImage(image, 0, 0, image.width, image.height, position.x, position.y, size.width, size.width * image.height / image.width)
@@ -84,6 +103,7 @@ function drawGrid(ctx, dom) {
 }
 
 const drawADottedLineWapper = drawADottedLine()
+const drawALineWapper = drawALine()
 
 export default function(oprateData) {
   return {
@@ -121,7 +141,7 @@ export default function(oprateData) {
           size = element.size
         }
 
-        element.draw(ctx, position, size, element.image, element.displayName, element.status)
+        element.draw(ctx, position, size, element.image, element.displayName, element.status, element)
         if (!element.highLevelAssembly && (element.assemblyName !== 'wapperAssembly')) {
           drawATip(ctx, {
             x: position.x + size.width / 2,
@@ -129,7 +149,7 @@ export default function(oprateData) {
           }, element.name, device === 'pc' ? element.sizePc.width : element.size.width)
         }
         if (choosenAssembly[element.id]) {
-          drawADottedLineWapper(ctx, [
+          drawALineWapper(ctx, [
             { x: position.x - 5, y: position.y - 5 },
             { x: position.x + size.width + 5, y: position.y - 5 },
             { x: position.x + size.width + 5, y: position.y + size.height + 5 },

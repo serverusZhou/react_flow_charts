@@ -12,21 +12,72 @@ function checkIsBelongPosition (point, belongPoints) {
   return point.x > belongPoints.x && point.x < belongPoints.endX && point.y > belongPoints.y && point.y < belongPoints.endY
 }
 function checkIsAPoint (size) {
-  console.log('size.width * size.height', size.width * size.height)
   return size.width * size.height < 16
+}
+function getRealAngleValue(asinValue, acosValue) {
+  // console.log('asinValueasinValueasinValue', asinValue)
+  // console.log('acosValueacosValueacosValue', acosValue)
+  // 第一象限
+  if (asinValue > 0 && acosValue < Math.PI / 2) {
+    return acosValue
+  }
+  // 第二象限
+  if (asinValue > 0 && acosValue > Math.PI / 2) {
+    return acosValue
+  }
+  // 第三象限
+  if (asinValue < 0 && acosValue > Math.PI / 2) {
+    return Math.PI * 2 - acosValue
+  }
+  // 第四象限
+  if (asinValue < 0 && acosValue < Math.PI / 2) {
+    return Math.PI * 2 - acosValue
+  }
+  if (asinValue === 0 && acosValue === 0) {
+    return 0
+  }
+  if (asinValue === Math.PI / 2 && acosValue === 0) {
+    return Math.PI / 2
+  }
+  if (asinValue === 0 && acosValue === Math.PI) {
+    return Math.PI
+  }
+  if (asinValue === (-Math.PI / 2) && acosValue === 0) {
+    return Math.PI / 2 * 3
+  }
 }
 function checkIsBelongLine (point, from, to) {
   const length = Math.sqrt(Math.pow(to.x - from.x, 2) + Math.pow(to.y - from.y, 2))
   const pLength = Math.sqrt(Math.pow(point.x - from.x, 2) + Math.pow(point.y - from.y, 2))
-  const angle = Math.asin((to.y - from.y) / length)
-  const pointAngle = Math.asin((point.y - from.y) / pLength)
+  // const angle = Math.asin((to.y - from.y) / length)
+  // console.log('from.xfrom.xfrom.x', from.x)
+  // console.log('to.xto.xto.xto.x', to.x)
+  // console.log('from.yfrom.yfrom.y', from.y)
+  // console.log('to.yto.yto.yto.yto.y', to.y)
+  const angle = getRealAngleValue(
+    Math.asin((from.y - to.y) / length),
+    Math.acos((to.x - from.x) / length)
+  )
+  // const pointAngle = Math.asin((point.y - from.y) / pLength)
+  const pointAngle = getRealAngleValue(
+    Math.asin((from.y - point.y) / pLength),
+    Math.acos((point.x - from.x) / pLength)
+  )
+  // console.log('angleangleangleangle', angle)
+  // console.log('pointAnglepointAnglepointAngle', pointAngle)
   // 以from为原点
   const transTo = { x: length, y: 0 }
   const transPoint = {
+    // x: pLength * Math.cos(angle - pointAngle) * ((angle - pointAngle) > 0 ? -1 : 1),
     x: pLength * Math.cos(angle - pointAngle),
     y: pLength * Math.sin(angle - pointAngle)
   }
-  const rule = length / 20 > 10 ? length / 20 : 10
+
+  // console.log('angle - pointAngleangle - pointAngle', angle - pointAngle)
+  // console.log('transPoint.x', transPoint.x)
+  // // console.log('lengthlengthlengthlength', length)
+  // // console.log('transPointtransPointtransPoint', transPoint)
+  const rule = 20
   // return Math.abs(transPoint.y) < rule &&
   // (transPoint.x < (transTo.x - Math.sqrt(Math.pow(toSize.width, 2) + Math.pow(toSize.height, 2)) / 2) &&
   // transPoint.x > Math.sqrt(Math.pow(fromSize.width, 2) + Math.pow(fromSize.height, 2)) / 2)
@@ -36,7 +87,6 @@ function checkIsBelongLine (point, from, to) {
 }
 
 function checkIsBelongBrokenLine (point, allPoints, fromSize, toSize, isNearDistence = 20, alignType = 'center') {
-  console.log('alignTypealignTypealignType', alignType)
   let isBelong = false
   let isNear = false
   let belongIndex = 0
@@ -309,7 +359,6 @@ export default function(oprateData) {
       let chooseLine = null
       lines.forEach(line => {
         const allPoints = [{ ...line.from.position }].concat(line.middlePoints).concat({ ...line.to.position })
-        console.log('line.connectionMethodline.connectionMethod', line.connectionMethod)
         if (checkIsBelongBrokenLine(position, allPoints, line.from.assembly.size, line.to.assembly.size, 20, line.connectionMethod).isBelong) {
           choosenLine[line.id] = true
           chooseLine = line

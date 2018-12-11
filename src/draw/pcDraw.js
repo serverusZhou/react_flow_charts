@@ -88,7 +88,7 @@ export default function(oprateData) {
           size = element.size
         }
 
-        element.draw(ctx, position, size, element.image, element.displayName, element.status)
+        element.draw(ctx, position, size, element.image, element.displayName, element.status, element)
         if (!element.highLevelAssembly && (element.assemblyName !== 'wapperAssembly')) {
           drawATip(ctx, {
             x: position.x + size.width / 2,

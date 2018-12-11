@@ -93,13 +93,16 @@ class Chart extends Component {
       }
     }
   }
-  chooseAssembly (ev, chooseAsmCallBack, chooseLineCallBack, clearChoose) {
+
+  clickCanvas (ev, chooseAsmCallBack, chooseLineCallBack, clearChoose) {
     if (flag) { flag = false; return false }
     const { mode, choosenLine, choosenAssembly, ableMovePAssembly, lines, ableAddPointLine, device, inputs } = oprateData
     const position = actionMehodWapper.transPixelToPos({
       x: ev.clientX,
       y: ev.clientY
     })
+    // console.log('assenblies', oprateData.assemblies)
+    // console.log('positionposition', position)
     if (mode.is('input')) {
       actionMehodWapper.addInputDiv({
         x: ev.clientX,
@@ -137,7 +140,6 @@ class Chart extends Component {
         return actionMehodWapper.addInputDiv(input.clientPosition, input.words)
       }
       const line = actionMehodWapper.chooseLine(position)
-      console.log('linelinelinelineline', line)
       if (line) {
         mode.setTo('inLineChoosen')
         if (chooseLineCallBack) {
@@ -178,6 +180,44 @@ class Chart extends Component {
       }
       clearChoose()
     }
+  }
+  chooseRightAsm (asm) {
+    const { mode, choosenLine, choosenAssembly, ableMovePAssembly, assemblies } = oprateData
+    mode.setTo('assembly')
+    util.clearObj(choosenLine)
+    util.clearObj(ableMovePAssembly)
+    util.clearObj(choosenAssembly)
+    const assembly = assemblies.find(asse => asse.id === asm.id)
+    choosenAssembly[asm.id] = true
+    const { chooseAssembly } = this.props
+    if (chooseAssembly) {
+      chooseAssembly(Object.assign({}, assembly), {
+        updateActuralData: (acturalData) => {
+          actionMehodWapper.updateChoosenAssemblyActuralData(acturalData)
+        },
+        addJumppingPoint: (inOrOut, displayName, acturalData) => {
+          if (inOrOut === 'in') {
+            actionMehodWapper.addPAssmbly('jumppingIntPoint', { x: assembly.position.x + 10, y: assembly.position.y + 10 }, displayName, acturalData)
+          }
+          if (inOrOut === 'out') {
+            actionMehodWapper.addPAssmbly('jumppingOutPoint', { x: assembly.position.x + 10, y: assembly.position.y + 10 }, displayName, acturalData)
+          }
+        },
+        deletePAssembly: (deletePAssembly) => {
+          return actionMehodWapper.deletePAssembly(deletePAssembly)
+        },
+        updatePAssemblyActuralData: (pAssembly, acturalData) => {
+          return actionMehodWapper.updatePAssemblyActuralData(pAssembly, acturalData)
+        },
+        updateChoosenAssemblyPosition: (position) => {
+          actionMehodWapper.updateChoosenAssemblyPosition(position)
+        },
+        updateChoosenAssemblySize: (size) => {
+          actionMehodWapper.updateChoosenAssemblySize(size)
+        }
+      })
+    }
+    return assembly
   }
   moveStart (ev) {
     if (this.props.isOnlyShow) return
@@ -361,6 +401,9 @@ class Chart extends Component {
   setInitFuncs = () => {
     if (this.props.getInitCallBackFuncs) {
       this.props.getInitCallBackFuncs({
+        chooseAssembly: (asm) => {
+          this.chooseRightAsm(asm)
+        },
         addAssembly: (assemblyType, position = { x: 0, y: 0 }) => {
           return actionMehodWapper.addAssmbly(assemblyType, position)
         },
@@ -660,7 +703,7 @@ class Chart extends Component {
               </div>
               <canvas
                 ref='flow_canvas'
-                onClick={(ev) => this.chooseAssembly(ev, this.props.chooseAssembly, this.props.chooseLine, this.props.clearChoose)}
+                onClick={(ev) => this.clickCanvas(ev, this.props.chooseAssembly, this.props.chooseLine, this.props.clearChoose)}
                 onMouseDown={(event) => this.moveStart(event)}
                 onMouseUp={event => this.moveEnd(event)}
                 onMouseOut={event => this.moveEnd(event)}
