@@ -129,7 +129,7 @@ export default function(oprateData) {
       mainLoop()
     },
     draw: function() {
-      const { assemblies, choosenAssembly, hoverAssembly, parasiticAssemblies, choosenLine, ctx, lines, temLine, inputs, actionBtns, dom, device } = oprateData
+      const { assemblies, choosenAssembly, hoverAssembly, parasiticAssemblies, choosenLine, ctx, lines, temLine, inputs, actionBtns, dom, device, isOnlyShow } = oprateData
       drawGrid(ctx, dom) // ok
       assemblies.forEach(element => {
         let position = {}; let size = {}
@@ -231,7 +231,7 @@ export default function(oprateData) {
           y: input.position.y + input.size.height / 2
         }, input.words, input.maxLength)
       })
-      if (actionBtns.enable) {
+      if (actionBtns.enable && !isOnlyShow) {
         actionBtns.btns.forEach((btn, index) => {
           drawAImage(ctx, btn.image, btn.position, btn.size)
         })

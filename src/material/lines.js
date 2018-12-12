@@ -60,10 +60,12 @@ export default {
                   center[index] = linePosition.from
                 }
                 // drawACircle(ctx, [center[index].x, center[index].y], 10, '#2643ef')
-                drawAArrow(ctx, center[index], {
-                  x: center[index].x + 20 * ((linePosition.to.x - linePosition.from.x) / length),
-                  y: center[index].y + 20 * ((linePosition.to.y - linePosition.from.y) / length),
-                }, 20, 7, 20, '#2643ef')
+                if (length > 20) {
+                  drawAArrow(ctx, center[index], {
+                    x: center[index].x + 20 * ((linePosition.to.x - linePosition.from.x) / length),
+                    y: center[index].y + 20 * ((linePosition.to.y - linePosition.from.y) / length),
+                  }, 20, 7, 20, '#2643ef')
+                }
               })()
             }
           }
@@ -157,10 +159,12 @@ export default {
                   center[index] = linePosition.from
                 }
                 // drawACircle(ctx, [center[index].x, center[index].y], 10, '#2643ef')
-                drawAArrow(ctx, center[index], {
-                  x: center[index].x + 20 * ((linePosition.to.x - linePosition.from.x) / length),
-                  y: center[index].y + 20 * ((linePosition.to.y - linePosition.from.y) / length),
-                }, 20, 7, 20, '#36125B')
+                if (length > 20) {
+                  drawAArrow(ctx, center[index], {
+                    x: center[index].x + 20 * ((linePosition.to.x - linePosition.from.x) / length),
+                    y: center[index].y + 20 * ((linePosition.to.y - linePosition.from.y) / length),
+                  }, 20, 7, 20, '#36125B')
+                }
               })()
             }
           }
@@ -255,10 +259,12 @@ export default {
                   center[index] = linePosition.from
                 }
                 // drawACircle(ctx, [center[index].x, center[index].y], 10, '#2643ef')
-                drawAArrow(ctx, center[index], {
-                  x: center[index].x + 20 * ((linePosition.to.x - linePosition.from.x) / length),
-                  y: center[index].y + 20 * ((linePosition.to.y - linePosition.from.y) / length),
-                }, 20, 7, 20, '#4FE7FF')
+                if (legnth > 20) {
+                  drawAArrow(ctx, center[index], {
+                    x: center[index].x + 20 * ((linePosition.to.x - linePosition.from.x) / length),
+                    y: center[index].y + 20 * ((linePosition.to.y - linePosition.from.y) / length),
+                  }, 20, 7, 20, '#4FE7FF')
+                }
               })()
             }
           }
@@ -303,49 +309,4 @@ export default {
       }
     }
   }
-  // flow: {
-  //   imgSrc: medisionLine,
-  //   lineName: '加药管',
-  //   draw: () => {
-  //     let distence = 1
-  //     return function(ctx, fromPosition, toPosition, fromSize, toSize) {
-  //       let from = {}
-  //       let to = {}
-  //       if (fromSize && toSize) {
-  //         const linePosition = getLinePositionWithoutAssembly(fromPosition, toPosition, fromSize, toSize)
-  //         const lineExtend = lineExtendFunc(linePosition.from, linePosition.to)
-  //         const elements = lineExtend.getElement()
-  //         if (distence < 30) {
-  //           distence = distence + 1
-  //         } else {
-  //           distence = 1
-  //         }
-  //         ctx.beginPath()
-  //         ctx.fillStyle = '#5eccdf'
-  //         ctx.lineWidth = 2
-  //         for (let mark = 0; mark < (elements.length / 20) - 1; mark++) {
-  //           const pAnyAND1D20 = lineExtend.getLineExtendPosition(1 / 40 * elements.length, mark * 20 + distence)
-  //           const dAnyplus1AND1D20 = lineExtend.getLineExtendPosition(1 / 40 * elements.length, mark * 20 + 15 + distence)
-  //           ctx.moveTo(pAnyAND1D20[0].x, pAnyAND1D20[0].y)
-  //           ctx.lineTo(dAnyplus1AND1D20[0].x, dAnyplus1AND1D20[0].y)
-  //           ctx.lineTo(dAnyplus1AND1D20[1].x, dAnyplus1AND1D20[1].y)
-  //           ctx.lineTo(pAnyAND1D20[1].x, pAnyAND1D20[1].y)
-  //           ctx.lineTo(pAnyAND1D20[0].x, pAnyAND1D20[0].y)
-  //         }
-  //         ctx.fill()
-  //         ctx.closePath()
-  //       } else {
-  //         from = { ...fromPosition }
-  //         to = { ...toPosition }
-  //         ctx.beginPath()
-  //         ctx.strokeStyle = 'rgba(0,0,0,1)'
-  //         ctx.lineWidth = 2
-  //         ctx.moveTo(from.x, from.y)
-  //         ctx.lineTo(to.x, to.y)
-  //         ctx.stroke()
-  //         ctx.closePath()
-  //       }
-  //     }
-  //   }
-  // }
 }

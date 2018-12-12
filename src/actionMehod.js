@@ -250,6 +250,7 @@ export default function(oprateData) {
           return turnedAssembly
         }
         const addedPassembly = pAssemblyAction.add(parasiticAssembly, belongToAssembly)
+        // console.log('after add', addedPassembly, typeof addedPassembly)
         assemblyAction.addPAssembly(belongToAssembly, addedPassembly)
         assemblyAction.reLayoutPAssemblies(belongToAssembly)
         return addedPassembly
@@ -621,6 +622,9 @@ export default function(oprateData) {
       const { assemblies, choosenAssembly } = oprateData
       const choosenAsm = assemblies.find(element => choosenAssembly[element.id])
       assemblyAction.updateSize(choosenAsm, size)
+    },
+    updateRightAsmSize: function(asm, size) {
+      assemblyAction.updateSize(asm, size)
     },
     updatePAssemblyPosition: function(position) {
       const { parasiticAssemblies, ableMovePAssembly, device } = oprateData

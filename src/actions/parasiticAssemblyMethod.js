@@ -9,15 +9,17 @@ export default class ParasiticAssemblyMethod {
   add = (_pAssemblyKey, _belongToAssembly) => {
     const { parasiticAssemblies, material } = this.DATA
     const _pAssembly = material.parasiticAssemblies[_pAssemblyKey]
+    const image = getImage(_pAssembly.imageUrl)
+    // const ratio = await imageRatio(getImage(_pAssembly.imageUrl))
     const addParasiticAssembly = {
       ...setting.parasiticAssemblySetting,
       id: UUID(),
       name: _pAssembly.assemblyName,
       assemblyName: _pAssemblyKey,
       imageUrl: _pAssembly.imageUrl,
-      image: getImage(_pAssembly.imageUrl),
+      image,
       belongsTo: _belongToAssembly,
-      ratio: imageRatio(getImage(_pAssembly.imageUrl)),
+      ratio: 1,
       isOccupyInternalSpace: _pAssembly.isOccupyInternalSpace,
       initData: _pAssembly.initData,
       assemblyType: _pAssembly.assemblyType,
@@ -27,6 +29,9 @@ export default class ParasiticAssemblyMethod {
         ? _pAssembly.draw()
         : null,
     }
+    imageRatio(getImage(_pAssembly.imageUrl)).then((ratio) => {
+      addParasiticAssembly.ratio = ratio
+    })
     parasiticAssemblies.push(addParasiticAssembly)
     return addParasiticAssembly
   }

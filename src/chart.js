@@ -43,7 +43,8 @@ const oprateData = {
     parasiticAssemblies: {},
     lines: {},
     others
-  }
+  },
+  isOnlyShow: false
 }
 
 const drawWapper = draw(oprateData)
@@ -332,7 +333,10 @@ class Chart extends Component {
     }
   }
   handelKeyboardAction = (keyCode) => {
-    const { choosenAssembly } = oprateData
+    const { choosenAssembly, isOnlyShow } = oprateData
+    if (isOnlyShow) {
+      return
+    }
     if (keyCode === 187) {
       if (choosenAssembly && Object.keys(choosenAssembly)) {
         this.enlargeAssembly()
@@ -353,6 +357,7 @@ class Chart extends Component {
     oprateData.material = nextProps.material
     oprateData.material.others = others
     oprateData.device = nextProps.device
+    oprateData.isOnlyShow = nextProps.isOnlyShow
     if (nextProps.shouldUpdate) {
       const resetMeterail = actionMehodWapper.resetAssembliesAndLines(
         nextProps.assemblies ? nextProps.assemblies : this.props.assemblies,
@@ -412,6 +417,9 @@ class Chart extends Component {
         },
         updateRightAsmPosition: (assembly, position) => {
           return actionMehodWapper.updateRightAsmPosition(assembly, position)
+        },
+        updateRightAsmSize: (assembly, size) => {
+          return actionMehodWapper.updateRightAsmSize(assembly, size)
         },
         updateAsmActuralData: (assembly, acturalData) => {
           actionMehodWapper.updateAsmActuralData(assembly, acturalData)
