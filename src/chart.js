@@ -30,6 +30,7 @@ const oprateData = {
   ableAddPointLine: {},
   temLine: {},
   inputs: [],
+  ableMoveInput: {},
   actionBtns: {
     enable: false,
     btns,
@@ -104,11 +105,24 @@ class Chart extends Component {
     })
     // console.log('assenblies', oprateData.assemblies)
     // console.log('positionposition', position)
+    const inputEles = document.getElementsByClassName('chart_input')
+    // console.log('inputElesinputEles', inputEles.length)
+    if (inputEles) {
+      for (let i = 0; i < inputEles.length; i++) {
+        const delImg = document.getElementById(inputEles[i].dataset.delImgId)
+        // console.log('inputEles[i].dataset.position', inputEles[i].dataset.position)
+        actionMehodWapper.addInput(JSON.parse(inputEles[i].dataset.position), inputEles[i].value, Number(inputEles[i].dataset.scrollTop))
+        inputEles[i].parentNode.removeChild(inputEles[i])
+        delImg.parentNode.removeChild(delImg)
+      }
+    }
     if (mode.is('input')) {
       actionMehodWapper.addInputDiv({
         x: ev.clientX,
         y: ev.clientY
       })
+      mode.setTo('assembly')
+      this.setState({})
       return
     }
     if (!mode.is('line')) {
@@ -138,7 +152,7 @@ class Chart extends Component {
         const filterInputs = inputs.filter(inp => inp.id !== input.id)
         oprateData.inputs = filterInputs
         this.setState({})
-        return actionMehodWapper.addInputDiv(input.clientPosition, input.words)
+        return actionMehodWapper.addInputDiv(input.clientPosition, input.words, input.scrollTop)
       }
       const line = actionMehodWapper.chooseLine(position)
       if (line) {
@@ -232,7 +246,9 @@ class Chart extends Component {
       if (choosenAssembly && Object.keys(choosenAssembly).length) {
         !actionMehodWapper.addAbleMovePAssembly(position) && actionMehodWapper.addAbleMoveDragingPoint(position)
       } else {
-        !actionMehodWapper.addAbleAddPointLine(position) && actionMehodWapper.addAbleMoveAssembly(position)
+        !actionMehodWapper.addAbleAddPointLine(position) &&
+        !actionMehodWapper.addAbleMoveAssembly(position) &&
+        actionMehodWapper.addAbleMoveInput(position)
       }
     }
     mode.is('line') && actionMehodWapper.addTemLine(position)
@@ -271,13 +287,23 @@ class Chart extends Component {
     }
   }
   move (ev) {
-    const { mode, ableMoveAssembly, ableMovePAssembly, temLine, ableDrafPoint, ableAddPointLine, dom } = oprateData
+    const {
+      mode,
+      ableMoveAssembly,
+      ableMovePAssembly,
+      ableMoveInput,
+      temLine,
+      ableDrafPoint,
+      ableAddPointLine,
+      dom,
+      choosenAssembly
+    } = oprateData
     const position = actionMehodWapper.transPixelToPos({
       x: ev.clientX,
       y: ev.clientY
     })
-    if (dom.canvas.style) {
-      dom.canvas.style.cursor = 'default'
+    if (dom.canvas.style && dom.canvas.style.cursor !== 'pointer') {
+      dom.canvas.style.cursor = 'pointer'
     }
     if (flag) {
       if (mode.is('assembly')) {
@@ -290,6 +316,9 @@ class Chart extends Component {
         if (Object.keys(ableMovePAssembly).length) {
           actionMehodWapper.updatePAssemblyPosition(position)
         }
+        if (Object.keys(ableMoveInput).length) {
+          actionMehodWapper.updateInputPosition(position)
+        }
         if (Object.keys(ableDrafPoint).length) {
           actionMehodWapper.updateDrafPointPosition(position)
         }
@@ -300,6 +329,32 @@ class Chart extends Component {
     } else {
       if (mode.is('assembly')) {
         actionMehodWapper.showHoverAssembly()(position)
+      }
+      if (Object.keys(choosenAssembly).length) {
+        const dragPoint = actionMehodWapper.getDragingPointByPosition(position)
+        if (dragPoint) {
+          if (dragPoint.type === 'topLeft') {
+            if (dom.canvas.style && dom.canvas.style.cursor !== 'nw-resize') {
+              dom.canvas.style.cursor = 'nw-resize'
+            }
+          }
+          if (dragPoint.type === 'topRight') {
+            if (dom.canvas.style && dom.canvas.style.cursor !== 'ne-resize') {
+              dom.canvas.style.cursor = 'ne-resize'
+            }
+          }
+          if (dragPoint.type === 'bottomLeft') {
+            if (dom.canvas.style && dom.canvas.style.cursor !== 'sw-resize') {
+              dom.canvas.style.cursor = 'sw-resize'
+            }
+          }
+          if (dragPoint.type === 'bottomRight') {
+            if (dom.canvas.style && dom.canvas.style.cursor !== 'se-resize') {
+              dom.canvas.style.cursor = 'se-resize'
+            }
+          }
+        }
+        // console.log('dragPointdragPoint', dragPoint)
       }
     }
   }

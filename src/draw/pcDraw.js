@@ -168,6 +168,12 @@ export default function(oprateData) {
           }
         }
       })
+      inputs.forEach(input => {
+        drawWords(ctx, {
+          x: input.position.x + input.size.width / 2,
+          y: input.position.y + 20
+        }, input.words, input.maxLength)
+      })
     }
   }
 }

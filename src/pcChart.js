@@ -23,6 +23,8 @@ const oprateData = {
   activeLine: {},
   ableAddPointLine: {},
   temLine: {},
+  inputs: [],
+  ableMoveInput: {},
   actionBtns: {
     enable: false,
     btns,

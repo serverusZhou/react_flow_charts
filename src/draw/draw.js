@@ -228,8 +228,15 @@ export default function(oprateData) {
       inputs.forEach(input => {
         drawWords(ctx, {
           x: input.position.x + input.size.width / 2,
-          y: input.position.y + input.size.height / 2
+          y: input.position.y + 20
         }, input.words, input.maxLength)
+        // drawALineWapper(ctx, [
+        //   { x: input.position.x, y: input.position.y },
+        //   { x: input.position.x + input.size.width, y: input.position.y },
+        //   { x: input.position.x + input.size.width, y: input.position.y + input.size.height },
+        //   { x: input.position.x, y: input.position.y + input.size.height },
+        //   { x: input.position.x, y: input.position.y },
+        // ], '#000', 1)
       })
       if (actionBtns.enable && !isOnlyShow) {
         actionBtns.btns.forEach((btn, index) => {

@@ -185,17 +185,22 @@ export default function(oprateData) {
   const pAssemblyAction = new PAssemblyMethod(oprateData)
   const lineAction = new LineMethod(oprateData)
   return {
-    transPixelToPos: function(pixel) {
+    transPixelToPos: function(pixel, scrollTop) {
+      let _scrollTop = 0
       const pixelMap = {
         'pc': { width: 2500, height: 2500 },
         'mobile': { width: 1000, height: 1000 }
       }
       const { dom, device } = oprateData
       const canvasPosition = getPosition(dom.canvas)
-      const scrollTop = getScrollTop()
+      if (scrollTop !== undefined && !isNaN(scrollTop)) {
+        _scrollTop = scrollTop
+      } else {
+        _scrollTop = getScrollTop()
+      }
       return {
         x: (pixel.x - canvasPosition.left) / dom.canvas.offsetWidth * pixelMap[device].width,
-        y: (pixel.y - canvasPosition.top + scrollTop) / dom.canvas.offsetWidth * pixelMap[device].height
+        y: (pixel.y - canvasPosition.top + _scrollTop) / dom.canvas.offsetWidth * pixelMap[device].height
       }
     },
     getAssemblyAtPos: function(position) {
@@ -303,7 +308,8 @@ export default function(oprateData) {
       util.clearObj(choosenAssembly)
       actionBtns.enable = false
       let cAsm = {}
-      let assembly = assemblies.find(element => {
+      let assembly = null
+      let filterAsms = assemblies.filter(element => {
         let APosition = {}; let ASize = {}
         if (device === 'mobile') {
           APosition = element.position
@@ -319,6 +325,15 @@ export default function(oprateData) {
           endY: APosition.y + ASize.height,
         })
       })
+      if (filterAsms.length) {
+        assembly = filterAsms.reduce((ev, asm) => {
+          if (asm.size.width * asm.size.width < ev.size.width * ev.size.height) {
+            return asm
+          }
+          return ev
+        }, filterAsms[0])
+      }
+      // console.log('assemblyassemblyassembly', assembly)
       if (assembly) {
         if (assembly.assemblyName === 'wapperAssembly') {
           let childAss = assembly.children.find(element => {
@@ -418,7 +433,7 @@ export default function(oprateData) {
     },
     findAssmblyByPosition: function(position) {
       const { assemblies, device } = oprateData
-      return assemblies.find(element => {
+      const filterAsms = assemblies.filter(element => {
         let APosition = {}; let ASize = {}
         if (device === 'mobile') {
           APosition = element.position
@@ -434,10 +449,19 @@ export default function(oprateData) {
           endY: APosition.y + ASize.height,
         })
       })
+      if (filterAsms.length) {
+        return filterAsms.reduce((ev, asm) => {
+          if (asm.size.width * asm.size.width < ev.size.width * ev.size.height) {
+            return asm
+          }
+          return ev
+        }, filterAsms[0])
+      }
     },
     addAbleMoveAssembly: function(position) {
       const { assemblies, ableMoveAssembly, device } = oprateData
       util.clearObj(ableMoveAssembly)
+      const filterAsms = []
       assemblies.forEach(element => {
         let APosition = {}; let ASize = {}
         if (device === 'mobile') {
@@ -453,9 +477,24 @@ export default function(oprateData) {
           y: APosition.y,
           endY: APosition.y + ASize.height,
         })) {
-          ableMoveAssembly[element.id] = true
+          filterAsms.push(element)
+          // console.log('elementelementelement', element)
+          // ableMoveAssembly[element.id] = true
+          // return true
         }
       })
+      if (filterAsms.length) {
+        const rightAsm = filterAsms.reduce((ev, asm) => {
+          if (asm.size.width * asm.size.width < ev.size.width * ev.size.height) {
+            return asm
+          }
+          return ev
+        }, filterAsms[0])
+        // console.log('filterAsmsfilterAsmsfilterAsms', filterAsms)
+        // console.log('rightAsmrightAsmrightAsmrightAsm', rightAsm)
+        ableMoveAssembly[rightAsm.id] = true
+        return true
+      }
     },
     addAbleMovePAssembly: function(position) {
       const { parasiticAssemblies, ableMovePAssembly, device } = oprateData
@@ -498,6 +537,25 @@ export default function(oprateData) {
       if (draftingPoint && Object.keys(draftingPoint).length) {
         ableDrafPoint[draftingPoint.type] = true
       }
+    },
+    getDragingPointByPosition: function(position) {
+      const { actionBtns, device } = oprateData
+      return actionBtns.draftingPoints.find(point => {
+        let APosition = {}; let ASize = {}
+        if (device === 'mobile') {
+          APosition = point.position
+          ASize = point.size
+        } else if (device === 'pc') {
+          APosition = point.positionPc
+          ASize = point.sizePc
+        }
+        return checkIsBelongPosition(position, {
+          x: APosition.x,
+          endX: APosition.x + ASize.width,
+          y: APosition.y,
+          endY: APosition.y + ASize.height,
+        })
+      })
     },
     addAbleAddPointLine: function(position) {
       const { ableAddPointLine, lines, device } = oprateData
@@ -815,7 +873,7 @@ export default function(oprateData) {
     },
     showHoverAssembly: function() {
       const that = this
-      const { hoverAssembly, dom } = oprateData
+      const { hoverAssembly } = oprateData
       return (position) => {
         const assembly = that.findAssmblyByPosition(position)
         if (!assembly) {
@@ -824,7 +882,6 @@ export default function(oprateData) {
         }
         util.clearObj(hoverAssembly)
         hoverAssembly[assembly.id] = true
-        dom.canvas.style.cursor = 'pointer'
       }
     },
     setActiveLine: function(lineType) {
@@ -1068,16 +1125,67 @@ export default function(oprateData) {
       }
       return false
     },
-    addInputDiv: function(position, words = '') {
+    addAbleMoveInput: function(position) {
+      const { inputs, ableMoveInput, device } = oprateData
+      util.clearObj(ableMoveInput)
+      inputs.forEach(element => {
+        let IPosition = {}; let ISize = {}
+        if (device === 'mobile') {
+          IPosition = element.position
+          ISize = element.size
+        } else if (device === 'pc') {
+          IPosition = element.positionPc
+          ISize = element.sizePc
+        }
+        if (checkIsBelongPosition(position, {
+          x: IPosition.x,
+          endX: IPosition.x + ISize.width,
+          y: IPosition.y,
+          endY: IPosition.y + ISize.height,
+        })) {
+          ableMoveInput[element.id] = true
+          return true
+        }
+      })
+    },
+    updateInputPosition: function(position) {
+      const { inputs, ableMoveInput, device } = oprateData
+      const moveInput = inputs.find(element => ableMoveInput[element.id])
+      if (!moveInput) { return }
+      if (device === 'mobile') {
+        moveInput.position = {
+          x: position.x - moveInput.size.width / 2,
+          y: position.y - moveInput.size.height / 2
+        }
+      } else if (device === 'pc') {
+        moveInput.positionPc = {
+          x: position.x - moveInput.sizePc.width / 2,
+          y: position.y - moveInput.sizePc.height / 2
+        }
+      }
+    },
+    addInputDiv: function(position, words = '', _scrollTop) {
       const canvasPosition = getPosition(oprateData.dom.content)
-      const scrollTop = getScrollTop()
+      let scrollTop = 0
+      if (_scrollTop !== undefined && !isNaN(_scrollTop)) {
+        scrollTop = _scrollTop
+      } else {
+        scrollTop = getScrollTop()
+      }
       let input = document.createElement('input')
+      const imgId = UUID() + (new Date()).getTime()
       input.style.position = 'absolute'
       input.style.left = (position.x - canvasPosition.left) + 'px'
       input.style.top = (position.y - canvasPosition.top + scrollTop) + 'px'
       input.style.width = '120px'
       input.style.height = '30px'
+      input.className = 'chart_input'
+      input.draggable = false
+      input.dataset.delImgId = imgId
+      input.dataset.position = JSON.stringify(position)
+      input.dataset.scrollTop = scrollTop
       let delImg = document.createElement('img')
+      delImg.id = imgId
       delImg.style.position = 'absolute'
       delImg.style.cursor = 'pointer'
       delImg.src = deleteBtn
@@ -1098,19 +1206,27 @@ export default function(oprateData) {
         if (key.keyCode === 13) {
           input.parentNode.removeChild(input)
           delImg.parentNode.removeChild(delImg)
-          this.addInput(position, key.target.value)
+          this.addInput(position, key.target.value, scrollTop)
         }
       }
     },
-    addInput: function(position, value) {
-      const self = this
+    addInput: function(position, value, scrollTop = 0) {
+      let width = 0
+      let height = 0
+      if (value.length < 6) {
+        width = 28 * value.length
+      } else {
+        width = 150
+      }
+      height = (value.length / 6 + 1) * 40
       oprateData.inputs.push({
         id: UUID(),
-        position: self.transPixelToPos(position),
+        position: this.transPixelToPos(position, scrollTop),
         clientPosition: position,
+        scrollTop,
         size: {
-          width: 100,
-          height: 30
+          width,
+          height
         },
         words: value,
         maxLength: 140
