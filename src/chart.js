@@ -318,7 +318,10 @@ class Chart extends Component {
           actionMehodWapper.updatePAssemblyPosition(position)
         }
         if (Object.keys(ableMoveInput).length) {
-          actionMehodWapper.updateInputPosition(position)
+          actionMehodWapper.updateInputPosition(position, {
+            x: ev.clientX,
+            y: ev.clientY
+          })
         }
         if (Object.keys(ableDrafPoint).length) {
           actionMehodWapper.updateDrafPointPosition(position)

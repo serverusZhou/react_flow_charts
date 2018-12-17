@@ -1148,7 +1148,7 @@ export default function(oprateData) {
         }
       })
     },
-    updateInputPosition: function(position) {
+    updateInputPosition: function(position, clientPosition) {
       const { inputs, ableMoveInput, device } = oprateData
       const moveInput = inputs.find(element => ableMoveInput[element.id])
       if (!moveInput) { return }
@@ -1157,11 +1157,13 @@ export default function(oprateData) {
           x: position.x - moveInput.size.width / 2,
           y: position.y - moveInput.size.height / 2
         }
+        moveInput.clientPosition = clientPosition
       } else if (device === 'pc') {
         moveInput.positionPc = {
           x: position.x - moveInput.sizePc.width / 2,
           y: position.y - moveInput.sizePc.height / 2
         }
+        moveInput.clientPosition = clientPosition
       }
     },
     addInputDiv: function(position, words = '', _scrollTop) {
