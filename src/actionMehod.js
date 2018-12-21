@@ -400,9 +400,14 @@ export default function(oprateData) {
       })
     },
     updateAsmActuralData: function(asm, acturalData) {
-      asm.acturalData = {
-        ...asm.acturalData,
-        ...acturalData,
+      const { assemblies } = oprateData
+      const aTAsm = assemblies.find(asma => asma.id === asm.id)
+      console.log('aTAsmaTAsm', aTAsm)
+      if (aTAsm) {
+        aTAsm.acturalData = {
+          ...asm.acturalData,
+          ...acturalData,
+        }
       }
     },
     updatePAssemblyActuralData: function(pAssembly, acturalData) {
@@ -1096,7 +1101,10 @@ export default function(oprateData) {
       }
     },
     chooseInput: function(position) {
-      const { inputs, choosenLine } = oprateData
+      const { inputs, choosenLine, device } = oprateData
+      if (device === 'pc') {
+        return
+      }
       const chooseInput = inputs.find(element => {
         return checkIsBelongPosition(position, {
           x: element.position.x,
@@ -1163,10 +1171,10 @@ export default function(oprateData) {
           x: position.x - moveInput.sizePc.width / 2,
           y: position.y - moveInput.sizePc.height / 2
         }
-        moveInput.clientPosition = clientPosition
+        moveInput.clientPositionPc = clientPosition
       }
     },
-    addInputDiv: function(position, words = '', _scrollTop) {
+    addInputDiv: function(position, words = '', _scrollTop, isEdit, inputObj) {
       const canvasPosition = getPosition(oprateData.dom.content)
       let scrollTop = 0
       if (_scrollTop !== undefined && !isNaN(_scrollTop)) {
@@ -1208,7 +1216,11 @@ export default function(oprateData) {
         if (key.keyCode === 13) {
           input.parentNode.removeChild(input)
           delImg.parentNode.removeChild(delImg)
-          this.addInput(position, key.target.value, scrollTop)
+          if (isEdit) {
+            this.editInput(position, key.target.value, scrollTop, inputObj)
+          } else {
+            this.addInput(position, key.target.value, scrollTop)
+          }
         }
       }
     },
@@ -1224,15 +1236,53 @@ export default function(oprateData) {
       oprateData.inputs.push({
         id: UUID(),
         position: this.transPixelToPos(position, scrollTop),
+        positionPc: this.transPixelToPos(position, scrollTop),
         clientPosition: position,
+        clientPositionPc: position,
         scrollTop,
+        scrollTopPc: 0,
         size: {
+          width,
+          height
+        },
+        sizePc: {
           width,
           height
         },
         words: value,
         maxLength: 140
       })
+    },
+    editInput: function(position, value, scrollTop = 0, input) {
+      const { inputs, device } = oprateData
+      // const input = inputs.find(inp => inp.id === inputId)
+      // console.log('inputIdinputIdinputId', inputId)
+      // console.log('inputinputinputinput', input)
+      let width = 0
+      let height = 0
+      if (value.length < 6) {
+        width = 28 * value.length
+      } else {
+        width = 150
+      }
+      height = (value.length / 6 + 1) * 40
+      if (device === 'mobile') {
+        input.clientPosition = position
+        input.position = this.transPixelToPos(position, scrollTop)
+        input.size = {
+          width,
+          height
+        }
+      }
+      if (device === 'pc') {
+        input.clientPositionPc = position
+        input.positionPc = this.transPixelToPos(position, scrollTop)
+        input.sizePc = {
+          width,
+          height
+        }
+      }
+      inputs.push(input)
     }
   }
 }

@@ -153,7 +153,7 @@ class Chart extends Component {
         const filterInputs = inputs.filter(inp => inp.id !== input.id)
         oprateData.inputs = filterInputs
         this.setState({})
-        return actionMehodWapper.addInputDiv(input.clientPosition, input.words, input.scrollTop)
+        return actionMehodWapper.addInputDiv(input.clientPosition, input.words, input.scrollTop, true, input)
       }
       const line = actionMehodWapper.chooseLine(position)
       if (line) {
@@ -256,7 +256,7 @@ class Chart extends Component {
   }
   moveEnd (ev) {
     clearTimeout(setTime)
-    const { mode, ableMoveAssembly, ableMovePAssembly, choosenAssembly, temLine, ableAddPointLine, ableDrafPoint } = oprateData
+    const { mode, ableMoveAssembly, ableMovePAssembly, ableMoveInput, choosenAssembly, temLine, ableAddPointLine, ableDrafPoint } = oprateData
     const position = actionMehodWapper.transPixelToPos({
       x: ev.clientX,
       y: ev.clientY
@@ -273,6 +273,9 @@ class Chart extends Component {
         }
         if (ableMovePAssembly && Object.keys(ableMovePAssembly).length) {
           util.clearObj(ableMovePAssembly)
+        }
+        if (ableMoveInput && Object.keys(ableMoveInput).length) {
+          util.clearObj(ableMoveInput)
         }
         if (ableDrafPoint && Object.keys(ableDrafPoint).length) {
           util.clearObj(ableDrafPoint)
@@ -793,7 +796,7 @@ class Chart extends Component {
               <div>
                 <canvas
                   ref='flow_canvas_pc'
-                  onClick={(ev) => this.chooseAssembly(ev, this.props.chooseAssembly, this.props.chooseLine, this.props.clearChoose)}
+                  onClick={(ev) => this.clickCanvas(ev, this.props.chooseAssembly, this.props.chooseLine, this.props.clearChoose)}
                   onMouseDown={(event) => this.moveStart(event)}
                   onMouseUp={event => this.moveEnd(event)}
                   onMouseOut={event => this.moveEnd(event)}

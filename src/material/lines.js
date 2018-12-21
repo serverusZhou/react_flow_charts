@@ -259,7 +259,7 @@ export default {
                   center[index] = linePosition.from
                 }
                 // drawACircle(ctx, [center[index].x, center[index].y], 10, '#2643ef')
-                if (legnth > 20) {
+                if (length > 20) {
                   drawAArrow(ctx, center[index], {
                     x: center[index].x + 20 * ((linePosition.to.x - linePosition.from.x) / length),
                     y: center[index].y + 20 * ((linePosition.to.y - linePosition.from.y) / length),

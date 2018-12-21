@@ -226,10 +226,24 @@ export default function(oprateData) {
         temLine.draw(ctx, temLine.from.position, temLine.to.position)
       }
       inputs.forEach(input => {
-        drawWords(ctx, {
-          x: input.position.x + input.size.width / 2,
-          y: input.position.y + 20
-        }, input.words, input.maxLength)
+        if (device === 'mobile') {
+          drawWords(ctx, {
+            x: input.position.x + input.size.width / 2,
+            y: input.position.y + 20
+          }, input.words, input.maxLength)
+        }
+        if (device === 'pc') {
+          if (!input.positionPc) {
+            input.positionPc = input.position
+          }
+          if (!input.sizePc) {
+            input.sizePc = input.size
+          }
+          drawWords(ctx, {
+            x: input.positionPc.x + input.sizePc.width / 2,
+            y: input.positionPc.y + 20
+          }, input.words, input.maxLength)
+        }
         // drawALineWapper(ctx, [
         //   { x: input.position.x, y: input.position.y },
         //   { x: input.position.x + input.size.width, y: input.position.y },

@@ -53,6 +53,7 @@ class Chart extends Component {
     oprateData.assemblies = resetMeterail.assemblies
     oprateData.lines = resetMeterail.lines
     oprateData.parasiticAssemblies = resetMeterail.parasiticAssemblies
+    oprateData.inputs = props.inputs || []
     oprateData.device = 'mobile'
     const openMap = {
       ...Object.keys(this.props.typeSummary).reduce((ev, type) => { ev[type] = false; return ev }, {}),
@@ -144,6 +145,7 @@ class Chart extends Component {
       oprateData.assemblies = resetMeterail.assemblies
       oprateData.lines = resetMeterail.lines
       oprateData.parasiticAssemblies = resetMeterail.parasiticAssemblies
+      oprateData.inputs = nextProps.inputs ? nextProps.inputs : this.props.inputs
       oprateData.choosenAssembly = {}
       oprateData.actionBtns.enable = false
     }

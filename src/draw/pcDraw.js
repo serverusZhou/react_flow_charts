@@ -16,6 +16,23 @@ function drawATip(ctx, position = { x: 0, y: 0 }, words = '暂无名称', maxWid
   ctx.restore()
 }
 
+function drawWords(ctx, position = { x: 0, y: 0 }, words = '暂无名称', maxWidth = 100) {
+  ctx.beginPath()
+  ctx.fillStyle = 'rgba(0,0,0,1)'
+  ctx.font = "bold 28px '宋体'"
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'top'
+  for (let i = 0; i < (words.length / 6 + 1); i++) {
+    if (i !== words.length / 6) {
+      ctx.fillText(words.substring(6 * i, 6 * (i + 1)), position.x, position.y + (40 * i), maxWidth)
+    } else {
+      ctx.fillText(words.substring(6 * i, 6 * (i + 1)), position.x, position.y + (40 * i))
+    }
+  }
+  ctx.closePath()
+  ctx.restore()
+}
+
 function drawADottedLine() {
   let isIncrease = 1
   let distence = 5
@@ -45,6 +62,25 @@ function drawADottedLine() {
   }
 }
 
+function drawALine() {
+  return function(ctx, positions, color, lineWidth = 2) {
+    ctx.save()
+    ctx.beginPath()
+    ctx.lineWidth = lineWidth
+    ctx.strokeStyle = color
+    positions.forEach((position, index) => {
+      if (index === 0) {
+        ctx.moveTo(position.x, position.y)
+      } else {
+        ctx.lineTo(position.x, position.y)
+      }
+    })
+    ctx.stroke()
+    ctx.closePath()
+    ctx.restore()
+  }
+}
+
 function drawAImage(ctx, image, position, size) {
   ctx.beginPath()
   ctx.drawImage(image, 0, 0, image.width, image.height, position.x, position.y, size.width, size.width * image.height / image.width)
@@ -52,6 +88,7 @@ function drawAImage(ctx, image, position, size) {
 }
 
 const drawADottedLineWapper = drawADottedLine()
+const drawALineWapper = drawALine()
 
 export default function(oprateData) {
   return {
@@ -77,7 +114,7 @@ export default function(oprateData) {
       mainLoop()
     },
     draw: function() {
-      const { assemblies, choosenAssembly, hoverAssembly, parasiticAssemblies, choosenLine, ctx, lines, device } = oprateData
+      const { assemblies, choosenAssembly, hoverAssembly, parasiticAssemblies, inputs, choosenLine, ctx, lines, device } = oprateData
       assemblies.forEach(element => {
         let position = {}; let size = {}
         if (device === 'pc') {
@@ -96,13 +133,13 @@ export default function(oprateData) {
           }, element.name, device === 'pc' ? element.sizePc.width : element.size.width)
         }
         if (choosenAssembly[element.id]) {
-          drawADottedLineWapper(ctx, [
+          drawALineWapper(ctx, [
             { x: position.x - 5, y: position.y - 5 },
             { x: position.x + size.width + 5, y: position.y - 5 },
             { x: position.x + size.width + 5, y: position.y + size.height + 5 },
             { x: position.x - 5, y: position.y + size.height + 5 },
             { x: position.x - 5, y: position.y - 5 },
-          ], '#39b54a', 3)
+          ], '#000', 3)
         }
         if (hoverAssembly[element.id]) {
           drawADottedLineWapper(ctx, [
@@ -169,10 +206,24 @@ export default function(oprateData) {
         }
       })
       inputs.forEach(input => {
-        drawWords(ctx, {
-          x: input.position.x + input.size.width / 2,
-          y: input.position.y + 20
-        }, input.words, input.maxLength)
+        if (device === 'mobile') {
+          drawWords(ctx, {
+            x: input.position.x + input.size.width / 2,
+            y: input.position.y + 20
+          }, input.words, input.maxLength)
+        }
+        if (device === 'pc') {
+          if (!input.positionPc) {
+            input.positionPc = input.position
+          }
+          if (!input.sizePc) {
+            input.sizePc = input.size
+          }
+          drawWords(ctx, {
+            x: input.positionPc.x + input.sizePc.width / 2,
+            y: input.positionPc.y + 20
+          }, input.words, input.maxLength)
+        }
       })
     }
   }
