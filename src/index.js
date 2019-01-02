@@ -6,6 +6,28 @@ import lines from './material/lines'
 import parasiticAssemblies from './material/parasiticAssemblise'
 import jumpingPointParasiticAssemblies from './material/parasiticAssemblise/jumpPoint'
 
+import {
+  getLinePositionWithoutAssembly,
+  drawADottedLine,
+  drawAArrow,
+  drawADottedArrow,
+  drawALineWithWidth,
+  drawAArrowWapper,
+  drawALineWithWidthWapper,
+  getLinePositionWithoutAssemblyBySide
+} from './material/drawUtils'
+
+const utils = {
+  getLinePositionWithoutAssembly,
+  drawADottedLine,
+  drawAArrow,
+  drawADottedArrow,
+  drawALineWithWidth,
+  drawAArrowWapper,
+  drawALineWithWidthWapper,
+  getLinePositionWithoutAssemblyBySide
+}
+
 ReactFlowChart.MobileChart = MobileChart
 ReactFlowChart.PcChart = PcChart
 
@@ -16,5 +38,6 @@ export {
   assemblies,
   parasiticAssemblies,
   jumpingPointParasiticAssemblies,
-  lines
+  lines,
+  utils
 }

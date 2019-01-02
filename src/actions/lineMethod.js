@@ -41,6 +41,8 @@ export default class LineMethod {
           y: _toAsb.positionPc.y + _toAsb.sizePc.height / 2,
         }
       },
+      startPoint: null,
+      endPoint: null,
       state: 'normal',
       draw: material.lines[lineType].draw(),
       drawChoosen: material.lines[lineType].drawChoosen ? material.lines[lineType].drawChoosen() : null

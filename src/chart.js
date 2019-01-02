@@ -112,7 +112,7 @@ class Chart extends Component {
       for (let i = 0; i < inputEles.length; i++) {
         const delImg = document.getElementById(inputEles[i].dataset.delImgId)
         // console.log('inputEles[i].dataset.position', inputEles[i].dataset.position)
-        actionMehodWapper.addInput(JSON.parse(inputEles[i].dataset.position), inputEles[i].value, Number(inputEles[i].dataset.scrollTop))
+        actionMehodWapper.addInput(JSON.parse(inputEles[i].dataset.position), inputEles[i].value)
         inputEles[i].parentNode.removeChild(inputEles[i])
         delImg.parentNode.removeChild(delImg)
       }
@@ -153,7 +153,7 @@ class Chart extends Component {
         const filterInputs = inputs.filter(inp => inp.id !== input.id)
         oprateData.inputs = filterInputs
         this.setState({})
-        return actionMehodWapper.addInputDiv(input.clientPosition, input.words, input.scrollTop, true, input)
+        return actionMehodWapper.addInputDiv(actionMehodWapper.transPosToPixels(input.position), input.words, true, input)
       }
       const line = actionMehodWapper.chooseLine(position)
       if (line) {

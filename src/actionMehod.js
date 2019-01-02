@@ -36,13 +36,13 @@ function getRealAngleValue(asinValue, acosValue) {
   if (asinValue === 0 && acosValue === 0) {
     return 0
   }
-  if (asinValue === Math.PI / 2 && acosValue === 0) {
+  if (asinValue === Math.PI / 2 && acosValue === Math.PI / 2) {
     return Math.PI / 2
   }
   if (asinValue === 0 && acosValue === Math.PI) {
     return Math.PI
   }
-  if (asinValue === (-Math.PI / 2) && acosValue === 0) {
+  if (asinValue === (-Math.PI / 2) && acosValue === Math.PI / 2) {
     return Math.PI / 2 * 3
   }
 }
@@ -81,6 +81,14 @@ function checkIsBelongLine (point, from, to) {
   // return Math.abs(transPoint.y) < rule &&
   // (transPoint.x < (transTo.x - Math.sqrt(Math.pow(toSize.width, 2) + Math.pow(toSize.height, 2)) / 2) &&
   // transPoint.x > Math.sqrt(Math.pow(fromSize.width, 2) + Math.pow(fromSize.height, 2)) / 2)
+  console.log('-----', point, from, to, (Math.abs(transPoint.y) < rule &&
+  (transPoint.x < transTo.x) &&
+  transPoint.x > 0))
+  console.log('pointAngle', angle)
+  console.log('pointAngle', pointAngle)
+  console.log('transPoint.y', transPoint.y)
+  console.log('transPoint.x', transPoint.x)
+  console.log('transTo.x', transTo.x)
   return Math.abs(transPoint.y) < rule &&
   (transPoint.x < transTo.x) &&
   transPoint.x > 0
@@ -201,6 +209,19 @@ export default function(oprateData) {
       return {
         x: (pixel.x - canvasPosition.left) / dom.canvas.offsetWidth * pixelMap[device].width,
         y: (pixel.y - canvasPosition.top + _scrollTop) / dom.canvas.offsetWidth * pixelMap[device].height
+      }
+    },
+    transPosToPixels: function(position) {
+      const pixelMap = {
+        'pc': { width: 2500, height: 2500 },
+        'mobile': { width: 1000, height: 1000 }
+      }
+      const { dom, device } = oprateData
+      const canvasPosition = getPosition(dom.canvas)
+      const scrollTop = getScrollTop()
+      return {
+        x: position.x / pixelMap[device].width * dom.canvas.offsetWidth + canvasPosition.left,
+        y: position.y / pixelMap[device].height * dom.canvas.offsetWidth + canvasPosition.top - scrollTop
       }
     },
     getAssemblyAtPos: function(position) {
@@ -374,8 +395,18 @@ export default function(oprateData) {
       util.clearObj(choosenLine)
       let chooseLine = null
       lines.forEach(line => {
-        const allPoints = [{ ...line.from.position }].concat(line.middlePoints).concat({ ...line.to.position })
-        if (checkIsBelongBrokenLine(position, allPoints, line.from.assembly.size, line.to.assembly.size, 20, line.connectionMethod).isBelong) {
+        const fromPosition = line.startPoint || line.from.position
+        const toPosition = line.endPoint || line.to.position
+        const fromSize = line.startPoint ? {
+          width: 2,
+          height: 2
+        } : line.from.assembly.size
+        const toSize = line.endPoint ? {
+          width: 2,
+          height: 2
+        } : line.to.assembly.size
+        const allPoints = [{ ...fromPosition }].concat(line.middlePoints).concat({ ...toPosition })
+        if (checkIsBelongBrokenLine(position, allPoints, fromSize, toSize, 20, line.connectionMethod).isBelong) {
           choosenLine[line.id] = true
           chooseLine = line
         }
@@ -402,7 +433,7 @@ export default function(oprateData) {
     updateAsmActuralData: function(asm, acturalData) {
       const { assemblies } = oprateData
       const aTAsm = assemblies.find(asma => asma.id === asm.id)
-      console.log('aTAsmaTAsm', aTAsm)
+      // console.log('aTAsmaTAsm', aTAsm)
       if (aTAsm) {
         aTAsm.acturalData = {
           ...asm.acturalData,
@@ -567,19 +598,23 @@ export default function(oprateData) {
       util.clearObj(ableAddPointLine)
       let findLine = null
       let findNum = 0
+      let isFirstPoint = false
+      let isLastPoint = false
       if (device === 'mobile') {
         lines.forEach(line => {
-          const allPoints = [{ ...line.from.position }].concat(line.middlePoints).concat({ ...line.to.position })
-          const belongObj = checkIsBelongBrokenLine(position, allPoints, line.from.assembly.size, line.to.assembly.size, 20, line.connectionMethod)
+          const allPoints = [line.startPoint ? { ...line.startPoint } : { ...line.from.position }].concat(line.middlePoints).concat(line.endPoint ? { ...line.endPoint } : { ...line.to.position })
+          const belongObj = checkIsBelongBrokenLine(position, allPoints, line.startPoint ? { width: 2, height: 2 } : line.from.assembly.size, line.endPoint ? { width: 2, height: 2 } : line.to.assembly.size, 20, line.connectionMethod)
           if (belongObj.isBelong) {
             findLine = line
             findNum = belongObj.belongIndex
             if (belongObj.isNear && findNum !== 0 && findNum !== line.middlePoints.length + 1) {
               findNum--
               line.middlePoints[findNum] = position
-            } else if (findNum === 1 && findNum === line.middlePoints.length + 1) {
-              findNum = 0
-              line.middlePoints.splice(findNum, 0, position)
+            } else if (belongObj.isNear && findNum === 0) {
+              isFirstPoint = true
+            } else if (belongObj.isNear && findNum === line.middlePoints.length + 1) {
+              findNum--
+              isLastPoint = true
             } else {
               line.middlePoints.splice(findNum, 0, position)
             }
@@ -588,17 +623,18 @@ export default function(oprateData) {
       }
       if (device === 'pc') {
         lines.forEach(line => {
-          const allPoints = [{ ...line.from.positionPc }].concat(line.middlePointsPc).concat({ ...line.to.positionPc })
-          const belongObj = checkIsBelongBrokenLine(position, allPoints, line.from.assembly.sizePc, line.to.assembly.sizePc, 20, line.connectionMethod)
+          const allPoints = [line.startPointPc ? { ...line.startPointPc } : { ...line.from.positionPc }].concat(line.middlePointsPc).concat(line.endPointPc ? { ...line.endPointPc } : { ...line.to.positionPc })
+          const belongObj = checkIsBelongBrokenLine(position, allPoints, line.startPointPc ? { width: 2, height: 2 } : line.from.assembly.sizePc, line.endPointPc ? { width: 2, height: 2 } : line.to.assembly.sizePc, 20, line.connectionMethod)
           if (belongObj.isBelong) {
             findLine = line
             findNum = belongObj.belongIndex
             if (belongObj.isNear && findNum !== 0 && findNum !== line.middlePointsPc.length + 1) {
               findNum--
               line.middlePointsPc[findNum] = position
-            } else if (findNum === 1 && findNum === line.middlePointsPc.length + 1) {
-              findNum = 0
-              line.middlePointsPc.splice(findNum, 0, position)
+            } else if (belongObj.isNear && findNum === 0) {
+              isFirstPoint = true
+            } else if (belongObj.isNear && findNum === line.middlePointsPc.length + 1) {
+              isLastPoint = true
             } else {
               line.middlePointsPc.splice(findNum, 0, position)
             }
@@ -608,7 +644,9 @@ export default function(oprateData) {
       if (findLine && Object.keys(findLine).length) {
         ableAddPointLine[findLine.id] = {
           positionAtLine: position,
-          belongIndex: findNum
+          belongIndex: findNum,
+          isFirstPoint,
+          isLastPoint
         }
         return true
       }
@@ -791,9 +829,25 @@ export default function(oprateData) {
       const line = lines.find(line => !!ableAddPointLine[line.id])
       if (line && Object.keys(line).length) {
         if (device === 'mobile') {
+          if (ableAddPointLine[line.id].isFirstPoint) {
+            line.startPoint = position
+            return
+          }
+          if (ableAddPointLine[line.id].isLastPoint) {
+            line.endPoint = position
+            return
+          }
           line.middlePoints[ableAddPointLine[line.id].belongIndex] = position
         }
         if (device === 'pc') {
+          if (ableAddPointLine[line.id].isFirstPoint) {
+            line.startPointPc = position
+            return
+          }
+          if (ableAddPointLine[line.id].isLastPoint) {
+            line.endPointPc = position
+            return
+          }
           line.middlePointsPc[ableAddPointLine[line.id].belongIndex] = position
         }
       }
@@ -802,19 +856,35 @@ export default function(oprateData) {
       const { lines, ableAddPointLine, device } = oprateData
       const line = lines.find(line => !!ableAddPointLine[line.id])
       if (device === 'mobile') {
-        const allPoints = [line.from.position].concat(line.middlePoints).concat([line.to.position])
+        const allPoints = [line.startPoint ? line.startPoint : line.from.position].concat(line.middlePoints).concat([line.endPoint ? line.endPoint : line.to.position])
+        // console.log('allPositionPositions', allPoints)
+        // console.log('ableAddPointLine', JSON.stringify(ableAddPointLine))
+        // console.log('ableAddPointLine[line.id].belongIndex', ableAddPointLine[line.id].belongIndex)
+        if (
+          !(allPoints[ableAddPointLine[line.id].belongIndex + 2]) ||
+          !allPoints[ableAddPointLine[line.id].belongIndex]) {
+          return
+        }
         if (checkIsThreePointsLine(
           allPoints[ableAddPointLine[line.id].belongIndex],
           allPoints[ableAddPointLine[line.id].belongIndex + 1],
           allPoints[ableAddPointLine[line.id].belongIndex + 2]
         )) {
+          console.log('怎么监测到是一条线上了啊')
           line.middlePoints.splice(ableAddPointLine[line.id].belongIndex, 1)
         } else {
-          line.middlePoints[ableAddPointLine[line.id].belongIndex ] = position
+          if (!ableAddPointLine[line.id].isFirstPoint && !ableAddPointLine[line.id].isLastPoint) {
+            line.middlePoints[ableAddPointLine[line.id].belongIndex ] = position
+          }
         }
       }
       if (device === 'pc') {
-        const allPoints = [line.from.positionPc].concat(line.middlePointsPc).concat([line.to.positionPc])
+        const allPoints = [line.startPointPc ? line.startPointPc : line.from.positionPc].concat(line.middlePointsPc).concat([line.endPointPc ? line.endPointPc : line.to.positionPc])
+        if (
+          !(allPoints[ableAddPointLine[line.id].belongIndex + 2]) ||
+          !allPoints[ableAddPointLine[line.id].belongIndex]) {
+          return
+        }
         if (checkIsThreePointsLine(
           allPoints[ableAddPointLine[line.id].belongIndex],
           allPoints[ableAddPointLine[line.id].belongIndex + 1],
@@ -822,7 +892,9 @@ export default function(oprateData) {
         )) {
           line.middlePointsPc.splice(ableAddPointLine[line.id].belongIndex, 1)
         } else {
-          line.middlePointsPc[ableAddPointLine[line.id].belongIndex ] = position
+          if (!ableAddPointLine[line.id].isFirstPoint && !ableAddPointLine[line.id].isLastPoint) {
+            line.middlePointsPc[ableAddPointLine[line.id].belongIndex ] = position
+          }
         }
       }
     },
@@ -1162,27 +1234,24 @@ export default function(oprateData) {
       if (!moveInput) { return }
       if (device === 'mobile') {
         moveInput.position = {
-          x: position.x - moveInput.size.width / 2,
-          y: position.y - moveInput.size.height / 2
+          // x: position.x - moveInput.size.width / 2,
+          // y: position.y - moveInput.size.height / 2
+          x: position.x,
+          y: position.y
         }
-        moveInput.clientPosition = clientPosition
       } else if (device === 'pc') {
         moveInput.positionPc = {
-          x: position.x - moveInput.sizePc.width / 2,
-          y: position.y - moveInput.sizePc.height / 2
+          // x: position.x - moveInput.sizePc.width / 2,
+          // y: position.y - moveInput.sizePc.height / 2
+          x: position.x,
+          y: position.y
         }
-        moveInput.clientPositionPc = clientPosition
       }
     },
-    addInputDiv: function(position, words = '', _scrollTop, isEdit, inputObj) {
+    addInputDiv: function(position, words = '', isEdit, inputObj) {
       const canvasPosition = getPosition(oprateData.dom.content)
-      let scrollTop = 0
-      if (_scrollTop !== undefined && !isNaN(_scrollTop)) {
-        scrollTop = _scrollTop
-      } else {
-        scrollTop = getScrollTop()
-      }
-      let input = document.createElement('input')
+      const scrollTop = getScrollTop()
+      const input = document.createElement('input')
       const imgId = UUID() + (new Date()).getTime()
       input.style.position = 'absolute'
       input.style.left = (position.x - canvasPosition.left) + 'px'
@@ -1193,8 +1262,7 @@ export default function(oprateData) {
       input.draggable = false
       input.dataset.delImgId = imgId
       input.dataset.position = JSON.stringify(position)
-      input.dataset.scrollTop = scrollTop
-      let delImg = document.createElement('img')
+      const delImg = document.createElement('img')
       delImg.id = imgId
       delImg.style.position = 'absolute'
       delImg.style.cursor = 'pointer'
@@ -1217,14 +1285,14 @@ export default function(oprateData) {
           input.parentNode.removeChild(input)
           delImg.parentNode.removeChild(delImg)
           if (isEdit) {
-            this.editInput(position, key.target.value, scrollTop, inputObj)
+            this.editInput(position, key.target.value, inputObj)
           } else {
-            this.addInput(position, key.target.value, scrollTop)
+            this.addInput(position, key.target.value)
           }
         }
       }
     },
-    addInput: function(position, value, scrollTop = 0) {
+    addInput: function(position, value) {
       let width = 0
       let height = 0
       if (value.length < 6) {
@@ -1235,12 +1303,8 @@ export default function(oprateData) {
       height = (value.length / 6 + 1) * 40
       oprateData.inputs.push({
         id: UUID(),
-        position: this.transPixelToPos(position, scrollTop),
-        positionPc: this.transPixelToPos(position, scrollTop),
-        clientPosition: position,
-        clientPositionPc: position,
-        scrollTop,
-        scrollTopPc: 0,
+        position: this.transPixelToPos(position),
+        positionPc: this.transPixelToPos(position),
         size: {
           width,
           height
@@ -1253,11 +1317,8 @@ export default function(oprateData) {
         maxLength: 140
       })
     },
-    editInput: function(position, value, scrollTop = 0, input) {
+    editInput: function(position, value, input) {
       const { inputs, device } = oprateData
-      // const input = inputs.find(inp => inp.id === inputId)
-      // console.log('inputIdinputIdinputId', inputId)
-      // console.log('inputinputinputinput', input)
       let width = 0
       let height = 0
       if (value.length < 6) {
@@ -1265,18 +1326,17 @@ export default function(oprateData) {
       } else {
         width = 150
       }
+      input.words = value
       height = (value.length / 6 + 1) * 40
       if (device === 'mobile') {
-        input.clientPosition = position
-        input.position = this.transPixelToPos(position, scrollTop)
+        input.position = this.transPixelToPos(position)
         input.size = {
           width,
           height
         }
       }
       if (device === 'pc') {
-        input.clientPositionPc = position
-        input.positionPc = this.transPixelToPos(position, scrollTop)
+        input.positionPc = this.transPixelToPos(position)
         input.sizePc = {
           width,
           height

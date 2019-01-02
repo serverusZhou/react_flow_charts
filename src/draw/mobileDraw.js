@@ -132,27 +132,37 @@ export default function(oprateData) {
         }
       })
       lines.forEach(element => {
-        let fromPosition = {}; let fromSize = {}; let toPosition = {}; let toSize = {}; let middlePoints = []
+        let fromPosition = {}
+        let fromSize = {}
+        let toPosition = {}
+        let toSize = {}
+        let middlePoints = []
+        let startPoint = {}
+        let endPoint = {}
         if (device === 'pc') {
           fromPosition = element.from.positionPc
           toPosition = element.to.positionPc
           fromSize = element.from.assembly.sizePc
           toSize = element.to.assembly.sizePc
           middlePoints = element.middlePointsPc
+          startPoint = element.startPointPc
+          endPoint = element.endPointPc
         } else if (device === 'mobile') {
           fromPosition = element.from.position
           toPosition = element.to.position
           fromSize = element.from.assembly.size
           toSize = element.to.assembly.size
           middlePoints = element.middlePoints
+          startPoint = element.startPoint
+          endPoint = element.endPoint
         }
 
         if (element.draw && (!(element.from.assembly.wapper || element.to.assembly.wapper)) ||
         (element.from.assembly.highLevelAssembly || element.to.assembly.highLevelAssembly)) {
-          element.draw(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, element.state, element.connectionMethod)
+          element.draw(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, element.state, element.connectionMethod, startPoint, endPoint)
         }
         if (choosenLine[element.id]) {
-          element.drawChoosen ? element.drawChoosen(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, element.state, element.connectionMethod) : (function() {
+          element.drawChoosen ? element.drawChoosen(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, element.state, element.connectionMethod, startPoint, endPoint) : (function() {
             ctx.beginPath()
             ctx.lineWidth = 2
             ctx.strokeStyle = '#666'

@@ -81,6 +81,26 @@ function drawALine() {
   }
 }
 
+function drawAWaveLine() {
+  let mark = 0
+  return function(ctx, from = { x: 20, y: 30 }, to = { x: 200, y: 30 }, width = 200, color, lineWidth = 3) {
+    ctx.save()
+    ctx.beginPath()
+    ctx.lineWidth = lineWidth
+    ctx.strokeStyle = color
+    ctx.moveTo(from.x, from.y)
+    for (let i = 1; i < width / 3; i += 0.1) { // x 应该等于canvas的 width/10
+      let x = i * 3 + from.x
+      let y = Math.sin(i + mark) * 2 + from.y
+      ctx.lineTo(x, y)
+    }
+    mark += 0.1
+    ctx.stroke()
+    ctx.closePath()
+    ctx.restore()
+  }
+}
+
 function drawAImage(ctx, image, position, size) {
   ctx.beginPath()
   ctx.drawImage(image, 0, 0, image.width, image.height, position.x, position.y, size.width, size.width * image.height / image.width)
@@ -104,6 +124,7 @@ function drawGrid(ctx, dom) {
 
 const drawADottedLineWapper = drawADottedLine()
 const drawALineWapper = drawALine()
+const drawAWaveLineWapper = drawAWaveLine()
 
 export default function(oprateData) {
   return {
@@ -142,6 +163,13 @@ export default function(oprateData) {
         }
 
         element.draw(ctx, position, size, element.image, element.displayName, element.status, element)
+        // drawAWaveLineWapper(
+        //   ctx,
+        //   { x: position.x + size.width / 4, y: position.y + size.height / 4 },
+        //   { x: position.x + size.width / 4 * 3, y: position.y + size.height / 4 },
+        //   size.width / 2,
+        //   '#000'
+        // )
         if (!element.highLevelAssembly && (element.assemblyName !== 'wapperAssembly')) {
           drawATip(ctx, {
             x: position.x + size.width / 2,
@@ -168,27 +196,37 @@ export default function(oprateData) {
         }
       })
       lines.forEach(element => {
-        let fromPosition = {}; let fromSize = {}; let toPosition = {}; let toSize = {}; let middlePoints = []
+        let fromPosition = {}
+        let fromSize = {}
+        let toPosition = {}
+        let toSize = {}
+        let middlePoints = []
+        let startPoint = {}
+        let endPoint = {}
         if (device === 'pc') {
           fromPosition = element.from.positionPc
           toPosition = element.to.positionPc
           fromSize = element.from.assembly.sizePc
           toSize = element.to.assembly.sizePc
           middlePoints = element.middlePointsPc
+          startPoint = element.startPointPc
+          endPoint = element.endPointPc
         } else if (device === 'mobile') {
           fromPosition = element.from.position
           toPosition = element.to.position
           fromSize = element.from.assembly.size
           toSize = element.to.assembly.size
           middlePoints = element.middlePoints
+          startPoint = element.startPoint
+          endPoint = element.endPoint
         }
 
         if (element.draw && (!(element.from.assembly.wapper || element.to.assembly.wapper)) ||
         (element.from.assembly.highLevelAssembly || element.to.assembly.highLevelAssembly)) {
-          element.draw(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, element.state, element.connectionMethod)
+          element.draw(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, element.state, element.connectionMethod, startPoint, endPoint)
         }
         if (choosenLine[element.id]) {
-          element.drawChoosen ? element.drawChoosen(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, element.state, element.connectionMethod) : (function() {
+          element.drawChoosen ? element.drawChoosen(ctx, fromPosition, toPosition, fromSize, toSize, middlePoints, element.state, element.connectionMethod, startPoint, endPoint) : (function() {
             ctx.beginPath()
             ctx.lineWidth = 2
             ctx.strokeStyle = '#666'
