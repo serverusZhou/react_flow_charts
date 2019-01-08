@@ -89,7 +89,7 @@ function drawAWaveLine() {
     ctx.lineWidth = lineWidth
     ctx.strokeStyle = color
     ctx.moveTo(from.x, from.y)
-    for (let i = 1; i < width / 3; i += 0.1) { // x 应该等于canvas的 width/10
+    for (let i = 1; i < width / 3; i += 0.1) {
       let x = i * 3 + from.x
       let y = Math.sin(i + mark) * 2 + from.y
       ctx.lineTo(x, y)

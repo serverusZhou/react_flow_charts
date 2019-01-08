@@ -7,25 +7,33 @@ import parasiticAssemblies from './material/parasiticAssemblise'
 import jumpingPointParasiticAssemblies from './material/parasiticAssemblise/jumpPoint'
 
 import {
+  drawAImage,
   getLinePositionWithoutAssembly,
-  drawADottedLine,
+  getLinePositionWithoutAssemblyBySide,
+  drawASvgImage,
+  lineExtendFunc,
   drawAArrow,
   drawADottedArrow,
-  drawALineWithWidth,
   drawAArrowWapper,
-  drawALineWithWidthWapper,
-  getLinePositionWithoutAssemblyBySide
+  drawALineWithWidth,
+  drawADottedLine,
+  drawACircle,
+  drawALineWithWidthWapper
 } from './material/drawUtils'
 
 const utils = {
+  drawAImage,
   getLinePositionWithoutAssembly,
-  drawADottedLine,
+  getLinePositionWithoutAssemblyBySide,
+  drawASvgImage,
+  lineExtendFunc,
   drawAArrow,
   drawADottedArrow,
-  drawALineWithWidth,
   drawAArrowWapper,
-  drawALineWithWidthWapper,
-  getLinePositionWithoutAssemblyBySide
+  drawALineWithWidth,
+  drawADottedLine,
+  drawACircle,
+  drawALineWithWidthWapper
 }
 
 ReactFlowChart.MobileChart = MobileChart

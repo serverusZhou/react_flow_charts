@@ -81,14 +81,14 @@ function checkIsBelongLine (point, from, to) {
   // return Math.abs(transPoint.y) < rule &&
   // (transPoint.x < (transTo.x - Math.sqrt(Math.pow(toSize.width, 2) + Math.pow(toSize.height, 2)) / 2) &&
   // transPoint.x > Math.sqrt(Math.pow(fromSize.width, 2) + Math.pow(fromSize.height, 2)) / 2)
-  console.log('-----', point, from, to, (Math.abs(transPoint.y) < rule &&
-  (transPoint.x < transTo.x) &&
-  transPoint.x > 0))
-  console.log('pointAngle', angle)
-  console.log('pointAngle', pointAngle)
-  console.log('transPoint.y', transPoint.y)
-  console.log('transPoint.x', transPoint.x)
-  console.log('transTo.x', transTo.x)
+  // console.log('-----', point, from, to, (Math.abs(transPoint.y) < rule &&
+  // (transPoint.x < transTo.x) &&
+  // transPoint.x > 0))
+  // console.log('pointAngle', angle)
+  // console.log('pointAngle', pointAngle)
+  // console.log('transPoint.y', transPoint.y)
+  // console.log('transPoint.x', transPoint.x)
+  // console.log('transTo.x', transTo.x)
   return Math.abs(transPoint.y) < rule &&
   (transPoint.x < transTo.x) &&
   transPoint.x > 0
@@ -870,7 +870,7 @@ export default function(oprateData) {
           allPoints[ableAddPointLine[line.id].belongIndex + 1],
           allPoints[ableAddPointLine[line.id].belongIndex + 2]
         )) {
-          console.log('怎么监测到是一条线上了啊')
+          // console.log('怎么监测到是一条线上了啊')
           line.middlePoints.splice(ableAddPointLine[line.id].belongIndex, 1)
         } else {
           if (!ableAddPointLine[line.id].isFirstPoint && !ableAddPointLine[line.id].isLastPoint) {
