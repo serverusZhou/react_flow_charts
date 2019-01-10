@@ -391,9 +391,12 @@ export default function(oprateData) {
       return cAsm
     },
     chooseLine: function(position) {
-      const { lines, choosenLine } = oprateData
+      const { lines, choosenLine, device } = oprateData
       util.clearObj(choosenLine)
       let chooseLine = null
+      if (device === 'pc') {
+        return chooseLine
+      }
       lines.forEach(line => {
         const fromPosition = line.startPoint || line.from.position
         const toPosition = line.endPoint || line.to.position
